@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Ghost Medic",
+    "slug": "ghost-medic",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0A0E0F"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ghostmedic.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Voice input for symptom description",
+        "NSCameraUsageDescription": "Wound documentation",
+        "NSLocationWhenInUseUsageDescription": "Region-specific injury guidance (offline only)"
+      }
+    },
+    "android": {
+      "package": "com.ghostmedic.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0E0F"
+      }
+    },
+    "plugins": [
+      "expo-audio"
+    ]
+  }
+}
