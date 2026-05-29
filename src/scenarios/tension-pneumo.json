@@ -1,0 +1,30 @@
+{
+  "id": "tension-pneumo-01",
+  "title": "Suspected Tension Pneumothorax",
+  "briefing": "Casualty treated 12 minutes ago for penetrating chest trauma with chest seal. Now decompensating rapidly. Increasing respiratory distress.",
+  "environment": "CCP, daylight, secured",
+  "casualty": {
+    "callsign": "CHARLIE-3-2",
+    "age": 27,
+    "sex": "F",
+    "weightKg": 68,
+    "mechanism": "Penetrating chest trauma, frag",
+    "timeOfInjury": "T-00:12:00",
+    "consciousness": "P",
+    "injuries": [
+      {
+        "region": "left lateral chest",
+        "type": "penetrating frag",
+        "severity": "critical",
+        "notes": "Vented chest seal in place. JVD noted. Tracheal deviation to right. Absent breath sounds left side."
+      }
+    ],
+    "vitals": {
+      "hr": 138,
+      "bpSys": 84,
+      "bpDia": 52,
+      "rr": 36,
+      "spo2": 82
+    }
+  }
+}

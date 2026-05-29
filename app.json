@@ -1,12 +1,13 @@
 {
   "expo": {
-    "name": "Ghost Medic",
+    "name": "GHOST MEDIC",
     "slug": "ghost-medic",
     "version": "1.0.0",
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "scheme": "ghostmedic",
     "splash": {
       "backgroundColor": "#0A0E0F"
     },
@@ -25,8 +26,15 @@
         "backgroundColor": "#0A0E0F"
       }
     },
+    "web": {
+      "bundler": "metro"
+    },
     "plugins": [
+      "expo-router",
       "expo-audio"
-    ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
   }
 }

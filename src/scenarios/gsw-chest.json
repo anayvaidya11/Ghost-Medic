@@ -1,0 +1,30 @@
+{
+  "id": "gsw-chest-01",
+  "title": "GSW — Right Chest",
+  "briefing": "Patrol contact. Single casualty down behind cover. Took small-arms fire approximately 90 seconds ago. Pulled to CCP under suppressive fire.",
+  "environment": "Urban, night, hostile",
+  "casualty": {
+    "callsign": "BRAVO-2-1",
+    "age": 24,
+    "sex": "M",
+    "weightKg": 84,
+    "mechanism": "Single GSW, anterior right chest, 7.62mm suspected",
+    "timeOfInjury": "T-00:01:30",
+    "consciousness": "V",
+    "injuries": [
+      {
+        "region": "right anterior chest",
+        "type": "GSW",
+        "severity": "critical",
+        "notes": "Penetrating wound, 4th intercostal space, mid-clavicular line. No exit wound located. Sucking sound on inspiration."
+      }
+    ],
+    "vitals": {
+      "hr": 132,
+      "bpSys": 92,
+      "bpDia": 58,
+      "rr": 28,
+      "spo2": 88
+    }
+  }
+}

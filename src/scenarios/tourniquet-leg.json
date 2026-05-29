@@ -1,0 +1,30 @@
+{
+  "id": "tq-leg-01",
+  "title": "Junctional Hemorrhage — Left Thigh",
+  "briefing": "IED strike on lead vehicle. One casualty extracted with massive lower-extremity bleeding. Buddy applied improvised tourniquet en route.",
+  "environment": "Rural road, day, post-blast",
+  "casualty": {
+    "callsign": "ALPHA-1-3",
+    "age": 31,
+    "sex": "M",
+    "weightKg": 91,
+    "mechanism": "Blast / frag, left lower extremity",
+    "timeOfInjury": "T-00:04:10",
+    "consciousness": "V",
+    "injuries": [
+      {
+        "region": "left thigh, mid-femur",
+        "type": "blast frag, partial amputation",
+        "severity": "critical",
+        "notes": "Buddy TQ in place, bright red bleeding still observed distal to TQ. Pulses absent below knee."
+      }
+    ],
+    "vitals": {
+      "hr": 144,
+      "bpSys": 78,
+      "bpDia": 44,
+      "rr": 30,
+      "spo2": 94
+    }
+  }
+}
