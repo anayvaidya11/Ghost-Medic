@@ -7,8 +7,8 @@ export type Vitals = {
 };
 
 export type Injury = {
-  region: string;
-  type: string;
+  region: string;     // e.g. "right chest", "left thigh"
+  type: string;       // e.g. "GSW", "blast frag", "burn"
   severity: 'minor' | 'moderate' | 'severe' | 'critical';
   notes?: string;
 };
@@ -18,9 +18,9 @@ export type Casualty = {
   age: number;
   sex: 'M' | 'F';
   weightKg: number;
-  mechanism: string;
-  timeOfInjury: string;
-  consciousness: 'A' | 'V' | 'P' | 'U';
+  mechanism: string;       // mechanism of injury
+  timeOfInjury: string;    // ISO-ish, free text for demo
+  consciousness: 'A' | 'V' | 'P' | 'U'; // AVPU
   injuries: Injury[];
   vitals: Vitals;
 };
@@ -29,6 +29,6 @@ export type Scenario = {
   id: string;
   title: string;
   briefing: string;
-  environment: string;
+  environment: string;     // e.g. "urban, night, hostile"
   casualty: Casualty;
 };
