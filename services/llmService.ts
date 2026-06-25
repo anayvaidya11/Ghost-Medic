@@ -1,16 +1,7 @@
 // services/llmService.ts
 import { OLLAMA_BASE_URL, OLLAMA_MODEL } from './llmConfig';
 
-const WILDERNESS_SYSTEM_PROMPT = `You are GHOST MEDIC — an offline AI clinical decision support tool for wilderness search-and-rescue responders, wilderness EMTs, and backcountry users. You follow Wilderness Medical Society guidelines and the Patient Assessment System (PAS). Always prioritize: scene safety, primary assessment ABCDE, secondary assessment SAMPLE, then treatment, then evacuation decision. Be concise. The responder is in the field, often cold, tired, and far from help. Drug recommendations should reflect what's realistically in a wilderness kit (epinephrine auto-injector, diphenhydramine, ibuprofen, acetaminophen, aspirin, glucose). Always end with: EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE] and one sentence on what to tell dispatch.
-
-FORMAT your response exactly like this:
-ASSESSMENT: [1-2 sentence summary]
-PRIORITY THREATS: [bullet list]
-IMMEDIATE ACTIONS:
-1. [step]
-2. [step]
-MONITOR FOR: [deterioration signs]
-EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE] — [one sentence on what to tell dispatch]`;
+const WILDERNESS_SYSTEM_PROMPT = `You are GHOST MEDIC — an offline AI survival assistant for solo backcountry users, wilderness travelers, and remote environment operators. The user may be injured, panicking, alone, and far from help. Your job is to give them clear, numbered, actionable steps they can follow right now. Follow wilderness medicine principles (PAS, ABCDE, WMS guidelines). Always assess scene safety first. Be direct. Use simple words. No medical jargon. Each step must be one sentence. Maximum 6 steps. Always end with an EVACUATION line: one sentence on whether they need to call for help now, wait, or can self-rescue. If the situation is immediately life-threatening, say so in the first line in plain language.`;
 
 export interface LLMCallbacks {
   onToken: (token: string) => void;
@@ -18,16 +9,30 @@ export interface LLMCallbacks {
   onError: (error: string) => void;
 }
 
-export async function streamWildernessGuidance(
+export interface LLMOptions {
+  /** Optional caller-supplied abort signal — abort to cancel the in-flight call. */
+  signal?: AbortSignal;
+}
+
+export async function streamTCCCGuidance(
   patientReport: string,
-  callbacks: LLMCallbacks
+  callbacks: LLMCallbacks,
+  options: LLMOptions = {}
 ): Promise<void> {
-  const prompt = `PATIENT REPORT:\n${patientReport}\n\nProvide wilderness (PAS / WMS) guidance:`;
+  const prompt = `SITUATION REPORT:\n${patientReport}\n\nGive clear, numbered survival first-aid steps now:`;
+
+  // Combine an internal timeout with any caller-supplied abort signal.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  const onExternalAbort = () => controller.abort();
+  if (options.signal) {
+    if (options.signal.aborted) controller.abort();
+    else options.signal.addEventListener('abort', onExternalAbort);
+  }
+
+  const aborted = () => controller.signal.aborted || !!options.signal?.aborted;
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
-
     const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -40,8 +45,6 @@ export async function streamWildernessGuidance(
       }),
     });
 
-    clearTimeout(timeout);
-
     if (!response.ok) {
       throw new Error(`Ollama returned ${response.status}`);
     }
@@ -51,15 +54,20 @@ export async function streamWildernessGuidance(
 
     if (!text) throw new Error('Empty response from model');
 
-    // Simulate token streaming for UX
+    // Simulate token streaming for UX — bail out immediately if cancelled.
     const words = text.split(' ');
     for (const word of words) {
+      if (aborted()) return;
       callbacks.onToken(word + ' ');
       await new Promise<void>((r) => setTimeout(r, 18));
     }
 
+    if (aborted()) return;
     callbacks.onComplete(text);
   } catch (error) {
+    // Caller-initiated cancel — stay silent, the UI already moved on.
+    if (options.signal?.aborted) return;
+
     const msg = error instanceof Error ? error.message : 'Unknown error';
     if (
       msg.includes('fetch') ||
@@ -74,5 +82,11 @@ export async function streamWildernessGuidance(
     } else {
       callbacks.onError(`[ ERROR ] ${msg}`);
     }
+  } finally {
+    clearTimeout(timeout);
+    options.signal?.removeEventListener('abort', onExternalAbort);
   }
 }
+
+// Backwards-compatible alias for older call sites.
+export const streamWildernessGuidance = streamTCCCGuidance;

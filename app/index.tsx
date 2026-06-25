@@ -1,247 +1,783 @@
 /**
- * MODE SELECT SCREEN
- * The entry point: pick SELF-AID, TEAMMATE, or STEALTH mode.
+ * GHOST MEDIC — single-file state machine UI.
+ *
+ * Three states, no navigation:
+ *   READY    → primary input (hold-to-speak / photo / type) + audio toggle
+ *   THINKING → pulsing dot while the LLM is queried (cancellable)
+ *   RESPONSE → numbered survival steps + evacuation line, optional read-aloud
+ *
+ * All other screens (triage/vitals/action/evacuation/handoff) are gone; the
+ * store, services, protocols and scenarios stay intact behind the scenes.
  */
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
+  ActivityIndicator,
+  Animated,
+  Easing,
+  Image,
+  Platform,
+  ScrollView,
   StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { C } from '@/theme/index';
-import { useSessionStore } from '@/store/sessionStore';
-import type { Mode } from '@/store/sessionStore';
+import * as ImagePicker from 'expo-image-picker';
+import * as Speech from 'expo-speech';
+import {
+  useAudioRecorder,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+} from 'expo-audio';
 
-const MODES: Array<{
-  id: Mode;
-  label: string;
-  sub: string;
-  color: string;
-  bg: string;
-  icon: string;
-}> = [
-  {
-    id: 'self',
-    label: 'SELF-AID',
-    sub: 'You are the patient',
-    color: C.green,
-    bg: C.greenBg,
-    icon: '◎',
-  },
-  {
-    id: 'teammate',
-    label: 'TEAMMATE',
-    sub: 'You are treating another person',
-    color: C.blue,
-    bg: C.blueBg,
-    icon: '⊕',
-  },
-  {
-    id: 'stealth',
-    label: 'STEALTH',
-    sub: 'No audio · Dim screen · Vibration only — night / avalanche zones',
-    color: C.red,
-    bg: C.redBg,
-    icon: '◈',
-  },
-];
+import { streamTCCCGuidance } from '@services/llmService';
+import { transcribeAudio } from '@services/transcriptionService';
 
-export default function IndexScreen() {
-  const setMode = useSessionStore((s) => s.setMode);
-  const resetSession = useSessionStore((s) => s.resetSession);
-  const startSession = useSessionStore((s) => s.startSession);
+// ── PALETTE (per spec) ───────────────────────────────────────────────────────
+const BG = '#0a0f0a';
+const WHITE = '#FFFFFF';
+const GREEN = '#7cff6b';
+const RED = '#ff4d4d';
+const AMBER = '#ffb547';
+const DIM = '#6b7560';
 
-  const handleSelect = (modeId: Mode) => {
-    resetSession();
-    setMode(modeId);
-    startSession();
-    router.push('/triage');
-  };
+const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' });
 
+type AppState = 'ready' | 'thinking' | 'response';
+
+// ── RESPONSE PARSING ─────────────────────────────────────────────────────────
+type ParsedStep = { num: string; text: string };
+type Parsed = { intro: string[]; steps: ParsedStep[]; evacuation: string | null };
+
+function parseResponse(text: string): Parsed {
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  const intro: string[] = [];
+  const steps: ParsedStep[] = [];
+  let evacuation: string | null = null;
+
+  for (const line of lines) {
+    const ev = /^EVACUATION\s*[:\-—]?\s*(.*)$/i.exec(line);
+    if (ev) {
+      evacuation = ev[1].trim() || line;
+      continue;
+    }
+    const step = /^(\d+)[.)]\s*(.*)$/.exec(line);
+    if (step) {
+      steps.push({ num: step[1], text: step[2].trim() });
+      continue;
+    }
+    intro.push(line);
+  }
+  return { intro, steps, evacuation };
+}
+
+export default function GhostMedic() {
+  const [appState, setAppState] = useState<AppState>('ready');
+  const [audioOn, setAudioOn] = useState(true);
+
+  // READY-state input
+  const [typing, setTyping] = useState(false);
+  const [typedText, setTypedText] = useState('');
+
+  // Submitted payload
+  const [submittedText, setSubmittedText] = useState('');
+  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageExpanded, setImageExpanded] = useState(false);
+
+  // LLM output
+  const [streaming, setStreaming] = useState('');
+  const [response, setResponse] = useState('');
+  const [spokenIndex, setSpokenIndex] = useState(-1);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+
+  // ── Pulsing dot (THINKING) ────────────────────────────────────────────────
+  const pulse = useRef(new Animated.Value(0.8)).current;
+  useEffect(() => {
+    if (appState !== 'thinking') return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1.2,
+          duration: 650,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0.8,
+          duration: 650,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [appState, pulse]);
+
+  // ── Text-to-speech ────────────────────────────────────────────────────────
+  const stopSpeech = useCallback(() => {
+    try {
+      Speech.stop();
+    } catch {
+      // fail silently
+    }
+    setSpokenIndex(-1);
+  }, []);
+
+  const speakSequence = useCallback((parts: string[]) => {
+    stopSpeech();
+    let i = 0;
+    const next = () => {
+      if (i >= parts.length) {
+        setSpokenIndex(-1);
+        return;
+      }
+      const idx = i;
+      setSpokenIndex(idx);
+      try {
+        Speech.speak(parts[idx], {
+          onDone: () => {
+            i += 1;
+            // short pause between utterances
+            setTimeout(next, 250);
+          },
+          onError: () => {
+            i += 1;
+            next();
+          },
+        });
+      } catch {
+        i += 1;
+        next();
+      }
+    };
+    next();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Spoken utterances, in order: intro lines, steps, then evacuation.
+  const buildUtterances = useCallback((text: string): string[] => {
+    const p = parseResponse(text);
+    const parts: string[] = [];
+    p.intro.forEach((l) => parts.push(l));
+    p.steps.forEach((s) => parts.push(`Step ${s.num}. ${s.text}`));
+    if (p.evacuation) parts.push(`Evacuation. ${p.evacuation}`);
+    return parts;
+  }, []);
+
+  // ── Core submit → THINKING → RESPONSE ─────────────────────────────────────
+  const submit = useCallback(
+    (inputText: string, image: string | null) => {
+      const cleanText = inputText.trim();
+      if (!cleanText && !image) return;
+
+      stopSpeech();
+      setSubmittedText(cleanText || 'Wound photograph submitted');
+      setImageUri(image);
+      setImageExpanded(false);
+      setStreaming('');
+      setResponse('');
+      setSpokenIndex(-1);
+      setAppState('thinking');
+
+      const report = [
+        cleanText ? `Reported: ${cleanText}` : null,
+        image ? 'The user submitted a photograph of the wound/injury.' : null,
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      let acc = '';
+      let movedToResponse = false;
+
+      streamTCCCGuidance(
+        report,
+        {
+          onToken: (token) => {
+            if (controller.signal.aborted) return;
+            acc += token;
+            if (!movedToResponse) {
+              movedToResponse = true;
+              setAppState('response');
+            }
+            setStreaming(acc);
+          },
+          onComplete: (full) => {
+            if (controller.signal.aborted) return;
+            setResponse(full);
+            setStreaming(full);
+            setAppState('response');
+            if (audioOn) speakSequence(buildUtterances(full));
+          },
+          onError: (err) => {
+            if (controller.signal.aborted) return;
+            setResponse(err);
+            setStreaming(err);
+            setAppState('response');
+          },
+        },
+        { signal: controller.signal }
+      );
+    },
+    [audioOn, buildUtterances, speakSequence, stopSpeech]
+  );
+
+  // ── Voice: hold-to-speak ──────────────────────────────────────────────────
+  const startRecording = useCallback(async () => {
+    try {
+      const perm = await requestRecordingPermissionsAsync();
+      if (!perm.granted) return;
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+    } catch {
+      // fail silently — release handler still submits the stub transcript
+    }
+  }, [recorder]);
+
+  const stopRecording = useCallback(async () => {
+    let uri: string | null = null;
+    try {
+      await recorder.stop();
+      uri = recorder.uri;
+    } catch {
+      // ignore — transcription is a stub regardless
+    }
+    const text = await transcribeAudio(uri);
+    submit(text, null);
+  }, [recorder, submit]);
+
+  // ── Photo ─────────────────────────────────────────────────────────────────
+  const pickImage = useCallback(async () => {
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) return;
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.6,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      submit('', result.assets[0].uri);
+    } catch {
+      // fail silently
+    }
+  }, [submit]);
+
+  // ── Type ──────────────────────────────────────────────────────────────────
+  const submitTyped = useCallback(() => {
+    if (!typedText.trim()) return;
+    const t = typedText;
+    setTypedText('');
+    setTyping(false);
+    submit(t, null);
+  }, [typedText, submit]);
+
+  // ── Cancel / reset ────────────────────────────────────────────────────────
+  const cancelThinking = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    stopSpeech();
+    setAppState('ready');
+  }, [stopSpeech]);
+
+  const newSituation = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    stopSpeech();
+    setSubmittedText('');
+    setImageUri(null);
+    setImageExpanded(false);
+    setStreaming('');
+    setResponse('');
+    setTypedText('');
+    setTyping(false);
+    setAppState('ready');
+  }, [stopSpeech]);
+
+  const toggleAudio = useCallback(() => {
+    setAudioOn((prev) => {
+      if (prev) stopSpeech();
+      return !prev;
+    });
+  }, [stopSpeech]);
+
+  const repeat = useCallback(() => {
+    const text = response || streaming;
+    if (text) speakSequence(buildUtterances(text));
+  }, [response, streaming, speakSequence, buildUtterances]);
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={s.container}>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
-
-      <View style={s.header}>
-        <Text style={s.cross}>✚</Text>
-        <Text style={s.title}>GHOST MEDIC</Text>
-        <Text style={s.tagline}>
-          Offline wilderness trauma assistant — when help is hours away.
-        </Text>
-        <Text style={s.protocol}>WMS · PATIENT ASSESSMENT SYSTEM</Text>
-      </View>
-
-      <View style={s.statusRow}>
-        <StatusPill label="OFFLINE" color={C.green} />
-        <StatusPill label="NO SIGNAL" color={C.green} />
-        <StatusPill label="NO RF" color={C.green} />
-        <StatusPill label="BATT" color={C.yellow} />
-      </View>
-
-      <Text style={s.selectLabel}>SELECT MODE</Text>
-
-      <View style={s.modes}>
-        {MODES.map((m) => (
-          <TouchableOpacity
-            key={m.id}
-            style={[s.modeBtn, { borderColor: m.color, backgroundColor: m.bg }]}
-            onPress={() => handleSelect(m.id)}
-            activeOpacity={0.75}
-          >
-            <View style={s.modeBtnInner}>
-              <Text style={[s.modeIcon, { color: m.color }]}>{m.icon}</Text>
-              <View style={s.modeText}>
-                <Text style={[s.modeName, { color: m.color }]}>{m.label}</Text>
-                <Text style={s.modeSub}>{m.sub}</Text>
-              </View>
-              <Text style={[s.modeArrow, { color: m.color }]}>›</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={s.disclaimer}>
-        DECISION SUPPORT TOOL ONLY · NOT A SUBSTITUTE FOR MEDICAL TRAINING{'\n'}
-        WILDERNESS MEDICAL SOCIETY · PATIENT ASSESSMENT SYSTEM
-      </Text>
+    <SafeAreaView style={s.screen}>
+      <StatusBar barStyle="light-content" backgroundColor={BG} />
+      {appState === 'ready' && (
+        <ReadyView
+          typing={typing}
+          typedText={typedText}
+          audioOn={audioOn}
+          onHoldStart={startRecording}
+          onHoldEnd={stopRecording}
+          onPhoto={pickImage}
+          onToggleTyping={() => setTyping((v) => !v)}
+          onChangeText={setTypedText}
+          onSubmitTyped={submitTyped}
+          onToggleAudio={toggleAudio}
+        />
+      )}
+      {appState === 'thinking' && (
+        <ThinkingView
+          pulse={pulse}
+          submittedText={submittedText}
+          imageUri={imageUri}
+          onCancel={cancelThinking}
+        />
+      )}
+      {appState === 'response' && (
+        <ResponseView
+          text={streaming}
+          imageUri={imageUri}
+          imageExpanded={imageExpanded}
+          onToggleImage={() => setImageExpanded((v) => !v)}
+          spokenIndex={spokenIndex}
+          audioOn={audioOn}
+          onRepeat={repeat}
+          onNew={newSituation}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
-function StatusPill({ label, color }: { label: string; color: string }) {
+// ── STATE 1: READY ─────────────────────────────────────────────────────────
+function ReadyView(props: {
+  typing: boolean;
+  typedText: string;
+  audioOn: boolean;
+  onHoldStart: () => void;
+  onHoldEnd: () => void;
+  onPhoto: () => void;
+  onToggleTyping: () => void;
+  onChangeText: (t: string) => void;
+  onSubmitTyped: () => void;
+  onToggleAudio: () => void;
+}) {
   return (
-    <View style={[sp.pill, { borderColor: color }]}>
-      <View style={[sp.dot, { backgroundColor: color }]} />
-      <Text style={[sp.text, { color }]}>{label}</Text>
+    <View style={s.readyRoot}>
+      <View style={s.readyHeader}>
+        <Text style={s.brand}>GHOST MEDIC</Text>
+        <Text style={s.tagline}>offline survival assistant</Text>
+      </View>
+
+      <View style={s.readyCenter}>
+        <TouchableOpacity
+          style={s.circle}
+          activeOpacity={0.7}
+          onPressIn={props.onHoldStart}
+          onPressOut={props.onHoldEnd}
+        >
+          <Text style={s.circleLabel}>HOLD{'\n'}TO SPEAK</Text>
+        </TouchableOpacity>
+
+        <View style={s.secondaryRow}>
+          <TouchableOpacity style={s.secondaryBtn} onPress={props.onPhoto} activeOpacity={0.7}>
+            <Text style={s.secondaryIcon}>◎</Text>
+            <Text style={s.secondaryLabel}>PHOTOGRAPH{'\n'}WOUND</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={s.secondaryBtn}
+            onPress={props.onToggleTyping}
+            activeOpacity={0.7}
+          >
+            <Text style={s.secondaryIcon}>⌨</Text>
+            <Text style={s.secondaryLabel}>TYPE{'\n'}INSTEAD</Text>
+          </TouchableOpacity>
+        </View>
+
+        {props.typing && (
+          <View style={s.typeBox}>
+            <TextInput
+              style={s.input}
+              placeholder="Describe what happened…"
+              placeholderTextColor={DIM}
+              value={props.typedText}
+              onChangeText={props.onChangeText}
+              multiline
+              autoFocus
+              returnKeyType="send"
+              onSubmitEditing={props.onSubmitTyped}
+            />
+            <TouchableOpacity style={s.sendBtn} onPress={props.onSubmitTyped} activeOpacity={0.7}>
+              <Text style={s.sendLabel}>SEND</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      <TouchableOpacity
+        style={[s.audioToggle, { borderColor: props.audioOn ? GREEN : DIM }]}
+        onPress={props.onToggleAudio}
+        activeOpacity={0.8}
+      >
+        <Text style={[s.audioLabel, { color: props.audioOn ? GREEN : DIM }]}>
+          {props.audioOn ? 'AUDIO ON' : 'AUDIO OFF'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
+// ── STATE 2: THINKING ────────────────────────────────────────────────────────
+function ThinkingView(props: {
+  pulse: Animated.Value;
+  submittedText: string;
+  imageUri: string | null;
+  onCancel: () => void;
+}) {
+  return (
+    <View style={s.thinkingRoot}>
+      {props.imageUri && (
+        <Image source={{ uri: props.imageUri }} style={s.thinkingThumb} />
+      )}
+      <View style={s.thinkingCenter}>
+        <Animated.View style={[s.pulseDot, { transform: [{ scale: props.pulse }] }]} />
+        <Text style={s.thinkingTitle}>GHOST MEDIC IS THINKING</Text>
+        <Text style={s.thinkingSub} numberOfLines={2}>
+          {truncate(props.submittedText, 80)}
+        </Text>
+        <ActivityIndicator color={DIM} style={{ marginTop: 16 }} />
+      </View>
+      <TouchableOpacity style={s.cancelBtn} onPress={props.onCancel} activeOpacity={0.8}>
+        <Text style={s.cancelLabel}>CANCEL</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+// ── STATE 3: RESPONSE ────────────────────────────────────────────────────────
+function ResponseView(props: {
+  text: string;
+  imageUri: string | null;
+  imageExpanded: boolean;
+  onToggleImage: () => void;
+  spokenIndex: number;
+  audioOn: boolean;
+  onRepeat: () => void;
+  onNew: () => void;
+}) {
+  const parsed = parseResponse(props.text);
+  // spokenIndex maps over [intro..., steps..., evacuation]; compute offsets.
+  const stepOffset = parsed.intro.length;
+  const evacIndex = stepOffset + parsed.steps.length;
+
+  return (
+    <View style={s.respRoot}>
+      <View style={s.topBar}>
+        <Text style={s.topBrand}>GHOST MEDIC</Text>
+        <TouchableOpacity onPress={props.onNew} activeOpacity={0.7} style={s.topBtn}>
+          <Text style={s.topBtnLabel}>NEW SITUATION</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={s.respScroll}
+        contentContainerStyle={s.respContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {props.imageUri && (
+          <TouchableOpacity style={s.imageTag} onPress={props.onToggleImage} activeOpacity={0.8}>
+            <Text style={s.imageTagLabel}>
+              {props.imageExpanded ? '▾ IMAGE SUBMITTED' : '▸ IMAGE SUBMITTED'}
+            </Text>
+            {props.imageExpanded && (
+              <Image source={{ uri: props.imageUri }} style={s.imageExpanded} />
+            )}
+          </TouchableOpacity>
+        )}
+
+        {parsed.intro.map((line, i) => (
+          <Text
+            key={`intro-${i}`}
+            style={[s.introLine, props.spokenIndex === i && s.spokenText]}
+          >
+            {line}
+          </Text>
+        ))}
+
+        {parsed.steps.map((step, i) => {
+          const spoken = props.spokenIndex === stepOffset + i;
+          return (
+            <View key={`step-${i}`} style={s.stepRow}>
+              <Text style={[s.stepNum, spoken && s.spokenNum]}>{step.num}</Text>
+              <Text style={[s.stepText, spoken && s.spokenText]}>{step.text}</Text>
+            </View>
+          );
+        })}
+
+        {parsed.evacuation && (
+          <View>
+            <Text style={s.evacLabel}>EVACUATION</Text>
+            <View style={[s.evacBox, props.spokenIndex === evacIndex && s.evacBoxActive]}>
+              <Text style={s.evacText}>{parsed.evacuation}</Text>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+
+      <View style={s.respButtons}>
+        {props.audioOn && (
+          <TouchableOpacity style={s.repeatBtn} onPress={props.onRepeat} activeOpacity={0.8}>
+            <Text style={s.repeatLabel}>REPEAT</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={s.newBtn} onPress={props.onNew} activeOpacity={0.8}>
+          <Text style={s.newLabel}>NEW SITUATION</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return text.slice(0, max - 1) + '…';
+}
+
+// ── STYLES ───────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: C.bg,
-    paddingHorizontal: 20,
-  },
-  header: {
-    alignItems: 'center',
-    paddingTop: 28,
-    paddingBottom: 20,
-  },
-  cross: {
-    fontSize: 38,
-    color: C.red,
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: C.white,
-    letterSpacing: 10,
+  screen: { flex: 1, backgroundColor: BG },
+
+  // READY
+  readyRoot: { flex: 1, paddingHorizontal: 20, paddingBottom: 16 },
+  readyHeader: { alignItems: 'center', paddingTop: 12 },
+  brand: {
+    fontFamily: MONO,
+    color: GREEN,
+    fontSize: 18,
+    letterSpacing: 4,
+    textAlign: 'center',
   },
   tagline: {
+    fontFamily: MONO,
+    color: DIM,
     fontSize: 11,
-    color: C.muted,
     letterSpacing: 1,
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 16,
-    paddingHorizontal: 12,
+    marginTop: 6,
   },
-  protocol: {
-    fontSize: 10,
-    color: C.dim,
-    letterSpacing: 4,
-    marginTop: 4,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: C.border,
-    marginBottom: 28,
-  },
-  selectLabel: {
-    fontSize: 10,
-    color: C.muted,
-    letterSpacing: 5,
-    textAlign: 'center',
-    marginBottom: 14,
-  },
-  modes: {
-    flex: 1,
-    gap: 12,
-    justifyContent: 'center',
-  },
-  modeBtn: {
-    borderWidth: 1,
-    borderRadius: 6,
-    padding: 18,
-    minHeight: 56,
-    justifyContent: 'center',
-  },
-  modeBtnInner: {
-    flexDirection: 'row',
+  readyCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  circle: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 3,
+    borderColor: GREEN,
+    backgroundColor: '#0d160d',
     alignItems: 'center',
-    gap: 14,
+    justifyContent: 'center',
   },
-  modeIcon: {
-    fontSize: 22,
-    width: 28,
-    textAlign: 'center',
-  },
-  modeText: {
-    flex: 1,
-  },
-  modeName: {
-    fontSize: 17,
+  circleLabel: {
+    color: WHITE,
+    fontSize: 20,
     fontWeight: '800',
     letterSpacing: 3,
-    marginBottom: 3,
-  },
-  modeSub: {
-    fontSize: 12,
-    color: C.muted,
-  },
-  modeArrow: {
-    fontSize: 24,
-  },
-  disclaimer: {
     textAlign: 'center',
-    color: C.dim,
-    fontSize: 9,
-    letterSpacing: 1,
-    lineHeight: 14,
-    paddingBottom: 12,
-    paddingTop: 8,
+    lineHeight: 26,
   },
-});
+  secondaryRow: { flexDirection: 'row', gap: 12, marginTop: 36, width: '100%' },
+  secondaryBtn: {
+    flex: 1,
+    minHeight: 72,
+    borderWidth: 1,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 4,
+  },
+  secondaryIcon: { color: GREEN, fontSize: 22 },
+  secondaryLabel: {
+    fontFamily: MONO,
+    color: WHITE,
+    fontSize: 12,
+    letterSpacing: 1,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  typeBox: { width: '100%', marginTop: 20, gap: 10 },
+  input: {
+    minHeight: 56,
+    borderWidth: 1,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    color: WHITE,
+    fontSize: 16,
+    padding: 14,
+    textAlignVertical: 'top',
+  },
+  sendBtn: {
+    minHeight: 56,
+    backgroundColor: '#0d160d',
+    borderWidth: 1,
+    borderColor: GREEN,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendLabel: { fontFamily: MONO, color: GREEN, fontSize: 16, letterSpacing: 3, fontWeight: '700' },
+  audioToggle: {
+    minHeight: 56,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  audioLabel: { fontFamily: MONO, fontSize: 16, letterSpacing: 3, fontWeight: '700' },
 
-const sp = StyleSheet.create({
-  pill: {
+  // THINKING
+  thinkingRoot: { flex: 1, padding: 20 },
+  thinkingThumb: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#27331f',
+  },
+  thinkingCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  pulseDot: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: GREEN,
+    marginBottom: 28,
+  },
+  thinkingTitle: {
+    color: WHITE,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 2,
+    textAlign: 'center',
+    fontFamily: MONO,
+  },
+  thinkingSub: {
+    color: DIM,
+    fontSize: 16,
+    marginTop: 14,
+    textAlign: 'center',
+    paddingHorizontal: 12,
+  },
+  cancelBtn: {
+    minHeight: 56,
+    borderWidth: 1,
+    borderColor: RED,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelLabel: { fontFamily: MONO, color: RED, fontSize: 16, letterSpacing: 4, fontWeight: '700' },
+
+  // RESPONSE
+  respRoot: { flex: 1 },
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a241a',
+  },
+  topBrand: { fontFamily: MONO, color: GREEN, fontSize: 14, letterSpacing: 2 },
+  topBtn: { minHeight: 40, justifyContent: 'center', paddingHorizontal: 4 },
+  topBtnLabel: { fontFamily: MONO, color: WHITE, fontSize: 13, letterSpacing: 1 },
+  respScroll: { flex: 1 },
+  respContent: { padding: 20, paddingBottom: 32 },
+  imageTag: {
     borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 18,
   },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
+  imageTagLabel: { fontFamily: MONO, color: DIM, fontSize: 13, letterSpacing: 1 },
+  imageExpanded: { width: '100%', height: 200, borderRadius: 6, marginTop: 12 },
+  introLine: {
+    color: WHITE,
+    fontSize: 18,
+    lineHeight: 26,
+    marginBottom: 18,
+    fontWeight: '600',
   },
-  text: {
-    fontSize: 9,
+  stepRow: { flexDirection: 'row', marginBottom: 24, gap: 16 },
+  stepNum: {
+    fontFamily: MONO,
+    color: GREEN,
+    fontSize: 32,
+    fontWeight: '800',
+    minWidth: 36,
+    lineHeight: 34,
+  },
+  stepText: { flex: 1, color: WHITE, fontSize: 18, lineHeight: 26 },
+  spokenNum: { color: GREEN },
+  spokenText: { color: GREEN },
+  evacLabel: {
+    fontFamily: MONO,
+    color: AMBER,
+    fontSize: 14,
+    letterSpacing: 3,
     fontWeight: '700',
-    letterSpacing: 2,
+    marginBottom: 8,
+    marginTop: 8,
   },
+  evacBox: {
+    borderWidth: 2,
+    borderColor: AMBER,
+    borderRadius: 8,
+    padding: 16,
+  },
+  evacBoxActive: { backgroundColor: '#1c1400' },
+  evacText: { color: WHITE, fontSize: 18, lineHeight: 26 },
+  respButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#1a241a',
+  },
+  repeatBtn: {
+    flex: 1,
+    minHeight: 56,
+    borderWidth: 1,
+    borderColor: GREEN,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  repeatLabel: { fontFamily: MONO, color: GREEN, fontSize: 16, letterSpacing: 2, fontWeight: '700' },
+  newBtn: {
+    flex: 2,
+    minHeight: 56,
+    backgroundColor: '#0d160d',
+    borderWidth: 1,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  newLabel: { fontFamily: MONO, color: WHITE, fontSize: 16, letterSpacing: 2, fontWeight: '700' },
 });

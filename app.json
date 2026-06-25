@@ -17,6 +17,7 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Voice input for symptom description",
         "NSCameraUsageDescription": "Wound documentation",
+        "NSPhotoLibraryUsageDescription": "Attach a wound photograph to your situation report",
         "NSLocationWhenInUseUsageDescription": "Region-specific injury guidance (offline only)"
       }
     },
