@@ -1,6 +1,6 @@
 /**
  * ACTION SCREEN
- * Step-by-step MARCH protocol execution + AI/LLM guidance.
+ * Step-by-step PAS treatment execution + AI/LLM guidance.
  * AIResponse component + wound photo context passed to LLM.
  */
 import React, { useState } from 'react';
@@ -25,7 +25,7 @@ import VitalsBar from '@/components/VitalsBar';
 import { RiskBadge, MarchBadge } from '@/components/RiskBadge';
 import { AIResponse } from '@/components/AIResponse';
 import { SessionHeader } from '@/components/SessionHeader';
-import { streamTCCCGuidance } from '@services/llmService';
+import { streamWildernessGuidance } from '@services/llmService';
 
 export default function ActionScreen() {
   const insets = useSafeAreaInsets();
@@ -52,7 +52,7 @@ export default function ActionScreen() {
   const [medicInput, setMedicInput] = useState('');
   const [showLLM, setShowLLM] = useState(false);
 
-  const isSilent = mode === 'silent';
+  const isSilent = mode === 'stealth';
 
   const step = protocol[protocolIdx];
   if (!step || protocol.length === 0) {
@@ -107,7 +107,7 @@ export default function ActionScreen() {
       setSubstepIdx(0);
       setProtocolIdx((p) => p + 1);
     } else {
-      router.push('/mist');
+      router.push('/evacuation');
     }
   };
 
@@ -132,7 +132,7 @@ export default function ActionScreen() {
       `CURRENT ACTION: ${step.action}`,
     ];
 
-    if (text) reportLines.push(`MEDIC OBSERVATION: ${text}`);
+    if (text) reportLines.push(`RESPONDER OBSERVATION: ${text}`);
     if (audioTranscript) reportLines.push(`AUDIO TRANSCRIPT: ${audioTranscript}`);
 
     // Pass wound photo as base64 label if available
@@ -151,7 +151,7 @@ export default function ActionScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
     }
 
-    streamTCCCGuidance(report, {
+    streamWildernessGuidance(report, {
       onToken: (token) => appendStreamToken(token),
       onComplete: (full) => {
         setAiResponse(full);

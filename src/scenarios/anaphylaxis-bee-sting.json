@@ -1,0 +1,32 @@
+{
+  "id": "anaphylaxis-bee-sting-01",
+  "title": "Scout with Multiple Bee Stings — Anaphylaxis",
+  "briefing": "9-year-old boy on a Scout trip stung multiple times near a lake shore. Hives spreading rapidly over torso, voice starting to change, and he says his throat feels 'funny.' No known allergy history. This is a developing airway emergency. Nearest road is a 2-hour carry.",
+  "environment": "Lake shore, daytime, mild",
+  "terrain": "Forested lake shore, 2 hours from the nearest road; open meadow nearby usable as a landing zone",
+  "evacNote": "Anaphylaxis — give epinephrine now, immediate evac, may need repeat dose",
+  "patient": {
+    "patientId": "MINOR-1",
+    "age": 9,
+    "sex": "M",
+    "weightKg": 30,
+    "mechanism": "Multiple bee stings with systemic allergic reaction (anaphylaxis)",
+    "timeOfInjury": "minutes ago, progressing",
+    "consciousness": "V",
+    "injuries": [
+      {
+        "region": "airway / systemic",
+        "type": "anaphylaxis",
+        "severity": "critical",
+        "notes": "Spreading hives, early voice change and throat tightness, hypotension and tachycardia. No prior known allergy. Airway involvement evolving."
+      }
+    ],
+    "vitals": {
+      "hr": 140,
+      "bpSys": 80,
+      "bpDia": 40,
+      "rr": 28,
+      "spo2": 91
+    }
+  }
+}

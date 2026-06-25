@@ -1,15 +1,7 @@
 // services/llmService.ts
 import { OLLAMA_BASE_URL, OLLAMA_MODEL } from './llmConfig';
 
-const TCCC_SYSTEM_PROMPT = `You are GHOST MEDIC — an AI clinical decision support system for US Army combat medics operating under TCCC (Tactical Combat Casualty Care) protocols in austere, comms-denied environments.
-
-RULES:
-- Follow the MARCH protocol order: Massive hemorrhage → Airway → Respiration → Circulation → Hypothermia/Head injury
-- Be concise. The medic is under stress. Use numbered steps.
-- Flag life threats in ALL CAPS.
-- Drug dosages use standard TCCC formulary (ketamine 1-2mg/kg IM, TXA 1g IV/IO, morphine 5mg IV/IM).
-- If critical info is missing, ask ONE clarifying question before proceeding.
-- Always end with: "REASSESS in 5 min."
+const WILDERNESS_SYSTEM_PROMPT = `You are GHOST MEDIC — an offline AI clinical decision support tool for wilderness search-and-rescue responders, wilderness EMTs, and backcountry users. You follow Wilderness Medical Society guidelines and the Patient Assessment System (PAS). Always prioritize: scene safety, primary assessment ABCDE, secondary assessment SAMPLE, then treatment, then evacuation decision. Be concise. The responder is in the field, often cold, tired, and far from help. Drug recommendations should reflect what's realistically in a wilderness kit (epinephrine auto-injector, diphenhydramine, ibuprofen, acetaminophen, aspirin, glucose). Always end with: EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE] and one sentence on what to tell dispatch.
 
 FORMAT your response exactly like this:
 ASSESSMENT: [1-2 sentence summary]
@@ -18,7 +10,7 @@ IMMEDIATE ACTIONS:
 1. [step]
 2. [step]
 MONITOR FOR: [deterioration signs]
-REASSESS in 5 min.`;
+EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE] — [one sentence on what to tell dispatch]`;
 
 export interface LLMCallbacks {
   onToken: (token: string) => void;
@@ -26,11 +18,11 @@ export interface LLMCallbacks {
   onError: (error: string) => void;
 }
 
-export async function streamTCCCGuidance(
-  casualtyReport: string,
+export async function streamWildernessGuidance(
+  patientReport: string,
   callbacks: LLMCallbacks
 ): Promise<void> {
-  const prompt = `CASUALTY REPORT:\n${casualtyReport}\n\nProvide TCCC guidance:`;
+  const prompt = `PATIENT REPORT:\n${patientReport}\n\nProvide wilderness (PAS / WMS) guidance:`;
 
   try {
     const controller = new AbortController();
@@ -43,7 +35,7 @@ export async function streamTCCCGuidance(
       body: JSON.stringify({
         model: OLLAMA_MODEL,
         prompt,
-        system: TCCC_SYSTEM_PROMPT,
+        system: WILDERNESS_SYSTEM_PROMPT,
         stream: false,
       }),
     });

@@ -39,7 +39,7 @@ export default function VitalsScreen() {
   const [o2, setO2] = useState('');
   const [avpu, setAvpu] = useState<string | null>(null);
 
-  const isSilent = mode === 'silent';
+  const isSilent = mode === 'stealth';
   const sensorConnected = sensorVitals.connected;
 
   const buildAndNavigate = () => {

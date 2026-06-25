@@ -1,6 +1,6 @@
 /**
  * MODE SELECT SCREEN
- * The entry point: pick SELF-AID, BUDDY-AID, or SILENT mode.
+ * The entry point: pick SELF-AID, TEAMMATE, or STEALTH mode.
  */
 import React from 'react';
 import {
@@ -27,23 +27,23 @@ const MODES: Array<{
   {
     id: 'self',
     label: 'SELF-AID',
-    sub: 'You are the casualty',
+    sub: 'You are the patient',
     color: C.green,
     bg: C.greenBg,
     icon: '◎',
   },
   {
-    id: 'buddy',
-    label: 'BUDDY-AID',
+    id: 'teammate',
+    label: 'TEAMMATE',
     sub: 'You are treating another person',
     color: C.blue,
     bg: C.blueBg,
     icon: '⊕',
   },
   {
-    id: 'silent',
-    label: 'SILENT',
-    sub: 'No audio · Dim screen · Vibration only',
+    id: 'stealth',
+    label: 'STEALTH',
+    sub: 'No audio · Dim screen · Vibration only — night / avalanche zones',
     color: C.red,
     bg: C.redBg,
     icon: '◈',
@@ -69,8 +69,10 @@ export default function IndexScreen() {
       <View style={s.header}>
         <Text style={s.cross}>✚</Text>
         <Text style={s.title}>GHOST MEDIC</Text>
-        <Text style={s.tagline}>OFFLINE TRAUMA ASSISTANT</Text>
-        <Text style={s.protocol}>TCCC · MARCH PROTOCOL</Text>
+        <Text style={s.tagline}>
+          Offline wilderness trauma assistant — when help is hours away.
+        </Text>
+        <Text style={s.protocol}>WMS · PATIENT ASSESSMENT SYSTEM</Text>
       </View>
 
       <View style={s.statusRow}>
@@ -104,7 +106,7 @@ export default function IndexScreen() {
 
       <Text style={s.disclaimer}>
         DECISION SUPPORT TOOL ONLY · NOT A SUBSTITUTE FOR MEDICAL TRAINING{'\n'}
-        TCCC HANDBOOK · MARCH PROTOCOL
+        WILDERNESS MEDICAL SOCIETY · PATIENT ASSESSMENT SYSTEM
       </Text>
     </SafeAreaView>
   );
@@ -144,8 +146,11 @@ const s = StyleSheet.create({
   tagline: {
     fontSize: 11,
     color: C.muted,
-    letterSpacing: 5,
-    marginTop: 6,
+    letterSpacing: 1,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 16,
+    paddingHorizontal: 12,
   },
   protocol: {
     fontSize: 10,

@@ -1,6 +1,7 @@
 /**
- * MIST CARD SCREEN
- * Auto-filled from session data. Ready to read aloud to receiving medic.
+ * SAR HANDOFF SCREEN
+ * Auto-filled from session data. Ready to read aloud to the receiving
+ * SAR team, wilderness EMT, or transporting crew.
  */
 import React from 'react';
 import {
@@ -25,7 +26,7 @@ function formatElapsed(start: number | null): string {
   return `${m}m ${s}s ago`;
 }
 
-export default function MistScreen() {
+export default function HandoffScreen() {
   const insets = useSafeAreaInsets();
   const mode = useSessionStore((s) => s.mode);
   const mechanism = useSessionStore((s) => s.mechanism);
@@ -33,16 +34,17 @@ export default function MistScreen() {
   const vitals = useSessionStore((s) => s.vitals);
   const protocol = useSessionStore((s) => s.protocol);
   const sessionStartTime = useSessionStore((s) => s.sessionStartTime);
+  const evacuationInitiatedAt = useSessionStore((s) => s.evacuationInitiatedAt);
   const audioTranscript = useSessionStore((s) => s.audioTranscript);
 
-  const isSilent = mode === 'silent';
+  const isSilent = mode === 'stealth';
 
-  // Build MIST fields from session data
+  // Build SAR handoff fields from session data
   const M_mechanism = mechanism
     ? mechanism.toUpperCase()
     : 'UNKNOWN — describe to receiver';
 
-  const I_injuries = selectedSymptoms.length > 0
+  const I_findings = selectedSymptoms.length > 0
     ? selectedSymptoms.map((s) => s.replace(/_/g, ' ').toUpperCase()).join(', ')
     : 'NOT DOCUMENTED';
 
@@ -54,11 +56,12 @@ export default function MistScreen() {
     vitals.avpu ? `LOC: ${vitals.avpu}` : 'LOC —',
   ].join(' | ');
 
-  const tqApplied = protocol.some((p) => p.id === 'tourniquet');
   const T_treatment = [
-    tqApplied ? `TQ APPLIED: ${formatElapsed(sessionStartTime)}` : null,
     `TREATMENT STARTED: ${formatElapsed(sessionStartTime)}`,
     `ACTIONS: ${protocol.filter((p) => p.id !== 'mist').map((p) => p.action).join(', ') || 'NONE'}`,
+    evacuationInitiatedAt
+      ? `EVAC INITIATED: ${formatElapsed(evacuationInitiatedAt)}`
+      : 'EVAC: not yet initiated',
     audioTranscript ? `VOICE NOTE: ${audioTranscript}` : null,
   ]
     .filter(Boolean)
@@ -72,33 +75,33 @@ export default function MistScreen() {
 
       {/* ALERT at top */}
       <View style={s.alertBanner}>
-        <Text style={s.alertText}>⚠ STATE TQ TIME VERBALLY TO ALL RECEIVING PROVIDERS</Text>
+        <Text style={s.alertText}>⚠ STATE TIMES AND TREND VERBALLY TO THE RECEIVING TEAM</Text>
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        <Text style={s.title}>MIST HANDOFF CARD</Text>
+        <Text style={s.title}>SAR HANDOFF</Text>
 
-        <MistField
+        <HandoffField
           letter="M"
-          title="MECHANISM"
+          title="MECHANISM OF INJURY"
           content={M_mechanism}
           color={C.red}
         />
-        <MistField
+        <HandoffField
           letter="I"
-          title="INJURIES"
-          content={I_injuries}
+          title="INJURIES / FINDINGS"
+          content={I_findings}
           color={C.yellow}
         />
-        <MistField
+        <HandoffField
           letter="S"
           title="SIGNS / VITALS"
           content={S_signs}
           color={C.blue}
         />
-        <MistField
+        <HandoffField
           letter="T"
-          title="TREATMENT"
+          title="TREATMENT / EVAC"
           content={T_treatment}
           color={C.green}
         />
@@ -117,14 +120,14 @@ export default function MistScreen() {
           style={s.secondaryBtn}
           onPress={() => router.back()}
         >
-          <Text style={s.secondaryBtnText}>◀ BACK TO TREATMENT</Text>
+          <Text style={s.secondaryBtnText}>◀ BACK TO EVACUATION</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
-function MistField({
+function HandoffField({
   letter,
   title,
   content,

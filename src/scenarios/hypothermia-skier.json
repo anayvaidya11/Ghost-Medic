@@ -1,0 +1,32 @@
+{
+  "id": "hypothermia-skier-01",
+  "title": "Lost Backcountry Skier — Severe Hypothermia",
+  "briefing": "Solo ski tourer reported 6 hours overdue. Located by SAR team in an alpine bowl after sundown, partially sheltered behind a boulder. Found cold, drowsy, and no longer shivering. Core temperature unmeasured in field — handle gently, assume severe hypothermia.",
+  "environment": "Alpine bowl, night, cold and windy",
+  "terrain": "Exposed alpine bowl above treeline; technical ground egress, possible helicopter hoist at first light",
+  "evacNote": "Severe hypothermia — gentle handling, warm before pronouncing, rewarming-capable facility",
+  "patient": {
+    "patientId": "SUBJECT-1",
+    "age": 34,
+    "sex": "M",
+    "weightKg": 75,
+    "mechanism": "Prolonged cold exposure, 6+ hours overdue, lost on backcountry ski tour",
+    "timeOfInjury": "approx 6h exposure",
+    "consciousness": "V",
+    "injuries": [
+      {
+        "region": "whole body / core",
+        "type": "severe hypothermia",
+        "severity": "critical",
+        "notes": "Shivering has stopped. Slow, shallow breathing. Bradycardic. Core temp unmeasured — treat as severe. SpO2 reading unreliable in cold periphery."
+      }
+    ],
+    "vitals": {
+      "hr": 48,
+      "bpSys": 90,
+      "bpDia": 60,
+      "rr": 8,
+      "spo2": 90
+    }
+  }
+}

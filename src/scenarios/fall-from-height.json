@@ -1,0 +1,32 @@
+{
+  "id": "fall-from-height-01",
+  "title": "Climber Ground Fall — Granite Slab",
+  "briefing": "45-year-old climber took a 30-foot ground fall onto rock at the base of a granite slab. Briefly unresponsive, now responds to pain only. Obvious deformity at the right hip/thigh and pelvic pain. High-energy mechanism — assume spine and internal injury until cleared. Helicopter access is possible at this location.",
+  "environment": "Granite slab base, daytime, clear",
+  "terrain": "Open granite slab with a viable helicopter landing/hoist site; ground carry-out would be long and rough",
+  "evacNote": "High-mechanism blunt trauma — spine precautions, pelvic binder, immediate helicopter evac",
+  "patient": {
+    "patientId": "PATIENT-C",
+    "age": 45,
+    "sex": "M",
+    "weightKg": 82,
+    "mechanism": "30 ft ground fall onto rock; high-energy blunt trauma",
+    "timeOfInjury": "witnessed, recent",
+    "consciousness": "P",
+    "injuries": [
+      {
+        "region": "pelvis and right femur",
+        "type": "fall / blunt trauma",
+        "severity": "critical",
+        "notes": "Suspected unstable pelvis and right femur fracture. GCS unclear; responds to pain (AVPU=P). Spine precautions in place. Monitor for internal hemorrhage and shock."
+      }
+    ],
+    "vitals": {
+      "hr": 124,
+      "bpSys": 100,
+      "bpDia": 60,
+      "rr": 24,
+      "spo2": 95
+    }
+  }
+}

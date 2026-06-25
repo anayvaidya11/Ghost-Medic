@@ -544,32 +544,32 @@ export function generateProtocol({
     });
   }
 
-  // ── MIST HANDOFF ─────────────────────────────────────────────────
+  // ── SAR HANDOFF ──────────────────────────────────────────────────
   steps.push({
     id: 'mist',
     phaseCode: 'EVA',
     priority: 99,
     riskLevel: 'STABLE',
-    category: 'MEDEVAC / Handoff',
-    action: 'Prepare MIST report',
-    detail: 'Prepare verbal handoff for receiving medical personnel using MIST format.',
+    category: 'Evacuation / Handoff',
+    action: 'Prepare SAR handoff',
+    detail: 'Prepare a verbal handoff for the receiving SAR team or wilderness EMT.',
     resource: null,
     supplyAlt: null,
     steps: [
       {
-        text: 'M — MECHANISM: describe how injury occurred (GSW, blast, fall…)',
+        text: 'MECHANISM OF INJURY: describe what happened (fall, exposure, bite, illness…)',
         critical: false,
       },
-      { text: 'I — INJURIES: list all injuries found, head to toe', critical: false },
-      { text: 'S — SIGNS: current HR, BP, RR, SpO2, LOC (AVPU)', critical: false },
+      { text: 'INJURIES / FINDINGS: list problems found, head to toe', critical: false },
+      { text: 'SIGNS: current HR, BP, RR, SpO2, LOC (AVPU) and the trend', critical: false },
       {
-        text: 'T — TREATMENT: tourniquet time, fluids given (volume), medications (name/dose/time)',
+        text: 'TREATMENT: interventions done, medications (name/dose/time), and evac initiated time',
         critical: false,
       },
-      { text: 'STATE TQ TIME verbally to ALL receiving providers', critical: true },
+      { text: 'STATE the EVACUATION level and location clearly to dispatch / receiving team', critical: true },
     ],
     diagram: null,
-    diagnosis: 'MIST handoff — continuity of care',
+    diagnosis: 'SAR handoff — continuity of care',
   });
 
   return steps.sort((a, b) => a.priority - b.priority);

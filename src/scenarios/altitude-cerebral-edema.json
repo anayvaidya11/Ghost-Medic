@@ -1,0 +1,32 @@
+{
+  "id": "altitude-cerebral-edema-01",
+  "title": "Expedition Member at High Camp — HACE",
+  "briefing": "52-year-old expedition member at 14,800 ft developed a severe headache and vomiting, now confused and unable to walk a straight line (ataxic). Classic High-Altitude Cerebral Edema. SpO2 critically low for the team. Descent is the treatment — do not wait for morning.",
+  "environment": "High camp, 14,800 ft, cold and thin air",
+  "terrain": "High alpine camp at 14,800 ft; descent on foot required, helicopter ceiling/weather dependent",
+  "evacNote": "HACE — descend immediately even at night, assist/carry, oxygen if available",
+  "patient": {
+    "patientId": "MEMBER-4",
+    "age": 52,
+    "sex": "M",
+    "weightKg": 78,
+    "mechanism": "High-altitude cerebral edema (HACE) at 14,800 ft after ascent",
+    "timeOfInjury": "progressive over hours",
+    "consciousness": "V",
+    "injuries": [
+      {
+        "region": "central nervous system",
+        "type": "altitude illness (HACE)",
+        "severity": "critical",
+        "notes": "Ataxia, confusion, severe headache, vomiting. SpO2 78% at altitude. Decreasing level of consciousness — descent is definitive treatment."
+      }
+    ],
+    "vitals": {
+      "hr": 100,
+      "bpSys": 140,
+      "bpDia": 95,
+      "rr": 22,
+      "spo2": 78
+    }
+  }
+}

@@ -11,14 +11,14 @@ import { useSessionStore } from '@/store/sessionStore';
 
 const MODE_LABEL: Record<string, string> = {
   self: 'SELF',
-  buddy: 'BUDDY',
-  silent: 'SILENT',
+  teammate: 'TEAMMATE',
+  stealth: 'STEALTH',
 };
 
 const MODE_COLOR: Record<string, string> = {
   self: C.green,
-  buddy: C.blue,
-  silent: C.red,
+  teammate: C.blue,
+  stealth: C.red,
 };
 
 function formatElapsed(seconds: number): string {

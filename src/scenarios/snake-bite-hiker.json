@@ -1,0 +1,32 @@
+{
+  "id": "snake-bite-hiker-01",
+  "title": "Suspected Rattlesnake Bite — Desert Canyon",
+  "briefing": "Day hiker struck on the right calf by a suspected rattlesnake roughly 40 minutes ago while scrambling. Two puncture marks visible; swelling and pain progressing up the lower leg. Patient anxious but alert. Trailhead is a 4-hour hike out through desert canyon.",
+  "environment": "Desert canyon, daytime, hot",
+  "terrain": "Narrow desert canyon, 4-hour hike to trailhead; limited helicopter access except at canyon mouth",
+  "evacNote": "Needs antivenom — keep calm, immobilize limb, track swelling; urgent evac",
+  "patient": {
+    "patientId": "PATIENT-A",
+    "age": 28,
+    "sex": "F",
+    "weightKg": 64,
+    "mechanism": "Suspected rattlesnake (pit viper) bite to right calf, ~40 min ago",
+    "timeOfInjury": "T+00:40 since bite",
+    "consciousness": "A",
+    "injuries": [
+      {
+        "region": "right calf",
+        "type": "snake bite",
+        "severity": "severe",
+        "notes": "Paired puncture marks. Progressive swelling and pain advancing proximally. Leading edge marked with time. No systemic bleeding signs yet."
+      }
+    ],
+    "vitals": {
+      "hr": 110,
+      "bpSys": 130,
+      "bpDia": 85,
+      "rr": 22,
+      "spo2": 98
+    }
+  }
+}

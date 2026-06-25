@@ -4,13 +4,15 @@
  */
 import { create } from 'zustand';
 import type { Scenario } from '@/types/scenario';
-import gswChest from '@/scenarios/gsw-chest.json';
-import tourniquetLeg from '@/scenarios/tourniquet-leg.json';
-import tensionPneumo from '@/scenarios/tension-pneumo.json';
+import hypothermiaSkier from '@/scenarios/hypothermia-skier.json';
+import snakeBiteHiker from '@/scenarios/snake-bite-hiker.json';
+import anaphylaxisBeeSting from '@/scenarios/anaphylaxis-bee-sting.json';
+import fallFromHeight from '@/scenarios/fall-from-height.json';
+import altitudeCerebralEdema from '@/scenarios/altitude-cerebral-edema.json';
 
 // ── TYPES ────────────────────────────────────────────────────────────
 
-export type Mode = 'self' | 'buddy' | 'silent';
+export type Mode = 'self' | 'teammate' | 'stealth';
 
 export type Vitals = {
   heartRate: number | null;
@@ -54,6 +56,9 @@ export type SessionState = {
   mode: Mode;
   sessionStartTime: number | null;
 
+  // Evacuation
+  evacuationInitiatedAt: number | null;
+
   // Triage inputs
   underFire: boolean;
   mechanism: string | null;
@@ -84,6 +89,7 @@ export type SessionState = {
   setMode: (mode: Mode) => void;
   startSession: () => void;
   resetSession: () => void;
+  markEvacuationInitiated: () => void;
 
   setUnderFire: (val: boolean) => void;
   setMechanism: (val: string | null) => void;
@@ -121,9 +127,11 @@ const EMPTY_VITALS: Vitals = {
 // ── SCENARIOS ───────────────────────────────────────────────────────
 
 const SCENARIOS: Scenario[] = [
-  gswChest as Scenario,
-  tourniquetLeg as Scenario,
-  tensionPneumo as Scenario,
+  hypothermiaSkier as Scenario,
+  snakeBiteHiker as Scenario,
+  anaphylaxisBeeSting as Scenario,
+  fallFromHeight as Scenario,
+  altitudeCerebralEdema as Scenario,
 ];
 
 // ── STORE ────────────────────────────────────────────────────────────
@@ -131,6 +139,7 @@ const SCENARIOS: Scenario[] = [
 export const useSessionStore = create<SessionState>((set, get) => ({
   mode: 'self',
   sessionStartTime: null,
+  evacuationInitiatedAt: null,
 
   underFire: false,
   mechanism: null,
@@ -158,9 +167,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   startSession: () => set({ sessionStartTime: Date.now() }),
 
+  markEvacuationInitiated: () =>
+    set((s) => ({ evacuationInitiatedAt: s.evacuationInitiatedAt ?? Date.now() })),
+
   resetSession: () =>
     set({
       sessionStartTime: null,
+      evacuationInitiatedAt: null,
       underFire: false,
       mechanism: null,
       selectedSymptoms: [],

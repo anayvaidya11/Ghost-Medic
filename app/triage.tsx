@@ -107,8 +107,8 @@ export default function TriageScreen() {
   const [hasRecording, setHasRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
-  // Silent mode overlay
-  const isSilent = mode === 'silent';
+  // Stealth mode overlay
+  const isSilent = mode === 'stealth';
 
   // expo-audio recorder hook
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);

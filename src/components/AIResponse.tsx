@@ -7,7 +7,7 @@ const SECTION_DEFS = [
   { key: 'PRIORITY THREATS', color: C.red },
   { key: 'IMMEDIATE ACTIONS', color: C.green },
   { key: 'MONITOR FOR', color: C.muted },
-  { key: 'REASSESS', color: C.green },
+  { key: 'EVACUATION', color: C.green },
 ] as const;
 
 type SectionDef = { key: string; color: string };
@@ -20,7 +20,7 @@ function parseSections(text: string): Section[] {
     const def = SECTION_DEFS.find((d) => raw.trim().toUpperCase().startsWith(d.key));
     if (def) {
       if (current) out.push(current);
-      current = { ...def, bold: def.key === 'REASSESS', lines: [raw] };
+      current = { ...def, bold: def.key === 'EVACUATION', lines: [raw] };
     } else if (current) {
       current.lines.push(raw);
     } else {
