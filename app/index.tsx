@@ -12,10 +12,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Easing,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -46,7 +50,7 @@ const DIM = '#6b7560';
 
 const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' });
 
-type AppState = 'ready' | 'thinking' | 'response';
+type AppState = 'ready' | 'review' | 'thinking' | 'response';
 
 // ── RESPONSE PARSING ─────────────────────────────────────────────────────────
 type ParsedStep = { num: string; text: string };
@@ -90,6 +94,11 @@ export default function GhostMedic() {
   const [submittedText, setSubmittedText] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageExpanded, setImageExpanded] = useState(false);
+
+  // REVIEW-state payload (image captured, awaiting text context)
+  const [reviewUri, setReviewUri] = useState<string | null>(null);
+  const [reviewBase64, setReviewBase64] = useState<string | null>(null);
+  const [reviewText, setReviewText] = useState('');
 
   // LLM output
   const [streaming, setStreaming] = useState('');
@@ -176,9 +185,9 @@ export default function GhostMedic() {
 
   // ── Core submit → THINKING → RESPONSE ─────────────────────────────────────
   const submit = useCallback(
-    (inputText: string, image: string | null) => {
+    (inputText: string, image: string | null, reportOverride?: string) => {
       const cleanText = inputText.trim();
-      if (!cleanText && !image) return;
+      if (!cleanText && !image && !reportOverride) return;
 
       stopSpeech();
       setSubmittedText(cleanText || 'Wound photograph submitted');
@@ -189,12 +198,14 @@ export default function GhostMedic() {
       setSpokenIndex(-1);
       setAppState('thinking');
 
-      const report = [
-        cleanText ? `Reported: ${cleanText}` : null,
-        image ? 'The user submitted a photograph of the wound/injury.' : null,
-      ]
-        .filter(Boolean)
-        .join('\n');
+      const report =
+        reportOverride ??
+        [
+          cleanText ? `Reported: ${cleanText}` : null,
+          image ? 'The user submitted a photograph of the wound/injury.' : null,
+        ]
+          .filter(Boolean)
+          .join('\n');
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -258,21 +269,61 @@ export default function GhostMedic() {
     submit(text, null);
   }, [recorder, submit]);
 
-  // ── Photo ─────────────────────────────────────────────────────────────────
-  const pickImage = useCallback(async () => {
+  // ── Camera → REVIEW ───────────────────────────────────────────────────────
+  const takePhoto = useCallback(async () => {
     try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) return;
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        quality: 0.6,
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Camera permission required to photograph wound.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.7,
+        allowsEditing: false,
+        base64: true,
       });
       if (result.canceled || !result.assets?.length) return;
-      submit('', result.assets[0].uri);
+      const asset = result.assets[0];
+      setReviewUri(asset.uri);
+      setReviewBase64(asset.base64 ?? null);
+      setReviewText('');
+      setAppState('review');
     } catch {
       // fail silently
     }
-  }, [submit]);
+  }, []);
+
+  // Build the casualty report from the captured image + typed context.
+  const submitReview = useCallback(() => {
+    const textContext = reviewText.trim();
+    const base64 = reviewBase64 ?? '';
+    const report = [
+      'IMAGE ATTACHED.',
+      `USER DESCRIPTION: ${textContext}`,
+      `WOUND IMAGE: [${base64.slice(0, 1000)}]`,
+    ].join('\n');
+    const uri = reviewUri;
+    setReviewBase64(null);
+    setReviewText('');
+    setReviewUri(null);
+    submit(textContext, uri, report);
+  }, [reviewText, reviewBase64, reviewUri, submit]);
+
+  const retakeReview = useCallback(() => {
+    setReviewUri(null);
+    setReviewBase64(null);
+    setReviewText('');
+    takePhoto();
+  }, [takePhoto]);
+
+  const cancelReview = useCallback(() => {
+    Keyboard.dismiss();
+    setReviewUri(null);
+    setReviewBase64(null);
+    setReviewText('');
+    setAppState('ready');
+  }, []);
 
   // ── Type ──────────────────────────────────────────────────────────────────
   const submitTyped = useCallback(() => {
@@ -298,6 +349,9 @@ export default function GhostMedic() {
     setSubmittedText('');
     setImageUri(null);
     setImageExpanded(false);
+    setReviewUri(null);
+    setReviewBase64(null);
+    setReviewText('');
     setStreaming('');
     setResponse('');
     setTypedText('');
@@ -321,40 +375,57 @@ export default function GhostMedic() {
   return (
     <SafeAreaView style={s.screen}>
       <StatusBar barStyle="light-content" backgroundColor={BG} />
-      {appState === 'ready' && (
-        <ReadyView
-          typing={typing}
-          typedText={typedText}
-          audioOn={audioOn}
-          onHoldStart={startRecording}
-          onHoldEnd={stopRecording}
-          onPhoto={pickImage}
-          onToggleTyping={() => setTyping((v) => !v)}
-          onChangeText={setTypedText}
-          onSubmitTyped={submitTyped}
-          onToggleAudio={toggleAudio}
-        />
-      )}
-      {appState === 'thinking' && (
-        <ThinkingView
-          pulse={pulse}
-          submittedText={submittedText}
-          imageUri={imageUri}
-          onCancel={cancelThinking}
-        />
-      )}
-      {appState === 'response' && (
-        <ResponseView
-          text={streaming}
-          imageUri={imageUri}
-          imageExpanded={imageExpanded}
-          onToggleImage={() => setImageExpanded((v) => !v)}
-          spokenIndex={spokenIndex}
-          audioOn={audioOn}
-          onRepeat={repeat}
-          onNew={newSituation}
-        />
-      )}
+      <KeyboardAvoidingView
+        style={s.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <Pressable style={s.flex} onPress={Keyboard.dismiss}>
+          {appState === 'ready' && (
+            <ReadyView
+              typing={typing}
+              typedText={typedText}
+              audioOn={audioOn}
+              onHoldStart={startRecording}
+              onHoldEnd={stopRecording}
+              onPhoto={takePhoto}
+              onToggleTyping={() => setTyping((v) => !v)}
+              onChangeText={setTypedText}
+              onSubmitTyped={submitTyped}
+              onToggleAudio={toggleAudio}
+            />
+          )}
+          {appState === 'review' && (
+            <ReviewView
+              imageUri={reviewUri}
+              text={reviewText}
+              onChangeText={setReviewText}
+              onSubmit={submitReview}
+              onRetake={retakeReview}
+              onCancel={cancelReview}
+            />
+          )}
+          {appState === 'thinking' && (
+            <ThinkingView
+              pulse={pulse}
+              submittedText={submittedText}
+              imageUri={imageUri}
+              onCancel={cancelThinking}
+            />
+          )}
+          {appState === 'response' && (
+            <ResponseView
+              text={streaming}
+              imageUri={imageUri}
+              imageExpanded={imageExpanded}
+              onToggleImage={() => setImageExpanded((v) => !v)}
+              spokenIndex={spokenIndex}
+              audioOn={audioOn}
+              onRepeat={repeat}
+              onNew={newSituation}
+            />
+          )}
+        </Pressable>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -372,6 +443,7 @@ function ReadyView(props: {
   onSubmitTyped: () => void;
   onToggleAudio: () => void;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
     <View style={s.readyRoot}>
       <View style={s.readyHeader}>
@@ -415,8 +487,22 @@ function ReadyView(props: {
               multiline
               autoFocus
               returnKeyType="send"
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
               onSubmitEditing={props.onSubmitTyped}
             />
+            {focused && (
+              <TouchableOpacity
+                style={s.doneBtn}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  props.onSubmitTyped();
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={s.doneLabel}>DONE</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={s.sendBtn} onPress={props.onSubmitTyped} activeOpacity={0.7}>
               <Text style={s.sendLabel}>SEND</Text>
             </TouchableOpacity>
@@ -433,6 +519,61 @@ function ReadyView(props: {
           {props.audioOn ? 'AUDIO ON' : 'AUDIO OFF'}
         </Text>
       </TouchableOpacity>
+    </View>
+  );
+}
+
+// ── STATE 1b: REVIEW (image captured, add textual context) ───────────────────
+function ReviewView(props: {
+  imageUri: string | null;
+  text: string;
+  onChangeText: (t: string) => void;
+  onSubmit: () => void;
+  onRetake: () => void;
+  onCancel: () => void;
+}) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <View style={s.reviewRoot}>
+      {props.imageUri && (
+        <Image source={{ uri: props.imageUri }} style={s.reviewImage} />
+      )}
+      <View style={s.reviewBody}>
+        <Text style={s.reviewLabel}>DESCRIBE WHAT YOU'RE SEEING</Text>
+        <TextInput
+          style={s.reviewInput}
+          placeholder="e.g. deep cut on left forearm, bleeding heavily"
+          placeholderTextColor={DIM}
+          value={props.text}
+          onChangeText={props.onChangeText}
+          multiline
+          returnKeyType="done"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+        {focused && (
+          <TouchableOpacity
+            style={s.doneBtn}
+            onPress={Keyboard.dismiss}
+            activeOpacity={0.7}
+          >
+            <Text style={s.doneLabel}>DONE</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <View style={s.reviewButtons}>
+        <TouchableOpacity style={s.reviewSubmit} onPress={props.onSubmit} activeOpacity={0.8}>
+          <Text style={s.reviewSubmitLabel}>SUBMIT</Text>
+        </TouchableOpacity>
+        <View style={s.reviewSecondaryRow}>
+          <TouchableOpacity style={s.reviewRetake} onPress={props.onRetake} activeOpacity={0.8}>
+            <Text style={s.reviewRetakeLabel}>RETAKE</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.reviewCancel} onPress={props.onCancel} activeOpacity={0.8}>
+            <Text style={s.reviewCancelLabel}>CANCEL</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
@@ -556,6 +697,79 @@ function truncate(text: string, max: number): string {
 // ── STYLES ───────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: BG },
+  flex: { flex: 1 },
+
+  // KEYBOARD DONE
+  doneBtn: {
+    minHeight: 48,
+    backgroundColor: '#0d160d',
+    borderWidth: 1,
+    borderColor: AMBER,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  doneLabel: { fontFamily: MONO, color: AMBER, fontSize: 15, letterSpacing: 3, fontWeight: '700' },
+
+  // REVIEW
+  reviewRoot: { flex: 1 },
+  reviewImage: { width: '100%', height: '50%', backgroundColor: '#0d160d' },
+  reviewBody: { flex: 1, paddingHorizontal: 20, paddingTop: 16, gap: 10 },
+  reviewLabel: {
+    fontFamily: MONO,
+    color: AMBER,
+    fontSize: 13,
+    letterSpacing: 2,
+    fontWeight: '700',
+  },
+  reviewInput: {
+    minHeight: 64,
+    borderWidth: 1,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    color: WHITE,
+    fontSize: 16,
+    padding: 14,
+    textAlignVertical: 'top',
+  },
+  reviewButtons: { paddingHorizontal: 20, paddingBottom: 12, gap: 12 },
+  reviewSubmit: {
+    minHeight: 56,
+    backgroundColor: '#0d160d',
+    borderWidth: 1,
+    borderColor: GREEN,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reviewSubmitLabel: {
+    fontFamily: MONO,
+    color: GREEN,
+    fontSize: 16,
+    letterSpacing: 3,
+    fontWeight: '700',
+  },
+  reviewSecondaryRow: { flexDirection: 'row', gap: 12 },
+  reviewRetake: {
+    flex: 1,
+    minHeight: 56,
+    borderWidth: 1,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reviewRetakeLabel: { fontFamily: MONO, color: WHITE, fontSize: 15, letterSpacing: 2, fontWeight: '700' },
+  reviewCancel: {
+    flex: 1,
+    minHeight: 56,
+    borderWidth: 1,
+    borderColor: RED,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reviewCancelLabel: { fontFamily: MONO, color: RED, fontSize: 15, letterSpacing: 2, fontWeight: '700' },
 
   // READY
   readyRoot: { flex: 1, paddingHorizontal: 20, paddingBottom: 16 },
