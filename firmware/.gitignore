@@ -1,0 +1,36 @@
+# Ghost Medic — sensor hub firmware (Pico SDK / CMake) ignores
+# Scoped to firmware/. The repo-root .gitignore also ignores build/ and .DS_Store.
+
+# --- CMake build output ---
+build/
+cmake-build-*/
+
+# --- CMake cache / generated files ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# --- Pico SDK build intermediates ---
+*.elf
+*.bin
+*.hex
+*.map
+*.dis
+*.o
+*.a
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Editor junk ---
+*.swp
+*~
+
+# NOTE: ghost_medic_firmware.uf2 is intentionally TRACKED (checked in on purpose
+# as proof the firmware compiles), so it is deliberately NOT ignored here.
+# The *.bin/*.hex/*.elf rules above never match .uf2, so no exception is needed.
