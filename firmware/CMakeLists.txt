@@ -39,6 +39,11 @@ target_link_libraries(ghost_medic_firmware
     hardware_i2c
 )
 
+# Build our own sources under strict warnings at -O3. Scoped to THIS target
+# with PRIVATE so we don't impose flags on the Pico SDK's libraries (doing that
+# globally clobbers the SDK's -mcpu/-mthumb arch flags). Verified warning-free.
+target_compile_options(ghost_medic_firmware PRIVATE -Wall -Wextra -O3)
+
 # Route stdio (printf) over USB CDC serial, not the UART pins.
 # 1 = enable, 0 = disable.
 pico_enable_stdio_usb(ghost_medic_firmware 1)
