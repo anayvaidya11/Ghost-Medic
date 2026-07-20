@@ -1,12 +1,11 @@
 # Ghost Medic
 
-An **offline-first wilderness survival assistant**. Ghost Medic reads your body
+An **offline AI Trauma assistant for survival**. Ghost Medic reads your body
 and your environment from a wrist-worn sensor unit, reasons about them with a
 **local** language model (no internet required), and talks to you through a
-voice + screen interface. It's built for places with no signal and no second
-chances — where a cloud API is not an option.
+voice + screen interface. It's built for places with no signal, that still require cloud APIs. Financially aims to live between starlink and invariable survival pdfs. 
 
-The full system is three physical parts that hand data up a chain:
+The full system: 
 
 ```
   ┌─────────────────┐      JSON over        ┌──────────────────┐      voice /      ┌──────────────────┐
@@ -33,18 +32,15 @@ firmware is bare-metal C written against the Raspberry Pi Pico SDK. See
 [`firmware/README.md`](firmware/README.md) for the driver details and, importantly,
 the **honest validation status** (summarized below).
 
-> ⚠️ **Hardware status — read this honestly.** The firmware is **written and
-> compile-tested against the real Raspberry Pi Pico SDK** — it builds clean with
-> zero warnings and produces a valid, flashable `ghost_medic_firmware.uf2`. It has
+>  The firmware is **written and
+> compile-tested against the real Raspberry Pi Pico SDK** It has
 > **NOT yet been flashed or run on physical hardware**, and its readings have not
 > been checked against real sensors. The drivers were transcribed carefully from
-> the MAX30102 / BMP280 / LIS3DH datasheets, but transcription and timing bugs can
+> the MAX30102, BMP280, LIS3DH datasheets, but transcription and timing bugs can
 > only be caught on a bench, which hasn't happened yet. Treat it as a
-> compile-verified design artifact, not a hardware-proven device. Full detail and
+> compile-verified design artifact. Full detail and
 > the reasoning (including why no simulator run) is in
 > [`firmware/README.md`](firmware/README.md).
-
-The checked-in `.uf2` is kept on purpose as proof the firmware compiles.
 
 ### 2. Pack brain — local LLM (concept-level)
 A compute unit running a **local, off-the-shelf** language model that consumes the
