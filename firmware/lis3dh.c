@@ -102,52 +102,15 @@ bool lis3dh_read(i2c_inst_t *i2c, lis3dh_reading_t *out) {
 
 /* ---- Fall detection heuristic ------------------------------------------- *
  *
- * THIS IS ILLUSTRATIVE, NOT MEDICAL-GRADE. A production fall detector uses
- * windowed signal features and is validated against labelled fall/non-fall
- * datasets. This implements the simple, widely-taught two-phase pattern:
- *
- *   Phase 1 (free-fall): total acceleration magnitude drops near 0 g. When a
- *     body/limb is in free fall, the accelerometer briefly reads ~0 g on all
- *     axes because it is no longer being "pushed" by a support surface.
- *   Phase 2 (impact): within a short window after free-fall, a high-g spike
- *     occurs as the fall is arrested (hitting the ground).
- *
- * A fall is flagged only if an impact spike follows a free-fall dip within
- * FALL_IMPACT_WINDOW_MS. This ordering requirement rejects ordinary jolts.
- *
- * Thresholds below are reasonable textbook starting points, NOT tuned values.
+ * The actual state machine now lives in fall_detection.c as the pure,
+ * hardware-free function fall_update() (so it can be unit-tested on a host).
+ * This wrapper keeps the driver-facing API unchanged: it drops invalid
+ * readings, then hands the magnitude and timestamp to fall_update(). Behaviour
+ * is identical to the previous inline implementation.
  */
-
-#define FREEFALL_THRESHOLD_G   0.35f   /* magnitude below this => "free fall"  */
-#define IMPACT_THRESHOLD_G     2.5f    /* magnitude above this => "impact"     */
-#define FALL_IMPACT_WINDOW_MS  400u    /* impact must follow within this time  */
-
 bool lis3dh_update_fall_detection(lis3dh_fall_state_t *state,
                                   const lis3dh_reading_t *reading,
                                   uint32_t now_ms) {
     if (!reading->valid) return false;
-
-    float m = reading->magnitude_g;
-
-    /* Detect entry into a free-fall event. */
-    if (m < FREEFALL_THRESHOLD_G) {
-        state->in_freefall_window = true;
-        state->freefall_start_ms  = now_ms;
-        return false;   /* free-fall alone is not yet a fall */
-    }
-
-    /* If we're within the watch window after a free-fall, look for impact. */
-    if (state->in_freefall_window) {
-        if (now_ms - state->freefall_start_ms > FALL_IMPACT_WINDOW_MS) {
-            /* Window expired with no impact — likely a controlled motion. */
-            state->in_freefall_window = false;
-        } else if (m > IMPACT_THRESHOLD_G) {
-            /* Free-fall then impact within the window => flag a fall. */
-            state->in_freefall_window = false;
-            state->fall_detected = true;
-            return true;
-        }
-    }
-
-    return false;
+    return fall_update(state, reading->magnitude_g, now_ms);
 }

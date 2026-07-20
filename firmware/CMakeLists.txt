@@ -28,7 +28,9 @@ add_executable(ghost_medic_firmware
     main.c
     max30102.c
     bmp280.c
+    bmp280_compensation.c   # pure BMP280 math (also host-unit-tested)
     lis3dh.c
+    fall_detection.c        # pure fall-detection logic (also host-unit-tested)
 )
 
 # Link the SDK libraries we use:

@@ -17,6 +17,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/*
+ * The pure fall-detection state machine now lives in fall_detection.h, which
+ * has no hardware dependency so it can be unit-tested on a host. We include it
+ * here and keep lis3dh_fall_state_t as an alias of the pure fall_state_t, so
+ * existing callers (main.c) compile and behave exactly as before.
+ */
+#include "fall_detection.h"
+
 /* 7-bit I2C address with SDO/SA0 -> GND. */
 #define LIS3DH_ADDR 0x18
 
@@ -36,12 +44,12 @@ typedef struct {
 /*
  * State kept for the fall-detection heuristic between calls. The caller owns
  * one of these and passes it into lis3dh_update_fall_detection().
+ *
+ * This is now just an alias for the pure fall_state_t (same struct, same
+ * layout) defined in fall_detection.h. Kept as a named type so existing
+ * callers using lis3dh_fall_state_t are unaffected.
  */
-typedef struct {
-    bool  in_freefall_window;   /* currently within the post-freefall watch window */
-    uint32_t freefall_start_ms; /* when free-fall was first seen */
-    bool  fall_detected;        /* latched true when a fall pattern completes */
-} lis3dh_fall_state_t;
+typedef fall_state_t lis3dh_fall_state_t;
 
 /*
  * Initialise the LIS3DH:

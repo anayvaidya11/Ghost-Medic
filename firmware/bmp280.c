@@ -12,8 +12,8 @@
  */
 
 #include "bmp280.h"
+#include "bmp280_compensation.h"   /* pure math: compensate_*, pressure_to_altitude */
 #include "i2c_helpers.h"
-#include <math.h>
 
 /* ---- Register map (BMP280 datasheet, "Memory map" table) ---------------- */
 #define REG_ID          0xD0  /* Chip ID register                            */
@@ -43,9 +43,6 @@
  * (0b000<<5) | (0b100<<2) | 0 = 0x10.
  */
 #define CONFIG_TSB05_FILTER16 0x10
-
-/* Sea-level reference pressure in Pa, used for the altitude estimate. */
-#define SEA_LEVEL_PA 101325.0f
 
 /* Read a little-endian unsigned 16-bit value from two consecutive cal bytes. */
 static uint16_t le16u(const uint8_t *p) {
@@ -89,43 +86,12 @@ bool bmp280_init(i2c_inst_t *i2c, bmp280_calib_t *calib_out) {
 }
 
 /*
- * Bosch floating-point compensation (datasheet 3.11.3).
- *
- * Temperature must be compensated first because it produces `t_fine`, a
- * shared intermediate that the pressure compensation also needs.
+ * NOTE: the Bosch floating-point compensation math (temperature + pressure)
+ * and the barometric altitude formula used to live here as static functions.
+ * They now live in bmp280_compensation.c as pure, hardware-free functions so
+ * they can be unit-tested on a host machine. This driver reads the raw bytes
+ * and calls those functions; the arithmetic is unchanged.
  */
-static float compensate_temperature(const bmp280_calib_t *cal,
-                                     int32_t adc_T, float *t_fine_out) {
-    float var1 = (((float)adc_T) / 16384.0f - ((float)cal->dig_T1) / 1024.0f)
-                 * ((float)cal->dig_T2);
-    float var2 = ((((float)adc_T) / 131072.0f - ((float)cal->dig_T1) / 8192.0f)
-                 * (((float)adc_T) / 131072.0f - ((float)cal->dig_T1) / 8192.0f))
-                 * ((float)cal->dig_T3);
-    float t_fine = var1 + var2;
-    *t_fine_out = t_fine;
-    return t_fine / 5120.0f;    /* degrees Celsius */
-}
-
-static float compensate_pressure(const bmp280_calib_t *cal,
-                                 int32_t adc_P, float t_fine) {
-    float var1 = (t_fine / 2.0f) - 64000.0f;
-    float var2 = var1 * var1 * ((float)cal->dig_P6) / 32768.0f;
-    var2 = var2 + var1 * ((float)cal->dig_P5) * 2.0f;
-    var2 = (var2 / 4.0f) + (((float)cal->dig_P4) * 65536.0f);
-    var1 = (((float)cal->dig_P3) * var1 * var1 / 524288.0f
-           + ((float)cal->dig_P2) * var1) / 524288.0f;
-    var1 = (1.0f + var1 / 32768.0f) * ((float)cal->dig_P1);
-
-    if (var1 == 0.0f)
-        return 0.0f;   /* avoid divide-by-zero (Bosch guards this case) */
-
-    float p = 1048576.0f - (float)adc_P;
-    p = (p - (var2 / 4096.0f)) * 6250.0f / var1;
-    var1 = ((float)cal->dig_P9) * p * p / 2147483648.0f;
-    var2 = p * ((float)cal->dig_P8) / 32768.0f;
-    p = p + (var1 + var2 + ((float)cal->dig_P7)) / 16.0f;
-    return p;   /* pascals */
-}
 
 bool bmp280_read(i2c_inst_t *i2c, const bmp280_calib_t *calib,
                  bmp280_reading_t *out) {
@@ -145,17 +111,9 @@ bool bmp280_read(i2c_inst_t *i2c, const bmp280_calib_t *calib,
     int32_t adc_T = ((int32_t)d[3] << 12) | ((int32_t)d[4] << 4) | (d[5] >> 4);
 
     float t_fine;
-    out->temperature_c = compensate_temperature(calib, adc_T, &t_fine);
-    out->pressure_pa   = compensate_pressure(calib, adc_P, t_fine);
-
-    /*
-     * International barometric altitude formula. This assumes a standard
-     * atmosphere and a fixed sea-level reference of 101325 Pa; real altitude
-     * needs the local sea-level pressure (which changes with weather). Good
-     * enough for relative altitude / a demo, not survey-grade.
-     */
-    out->altitude_m = 44330.0f *
-        (1.0f - powf(out->pressure_pa / SEA_LEVEL_PA, 0.1903f));
+    out->temperature_c = bmp280_compensate_temperature(calib, adc_T, &t_fine);
+    out->pressure_pa   = bmp280_compensate_pressure(calib, adc_P, t_fine);
+    out->altitude_m    = bmp280_pressure_to_altitude(out->pressure_pa);
 
     out->valid = true;
     return true;

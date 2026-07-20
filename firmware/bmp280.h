@@ -23,20 +23,16 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/*
+ * The bmp280_calib_t struct and the pure compensation math now live in
+ * bmp280_compensation.h, which has NO hardware dependency so it can be unit-
+ * tested on a host machine. We include it here so the driver still sees the
+ * same bmp280_calib_t type it always did.
+ */
+#include "bmp280_compensation.h"
+
 /* 7-bit I2C address with SDO -> GND. */
 #define BMP280_ADDR 0x76
-
-/*
- * Factory calibration constants (BMP280 datasheet, "Trimming parameter
- * readout" table). Signedness matters and is specified per-field by Bosch:
- * dig_T1 and dig_P1 are unsigned; the rest are signed.
- */
-typedef struct {
-    uint16_t dig_T1;
-    int16_t  dig_T2, dig_T3;
-    uint16_t dig_P1;
-    int16_t  dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
-} bmp280_calib_t;
 
 typedef struct {
     float temperature_c;    /* degrees Celsius                              */
