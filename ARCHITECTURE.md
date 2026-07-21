@@ -2,7 +2,7 @@
 
 *What the system is, what runs where, and exactly where the "real" line is.*
 
-Ghost Medic is an **offline AI trauma assistant for the backcountry**: a person is
+Ghost Medic is an **offline AI first-aid assistant prototype for the backcountry**: a person is
 injured, alone, far from help, and has no signal. The system senses their body and
 environment, reasons about it with a **local** language model, and gives spoken,
 numbered first-aid guidance — with **no internet**.
@@ -24,7 +24,7 @@ whole point — it's how we stay honest about what's proven.
  │  BIOSENSOR /     │   │   WEARABLE       │   │    PACK BRAIN    │   │   INTERFACE      │
  │  WRIST UNIT      │   │   (sensor hub)   │   │   (compute)      │   │   (voice+screen) │
  │                  │   │                  │   │                  │   │                  │
- │  MAX30102  HR/SpO2   │  RP2040 / Pico   │   │  local LLM       │   │  React Native /  │
+ │  MAX30102  raw PPG   │  RP2040 / Pico   │   │  local LLM       │   │  React Native /  │
  │  BMP280    baro  │──▶│  reads I²C @10Hz │──▶│  (Ollama today)  │──▶│  Expo app        │
  │  LIS3DH    accel │   │  emits NDJSON    │   │  + vision/voice  │   │  speaks steps    │
  │  (custom PCB)    │   │  over USB serial │   │                  │   │                  │

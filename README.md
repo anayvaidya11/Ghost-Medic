@@ -1,6 +1,6 @@
 # Ghost Medic
 
-An **offline AI Trauma assistant for survival**. Ghost Medic reads your body
+An **offline AI first-aid assistant prototype for survival**. Ghost Medic reads your body
 and your environment from a wrist-worn sensor unit, reasons about them with a
 **local** language model (no internet required), and talks to you through a
 voice + screen interface. It's built for places with no signal, that still require cloud APIs. Financially aims to live between starlink and invariable survival pdfs. 
@@ -23,7 +23,7 @@ A **Raspberry Pi Pico / RP2040** reading three I²C sensors on a shared bus:
 
 | Sensor   | Role                                   |
 |----------|----------------------------------------|
-| MAX30102 | Heart rate / SpO₂ optical front-end (raw counts) |
+| MAX30102 | Raw optical (PPG) front-end — raw red/IR counts, **not** HR/SpO₂ |
 | BMP280   | Barometric pressure → altitude         |
 | LIS3DH   | Accelerometer → motion / fall detection |
 
