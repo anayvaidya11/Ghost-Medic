@@ -11,7 +11,7 @@
 export const PROVIDER = 'ollama';  // Change to: 'anthropic' | 'openai' | 'openai_compatible'
 
 // ── OLLAMA (active — runs fully offline) ────────────────────────────────────
-export const OLLAMA_BASE_URL = 'http://192.168.1.157:11434';  // Change to your Ollama server IP
+export const OLLAMA_BASE_URL = 'http://YOUR_OLLAMA_IP:11434';  // Change to your Ollama server IP
 export const OLLAMA_MODEL = 'llama3.2:3b';                    // Change to your pulled model name
 
 // ── ANTHROPIC (commented out — requires network + API key) ──────────────────
@@ -39,7 +39,7 @@ export const OLLAMA_MODEL = 'llama3.2:3b';                    // Change to your 
 
 // ── VISION MODEL (wound image analysis — commented out) ─────────────────────
 // export const VISION_CONFIG = {
-//   baseUrl: 'http://192.168.1.157:11434',          // Change: same as OLLAMA_BASE_URL or separate server
+//   baseUrl: 'http://YOUR_OLLAMA_IP:11434',          // Change: same as OLLAMA_BASE_URL or separate server
 //   model: 'llava:13b',                             // Change: any vision-capable model in Ollama
 //   maxTokens: 256,                                 // Change: vision descriptions can be short
 // };

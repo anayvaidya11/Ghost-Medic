@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GHOST MEDIC — Wrist Unit Simulator</title>
+<style>
+  :root{
+    --bg:#0a0d0a;
+    --panel:#11150f;
+    --panel-edge:#1e2a1a;
+    --ink:#c8d6c0;
+    --ink-dim:#7f8f78;
+    --amber:#ffb000;
+    --amber-dim:#a06c00;
+    --green:#3dff7a;
+    --green-dim:#1f7a3c;
+    --red:#ff3b30;
+    --grid:#141a12;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #0f160e 0%, var(--bg) 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--mono);
+    font-size:14px;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+    padding:18px;
+  }
+  /* faint scanline / field-equipment texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:9999;
+    background:repeating-linear-gradient(
+      to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.10) 3px);
+    mix-blend-mode:multiply;
+    opacity:.5;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+
+  /* ---- Header / honesty banner ---------------------------------------- */
+  header{
+    border:1px solid var(--panel-edge);
+    background:linear-gradient(180deg,#121710,#0d110c);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    box-shadow:inset 0 0 0 1px #000, 0 1px 0 #0006;
+  }
+  .titlerow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .brand{
+    font-size:20px;letter-spacing:.28em;font-weight:700;color:var(--amber);
+    text-shadow:0 0 12px rgba(255,176,0,.25);
+  }
+  .brand .ghost{color:var(--green)}
+  .unit{color:var(--ink-dim);letter-spacing:.24em;font-size:11px}
+  .banner{
+    margin-top:10px;
+    border:1px dashed var(--amber-dim);
+    background:repeating-linear-gradient(45deg,#1a1405 0 10px,#181203 10px 20px);
+    color:#ffce6b;
+    padding:8px 11px;border-radius:4px;font-size:12px;letter-spacing:.02em;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .banner b{color:var(--amber)}
+  .banner .tag{
+    flex:none;background:var(--amber);color:#181000;font-weight:700;
+    padding:1px 7px;border-radius:3px;letter-spacing:.1em;font-size:11px;
+  }
+
+  /* ---- Layout --------------------------------------------------------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:14px}
+  @media (max-width:860px){ .grid{grid-template-columns:1fr} }
+
+  .panel{
+    border:1px solid var(--panel-edge);
+    background:
+      linear-gradient(180deg,#0f130d,#0b0f0a);
+    border-radius:6px;padding:14px;
+    box-shadow:inset 0 0 0 1px #000;
+  }
+  .panel h2{
+    margin:0 0 12px;font-size:11px;letter-spacing:.26em;color:var(--ink-dim);
+    font-weight:700;text-transform:uppercase;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .panel h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+  @keyframes blink{50%{opacity:.35}}
+
+  /* ---- Controls ------------------------------------------------------- */
+  .ctrl{margin-bottom:18px}
+  .ctrl:last-child{margin-bottom:4px}
+  .ctrl .lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .ctrl .name{letter-spacing:.14em;font-size:12px;color:var(--ink)}
+  .ctrl .val{color:var(--amber);font-weight:700;font-size:15px;
+    text-shadow:0 0 8px rgba(255,176,0,.3)}
+  .ctrl .val small{color:var(--ink-dim);font-weight:400;font-size:11px;letter-spacing:.05em}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:6px;
+    background:linear-gradient(90deg,var(--green-dim),var(--amber-dim));
+    border:1px solid #000;border-radius:3px;outline:none;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:26px;border-radius:3px;
+    background:linear-gradient(180deg,#e8e2d0,#8b8574);
+    border:1px solid #000;box-shadow:0 0 0 1px #3a3a30, 0 2px 4px #000a;cursor:grab;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;height:26px;border-radius:3px;border:1px solid #000;
+    background:linear-gradient(180deg,#e8e2d0,#8b8574);cursor:grab;
+  }
+  .derived{
+    margin-top:8px;font-size:11px;color:var(--ink-dim);letter-spacing:.03em;
+    display:flex;gap:14px;flex-wrap:wrap;
+  }
+  .derived b{color:var(--green)}
+
+  .btn{
+    font-family:var(--mono);font-size:12px;letter-spacing:.12em;font-weight:700;
+    color:#1a1200;background:linear-gradient(180deg,#ffc23d,#e09400);
+    border:1px solid #000;border-radius:4px;padding:9px 14px;cursor:pointer;
+    text-transform:uppercase;box-shadow:0 2px 0 #7a5200, inset 0 1px 0 #fff6;
+  }
+  .btn:active{transform:translateY(1px);box-shadow:0 1px 0 #7a5200, inset 0 1px 0 #fff6}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:#161c13;color:var(--ink);box-shadow:none;border-color:var(--panel-edge)}
+
+  /* ---- Fall alert ----------------------------------------------------- */
+  .alert{
+    margin-top:14px;border:1px solid #3a0f0c;border-radius:5px;
+    background:#160806;color:var(--ink-dim);padding:11px 13px;
+    display:flex;align-items:center;gap:11px;font-size:12px;letter-spacing:.1em;
+    transition:background .1s;
+  }
+  .alert .siren{width:11px;height:11px;border-radius:50%;background:#3a1512;flex:none}
+  .alert.hot{
+    background:#2a0705;border-color:var(--red);color:#ffd9d6;
+    animation:sirenpulse .5s steps(2) infinite;
+  }
+  .alert.hot .siren{background:var(--red);box-shadow:0 0 14px var(--red)}
+  .alert.hot .msg b{color:var(--red)}
+  @keyframes sirenpulse{50%{background:#3d0a07}}
+
+  /* ---- Live readout tiles --------------------------------------------- */
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .tile{border:1px solid var(--panel-edge);border-radius:5px;background:#0c100a;padding:9px 10px}
+  .tile .k{font-size:9.5px;letter-spacing:.18em;color:var(--ink-dim);text-transform:uppercase}
+  .tile .v{font-size:17px;color:var(--green);font-weight:700;margin-top:3px;
+    text-shadow:0 0 8px rgba(61,255,122,.25)}
+  .tile .v small{font-size:10px;color:var(--ink-dim);font-weight:400}
+  .tile.ok .k::after{content:" ●";color:var(--green);font-size:8px;vertical-align:middle}
+
+  /* ---- Serial feed ---------------------------------------------------- */
+  .feedhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .feedhead .meta{font-size:10.5px;color:var(--ink-dim);letter-spacing:.1em}
+  .feedhead .meta b{color:var(--green)}
+  #feed{
+    height:340px;overflow-y:auto;overflow-x:hidden;
+    background:#060806;border:1px solid #000;border-radius:5px;
+    padding:9px 11px;font-size:12px;line-height:1.55;
+    box-shadow:inset 0 0 24px #000c;
+    scrollbar-width:thin;scrollbar-color:var(--green-dim) #060806;
+  }
+  #feed::-webkit-scrollbar{width:9px}
+  #feed::-webkit-scrollbar-thumb{background:var(--green-dim);border-radius:4px}
+  .line{white-space:pre-wrap;word-break:break-all;color:#6fae7d;opacity:.85}
+  .line:last-child{color:var(--green);opacity:1;text-shadow:0 0 8px rgba(61,255,122,.2)}
+  .line .k{color:var(--ink-dim)}
+  .line .n{color:var(--amber)}
+  .line .b-true{color:var(--green)}
+  .line .b-false{color:#6a7a64}
+  .line .fall-true{color:var(--red);font-weight:700}
+
+  footer{margin-top:14px;color:var(--ink-dim);font-size:10.5px;letter-spacing:.06em;text-align:center}
+  footer code{color:var(--amber-dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="titlerow">
+      <span class="brand"><span class="ghost">GHOST</span> MEDIC</span>
+      <span class="unit">// WRIST UNIT · SENSOR-HUB TELEMETRY · RP2040</span>
+    </div>
+    <div class="banner">
+      <span class="tag">SIMULATOR</span>
+      <span><b>This is a SIMULATOR, not real hardware.</b> No sensors are connected.
+      It stands in for the Ghost Medic wrist unit by running the <b>same physics &amp;
+      fall-detection formulas as the actual firmware</b> (BMP280 barometric altitude,
+      LIS3DH free-fall→impact logic, MAX30102 raw optical counts) and emitting the
+      <b>identical JSON line format</b>. Drag the sliders to generate readings. A real
+      Pico could replace this source with zero downstream changes.</span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ============ CONTROLS ============ -->
+    <section class="panel">
+      <h2>Manual Inputs <span class="dot"></span></h2>
+
+      <!-- Altitude -->
+      <div class="ctrl">
+        <div class="lab">
+          <span class="name">ALTITUDE</span>
+          <span class="val"><span id="altV">0</span> <small>m</small></span>
+        </div>
+        <input type="range" id="alt" min="0" max="4000" step="1" value="0">
+        <div class="derived">
+          → BMP280 pressure <b><span id="pressD">101325</span> Pa</b>
+          <span>· temp <b><span id="tempD">15.0</span> °C</b></span>
+        </div>
+      </div>
+
+      <!-- Motion -->
+      <div class="ctrl">
+        <div class="lab">
+          <span class="name">MOTION / G-FORCE</span>
+          <span class="val"><span id="gV">1.00</span> <small>g</small></span>
+        </div>
+        <input type="range" id="g" min="0" max="4" step="0.01" value="1">
+        <div class="derived">
+          → LIS3DH magnitude <b><span id="magD">1.000</span> g</b>
+          <span style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn" id="fallBtn">⚠ Simulate Fall</button>
+          </span>
+        </div>
+        <div class="alert" id="alert">
+          <span class="siren"></span>
+          <span class="msg" id="alertMsg">FALL DETECTOR ARMED — free-fall &lt;0.35 g then impact &gt;2.5 g within 400 ms</span>
+        </div>
+      </div>
+
+      <!-- Exertion -->
+      <div class="ctrl">
+        <div class="lab">
+          <span class="name">EXERTION LEVEL</span>
+          <span class="val"><span id="exV">0</span> <small>/100</small></span>
+        </div>
+        <input type="range" id="ex" min="0" max="100" step="1" value="0">
+        <div class="derived">
+          → heart rate <b><span id="hrD">60</span> bpm</b>
+          <span>· MAX30102 raw IR <b><span id="irD">10500</span></b> / RED <b><span id="redD">10340</span></b></span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:8px;align-items:center">
+        <button class="btn ghost" id="pauseBtn">⏸ Pause Stream</button>
+        <button class="btn ghost" id="clearBtn">Clear Log</button>
+        <span style="margin-left:auto;font-size:10.5px;color:var(--ink-dim);letter-spacing:.08em">
+          10 Hz · uptime <b style="color:var(--green)"><span id="uptime">0.0</span>s</b>
+        </span>
+      </div>
+    </section>
+
+    <!-- ============ OUTPUT ============ -->
+    <section class="panel">
+      <h2>Live Sensor Stream <span class="dot"></span></h2>
+
+      <div class="tiles">
+        <div class="tile ok"><div class="k">MAX30102</div><div class="v"><span id="tHr">60</span><small> bpm</small></div></div>
+        <div class="tile ok"><div class="k">BMP280</div><div class="v"><span id="tAlt">0</span><small> m</small></div></div>
+        <div class="tile ok"><div class="k">LIS3DH</div><div class="v"><span id="tMag">1.00</span><small> g</small></div></div>
+      </div>
+
+      <div class="feedhead">
+        <span class="meta">/dev/ttyACM0 · 115200 8N1 · one JSON object per line</span>
+        <span class="meta">lines <b id="lineCount">0</b></span>
+      </div>
+      <div id="feed" aria-live="off"></div>
+    </section>
+
+  </div>
+
+  <footer>
+    Simulated telemetry only · formulas mirrored from <code>firmware/bmp280.c</code>,
+    <code>firmware/lis3dh.c</code>, <code>firmware/max30102.c</code> · TODAY IS A DEMO, THE HARDWARE IS NOT WIRED
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+ * Ghost Medic — Wrist Unit Simulator
+ *
+ * This file simulates the RP2040 sensor-hub firmware. Every constant and
+ * formula below is copied from the real firmware so the JSON this page
+ * emits is indistinguishable from what a wired Pico would print.
+ *   - BMP280 altitude/pressure : firmware/bmp280.c
+ *   - LIS3DH fall detection     : firmware/lis3dh.c
+ *   - MAX30102 raw counts       : firmware/max30102.c
+ * ===================================================================== */
+
+/* ---- Firmware-matched constants ------------------------------------- */
+const SEA_LEVEL_PA        = 101325.0;   // bmp280.c SEA_LEVEL_PA
+const ALT_COEFF           = 44330.0;    // bmp280.c altitude formula
+const ALT_EXP             = 0.1903;     // bmp280.c altitude formula
+const TEMP_SEA_LEVEL_C    = 15.0;       // standard-atmosphere baseline
+const TEMP_LAPSE_PER_M    = 6.5 / 1000; // ~6.5 C drop per 1000 m
+
+const FREEFALL_THRESHOLD_G = 0.35;      // lis3dh.c
+const IMPACT_THRESHOLD_G    = 2.5;      // lis3dh.c
+const FALL_IMPACT_WINDOW_MS = 400;      // lis3dh.c
+
+const LOOP_PERIOD_MS = 100;             // main.c LOOP_PERIOD_MS (10 Hz)
+const MAX_LINES      = 50;              // keep last ~50 lines visible
+
+/* ---- Physics: altitude -> pressure (inverse of firmware's alt calc) -- *
+ * firmware computes:  alt = 44330 * (1 - (P/101325)^0.1903)
+ * solving for P:      P   = 101325 * (1 - alt/44330)^(1/0.1903)          */
+function altitudeToPressurePa(alt_m){
+  return SEA_LEVEL_PA * Math.pow(1 - alt_m / ALT_COEFF, 1 / ALT_EXP);
+}
+function altitudeToTempC(alt_m){
+  return TEMP_SEA_LEVEL_C - TEMP_LAPSE_PER_M * alt_m;
+}
+
+/* ---- Exertion -> heart rate ----------------------------------------- */
+function exertionToHr(ex){ return 60 + (ex / 100) * 120; } // 60 resting .. 180 max
+
+/* ---- State ---------------------------------------------------------- */
+const els = {
+  alt: document.getElementById('alt'),
+  g:   document.getElementById('g'),
+  ex:  document.getElementById('ex'),
+};
+let paused = false;
+let lineCount = 0;
+const t0 = performance.now();
+
+// Fall-detection state — mirrors lis3dh_fall_state_t (main.c holds one instance)
+const fallState = { in_freefall_window:false, freefall_start_ms:0, fall_detected:false };
+
+// Active scripted fall sequence (set by the button); null when idle.
+let fallScript = null;          // { start_ms }
+let alertHotUntil = 0;          // wall-clock ms to keep the FALL alert lit
+
+// Pulse-waveform phase accumulator for the MAX30102 raw counts.
+let pulsePhase = 0;
+
+/* ---- Scripted fall: free-fall dip then impact spike ------------------ *
+ * Returns a magnitude (g) for a given elapsed time since the button was
+ * pressed, then signals completion. Shape:
+ *   0   .. 320 ms : ~0.08 g  (free fall, below 0.35 g threshold)
+ *   320 .. 480 ms : ~3.1  g  (impact, above 2.5 g threshold)
+ *   > 480 ms      : done -> hand back to the slider                      */
+function fallScriptMagnitude(elapsed_ms){
+  if (elapsed_ms < 320)  return 0.06 + Math.random()*0.05;   // free fall
+  if (elapsed_ms < 480)  return 3.0  + Math.random()*0.3;    // impact
+  return null;                                               // sequence over
+}
+
+/* ---- Build the accelerometer sample for a target magnitude ---------- *
+ * Distribute the magnitude mostly on Z (gravity axis at rest) with small
+ * X/Y perturbations, keeping sqrt(x^2+y^2+z^2) == target exactly, matching
+ * how lis3dh.c derives magnitude_g.                                      */
+function accelFromMagnitude(mag){
+  const nx = (Math.random()-0.5) * Math.min(0.06, mag*0.5);
+  const ny = (Math.random()-0.5) * Math.min(0.06, mag*0.5);
+  const rem = Math.max(0, mag*mag - nx*nx - ny*ny);
+  const z = Math.sqrt(rem);
+  return { x:nx, y:ny, z:z, mag:mag };
+}
+
+/* ---- Fall detection — line-for-line port of lis3dh.c ---------------- */
+function updateFallDetection(mag, now_ms){
+  const m = mag;
+  if (m < FREEFALL_THRESHOLD_G){
+    fallState.in_freefall_window = true;
+    fallState.freefall_start_ms  = now_ms;
+    return false;                       // free-fall alone is not yet a fall
+  }
+  if (fallState.in_freefall_window){
+    if (now_ms - fallState.freefall_start_ms > FALL_IMPACT_WINDOW_MS){
+      fallState.in_freefall_window = false;   // window expired, controlled motion
+    } else if (m > IMPACT_THRESHOLD_G){
+      fallState.in_freefall_window = false;
+      fallState.fall_detected = true;
+      return true;                      // free-fall then impact => FALL
+    }
+  }
+  return false;
+}
+
+/* ---- MAX30102 raw IR/RED counts ------------------------------------- *
+ * Not a real HR algorithm — large baseline 18-bit-ish integer counts with
+ * a small pulsing waveform locked to the derived heart rate, plus noise.  */
+function maxCounts(hr, dt_s){
+  const beatsPerSec = hr / 60;
+  pulsePhase += 2*Math.PI * beatsPerSec * dt_s;
+  // Sharpen the sine into a plausible PPG-ish pulse (systolic peak).
+  const s = Math.sin(pulsePhase);
+  const wave = Math.pow((s+1)/2, 2.2);          // 0..1, peaked
+  const pulseAmp = 180 + hr*1.2;                // stronger pulse when working harder
+  const noise = () => (Math.random()-0.5)*24;
+  const red = Math.round(10180 + pulseAmp*wave*0.96 + noise());
+  const ir  = Math.round(10440 + pulseAmp*wave*1.03 + noise());
+  return { red, ir };
+}
+
+/* ---- Number formatting to match firmware printf specifiers ---------- */
+const f1 = v => (Math.round(v*10)/10).toFixed(1);      // %.1f
+const f2 = v => (Math.round(v*100)/100).toFixed(2);    // %.2f
+const f3 = v => (Math.round(v*1000)/1000).toFixed(3);  // %.3f
+
+/* ---- One 10 Hz tick: read inputs, compute, emit JSON ---------------- */
+const feed = document.getElementById('feed');
+function tick(){
+  if (paused) return;
+  const now = performance.now();
+  const t_ms = Math.round(now - t0);
+  const dt_s = LOOP_PERIOD_MS / 1000;
+
+  // --- Inputs ---
+  const altSlider = parseFloat(els.alt.value);
+  const gSlider   = parseFloat(els.g.value);
+  const exSlider  = parseFloat(els.ex.value);
+
+  // --- BMP280 ---
+  const press = altitudeToPressurePa(altSlider);
+  const baseTemp = altitudeToTempC(altSlider);
+  const temp = baseTemp + (Math.random()-0.5)*0.06;
+  // altitude the firmware would REPORT back from that pressure (round-trip)
+  const altReported = ALT_COEFF * (1 - Math.pow(press/SEA_LEVEL_PA, ALT_EXP));
+
+  // --- LIS3DH magnitude: slider, unless a scripted fall is running ---
+  let targetMag = gSlider;
+  if (fallScript){
+    const scripted = fallScriptMagnitude(now - fallScript.start_ms);
+    if (scripted === null){ fallScript = null; }
+    else { targetMag = scripted; }
+  }
+  const acc = accelFromMagnitude(targetMag);
+  const fall = updateFallDetection(acc.mag, t_ms);
+  if (fall) alertHotUntil = now + 4000;
+
+  // --- MAX30102 ---
+  const hr = exertionToHr(exSlider);
+  const mc = maxCounts(hr, dt_s);
+
+  // --- Assemble JSON exactly like main.c prints it ---
+  const obj = {
+    t_ms: t_ms,
+    max30102: { ok:true, red:mc.red, ir:mc.ir },
+    bmp280:   { ok:true, temp_c:parseFloat(f2(temp)), press_pa:parseFloat(f1(press)), alt_m:parseFloat(f1(altReported)) },
+    lis3dh:   { ok:true, x_g:parseFloat(f3(acc.x)), y_g:parseFloat(f3(acc.y)), z_g:parseFloat(f3(acc.z)), mag_g:parseFloat(f3(acc.mag)) },
+    fall_detected: fall
+  };
+
+  emitLine(obj);
+  updateTiles(hr, altReported, acc.mag);
+  updateAlert(now);
+  document.getElementById('uptime').textContent = f1((now - t0)/1000);
+}
+
+/* ---- Render one JSON line into the scrolling feed ------------------- */
+function emitLine(o){
+  // Build the exact single-line JSON string (field order matches firmware).
+  const str =
+    '{"t_ms":'+o.t_ms+',' +
+    '"max30102":{"ok":true,"red":'+o.max30102.red+',"ir":'+o.max30102.ir+'},' +
+    '"bmp280":{"ok":true,"temp_c":'+f2(o.bmp280.temp_c)+',"press_pa":'+f1(o.bmp280.press_pa)+',"alt_m":'+f1(o.bmp280.alt_m)+'},' +
+    '"lis3dh":{"ok":true,"x_g":'+f3(o.lis3dh.x_g)+',"y_g":'+f3(o.lis3dh.y_g)+',"z_g":'+f3(o.lis3dh.z_g)+',"mag_g":'+f3(o.lis3dh.mag_g)+'},' +
+    '"fall_detected":'+(o.fall_detected?'true':'false')+'}';
+
+  const div = document.createElement('div');
+  div.className = 'line';
+  div.innerHTML = colorize(str);
+  feed.appendChild(div);
+
+  while (feed.childNodes.length > MAX_LINES) feed.removeChild(feed.firstChild);
+  feed.scrollTop = feed.scrollHeight;   // auto-scroll, newest at bottom
+
+  lineCount++;
+  document.getElementById('lineCount').textContent = lineCount;
+}
+
+/* Light syntax coloring for the serial line (keys dim, numbers amber,
+ * booleans green/grey, a positive fall in red). Order matters: wrap keys
+ * WITHOUT the colon so the colon stays free for the number/bool rules. */
+function colorize(s){
+  let h = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h = h.replace(/"([a-z0-9_]+)"/g, '<span class="k">"$1"</span>');   // keys
+  h = h.replace(/:(-?\d+\.?\d*)/g, ':<span class="n">$1</span>');    // numbers
+  h = h.replace(/:true/g,  ':<span class="b-true">true</span>');     // true
+  h = h.replace(/:false/g, ':<span class="b-false">false</span>');   // false
+  // Re-color a POSITIVE fall flag red instead of the normal green.
+  h = h.replace(/("fall_detected"<\/span>:<span class=")b-true(">true<\/span>)/,
+                '$1fall-true$2');
+  return h;
+}
+
+/* ---- Live tiles ----------------------------------------------------- */
+function updateTiles(hr, alt, mag){
+  document.getElementById('tHr').textContent  = Math.round(hr);
+  document.getElementById('tAlt').textContent = f1(alt);
+  document.getElementById('tMag').textContent = f2(mag);
+}
+
+/* ---- Fall alert banner ---------------------------------------------- */
+const alertBox = document.getElementById('alert');
+const alertMsg = document.getElementById('alertMsg');
+function updateAlert(now){
+  if (now < alertHotUntil){
+    alertBox.classList.add('hot');
+    alertMsg.innerHTML = '<b>⚠ FALL DETECTED</b> — free-fall then impact spike within 400 ms window';
+  } else {
+    alertBox.classList.remove('hot');
+    alertMsg.innerHTML = 'FALL DETECTOR ARMED — free-fall &lt;0.35 g then impact &gt;2.5 g within 400 ms';
+  }
+}
+
+/* ---- Derived-value labels under the sliders (live, pre-stream) ------- */
+function refreshDerived(){
+  const alt = parseFloat(els.alt.value);
+  const g   = parseFloat(els.g.value);
+  const ex  = parseFloat(els.ex.value);
+  document.getElementById('altV').textContent  = alt;
+  document.getElementById('pressD').textContent= f1(altitudeToPressurePa(alt));
+  document.getElementById('tempD').textContent = f1(altitudeToTempC(alt));
+  document.getElementById('gV').textContent    = f2(g);
+  document.getElementById('magD').textContent  = f3(g);
+  document.getElementById('exV').textContent   = ex;
+  const hr = exertionToHr(ex);
+  document.getElementById('hrD').textContent   = Math.round(hr);
+  document.getElementById('irD').textContent   = Math.round(10440 + (180+hr*1.2)*0.5);
+  document.getElementById('redD').textContent  = Math.round(10180 + (180+hr*1.2)*0.48);
+}
+['alt','g','ex'].forEach(id => els[id].addEventListener('input', refreshDerived));
+
+/* ---- Buttons -------------------------------------------------------- */
+document.getElementById('fallBtn').addEventListener('click', () => {
+  fallScript = { start_ms: performance.now() };
+});
+const pauseBtn = document.getElementById('pauseBtn');
+pauseBtn.addEventListener('click', () => {
+  paused = !paused;
+  pauseBtn.textContent = paused ? '▶ Resume Stream' : '⏸ Pause Stream';
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  feed.innerHTML = '';
+});
+
+/* ---- Go ------------------------------------------------------------- */
+refreshDerived();
+setInterval(tick, LOOP_PERIOD_MS);   // 10 Hz, matching main.c
+</script>
+</body>
+</html>
