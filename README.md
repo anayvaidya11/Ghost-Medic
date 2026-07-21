@@ -55,24 +55,38 @@ subfolder:
 
 | Path                | What's there                         |
 |---------------------|--------------------------------------|
-| [`App.js`](App.js)  | App entry point                      |
-| [`app/`](app/)      | expo-router screens (`_layout.tsx`, `index.tsx`) |
-| [`src/`](src/)      | App source                           |
-| [`services/`](services/) | LLM config and service plumbing |
-| [`training/`](training/) | Training assets — see [`training/README.md`](training/README.md) |
+| [`app/`](app/)      | expo-router app — entry (`_layout.tsx`) + the UI (`index.tsx`) |
+| [`services/`](services/) | LLM plumbing + forward-looking sensor/vision stubs |
+| [`training/`](training/) | Fine-tuning pipeline — see [`training/README.md`](training/README.md) |
+
+## Start here (project docs)
+
+| Doc | What it's for |
+|---|---|
+| [`ROADMAP.md`](ROADMAP.md) | **Read first.** Phased plan + what's done vs. next. |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | System topology, what runs where, real-vs-simulated table. |
+| [`DATA_FORMAT.md`](DATA_FORMAT.md) | The NDJSON wire contract between firmware, bridge, and app. |
 
 ## Repository layout
 
 ```
 Ghost-Medic/
 ├── README.md            ← you are here (whole-system overview)
+├── ROADMAP.md · ARCHITECTURE.md · DATA_FORMAT.md   ← project memory
 ├── firmware/            ← 1. wrist unit — RP2040 sensor hub (Pico SDK C)
 │   └── README.md          firmware detail + validation status
-├── App.js, app/, src/,  ← 3. interface — React Native / Expo app
-│   services/, training/
+├── simulator/           ← browser demo emitting firmware-format JSON (hardware-free)
+├── app/                 ← 3. interface — React Native / Expo app (the entry)
+├── services/            ← LLM + sensor/vision service layer
+├── training/            ← wilderness-medicine fine-tuning pipeline
+├── legacy/              ← archived deterministic TCCC app (not the product)
 ├── app.json, package.json, tsconfig.json, babel.config.js
 └── ...
 ```
+
+The **product is the LLM wilderness assistant** (`app/` + `services/`). An earlier
+deterministic TCCC/MARCH engine lives in [`legacy/`](legacy/README.md) — archived,
+not deleted, and not imported by anything shipping.
 
 ## Data flow, in one sentence
 
