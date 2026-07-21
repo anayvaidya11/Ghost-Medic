@@ -39,6 +39,8 @@ import {
 
 import { streamTCCCGuidance } from '@services/llmService';
 import { transcribeAudio } from '@services/transcriptionService';
+import { useWristVitals } from '@services/useWristVitals';
+import type { WristVitals } from '@services/wristVitalsParser';
 
 // ── PALETTE (per spec) ───────────────────────────────────────────────────────
 const BG = '#0a0f0a';
@@ -85,6 +87,12 @@ function parseResponse(text: string): Parsed {
 export default function GhostMedic() {
   const [appState, setAppState] = useState<AppState>('ready');
   const [audioOn, setAudioOn] = useState(true);
+
+  // Live wrist-unit telemetry from the bridge (ws://localhost:8080/stream).
+  // HONEST: only what the firmware actually emits — raw optical/accel counts +
+  // derived altitude/temp/fall. No HR/SpO2 anywhere (Decision 2). When the bridge
+  // isn't running this stays DISCONNECTED and the UI shows "—", never a fake 0.
+  const vitals = useWristVitals();
 
   // READY-state input
   const [typing, setTyping] = useState(false);
@@ -382,6 +390,7 @@ export default function GhostMedic() {
         <Pressable style={s.flex} onPress={Keyboard.dismiss}>
           {appState === 'ready' && (
             <ReadyView
+              vitals={vitals}
               typing={typing}
               typedText={typedText}
               audioOn={audioOn}
@@ -430,8 +439,91 @@ export default function GhostMedic() {
   );
 }
 
+// ── LIVE SENSOR MONITOR ──────────────────────────────────────────────────────
+/*
+ * VITALS INTEGRATION PLAN (Phase 1 payoff — app wired to the bridge)
+ * -----------------------------------------------------------------
+ * SOURCE:  useWristVitals() -> ws://localhost:8080/stream (the bridge). One
+ *          NDJSON telemetry line per message, parsed by wristVitalsParser.
+ * HONESTY (Decision 2): show ONLY what the firmware actually emits
+ *   (see DATA_FORMAT.md), and visibly separate DERIVED from RAW:
+ *     DERIVED  (physical quantities the firmware computes):
+ *        • Altitude  (m,  BMP280)   • Temperature (°C, BMP280)
+ *        • Fall detected (bool, LIS3DH heuristic — status indicator)
+ *     RAW SIGNAL  (uncomputed sensor counts, dimmed + under a "RAW" header):
+ *        • Optical red / ir (MAX30102 FIFO counts) — NOT heart rate / SpO2
+ *        • Accel magnitude  (g, LIS3DH)
+ *   There is NO heart-rate / SpO2 / BPM number anywhere.
+ * CONNECTION INDICATOR (the honesty discipline made visible in the UI):
+ *     ● LIVE (green) = connected + data · ◌ CONNECTING (amber) ·
+ *     ○ DISCONNECTED (grey) = bridge not running.
+ * NULLS: the parser gates every value on its per-sensor `ok` flag; a missing /
+ *   not-ok reading renders as "—", never a fabricated 0.
+ * PLACEMENT: the READY (standby) screen — the natural monitoring surface. The
+ *   hook lives at the top-level component, so the same snapshot is available to
+ *   feed the LLM in Phase 2 (sensor-aware advice) without re-plumbing.
+ */
+function VitalsMonitor({ vitals }: { vitals: WristVitals }) {
+  const live = vitals.source === 'live';
+  const connecting = vitals.source === 'connecting';
+  const dotColor = live ? GREEN : connecting ? AMBER : DIM;
+  const dotChar = live ? '●' : connecting ? '◌' : '○';
+  const statusText = live ? 'LIVE' : connecting ? 'CONNECTING' : 'DISCONNECTED';
+
+  const fmt = (v: number | null, digits: number, unit = '') =>
+    v === null ? '—' : `${v.toFixed(digits)}${unit}`;
+  const fmtInt = (v: number | null) => (v === null ? '—' : String(v));
+
+  return (
+    <View style={s.monitor}>
+      <View style={s.monitorTopRow}>
+        <Text style={[s.monitorStatus, { color: dotColor }]}>
+          {dotChar} {statusText}
+        </Text>
+        <Text style={s.monitorTitle}>SENSOR MONITOR</Text>
+      </View>
+
+      <Text style={s.monitorGroupLabel}>DERIVED</Text>
+      <View style={s.monitorRow}>
+        <Metric label="ALT" value={fmt(vitals.altM, 1, ' m')} />
+        <Metric label="TEMP" value={fmt(vitals.tempC, 1, ' °C')} />
+        <Metric
+          label="FALL"
+          value={live ? (vitals.fallDetected ? 'DETECTED' : 'no') : '—'}
+          alert={live && vitals.fallDetected}
+        />
+      </View>
+
+      <Text style={s.monitorGroupLabel}>RAW SIGNAL (not vitals)</Text>
+      <View style={s.monitorRow}>
+        <Metric label="OPT red" value={fmtInt(vitals.red)} raw />
+        <Metric label="OPT ir" value={fmtInt(vitals.ir)} raw />
+        <Metric label="ACCEL" value={fmt(vitals.accelMagG, 2, ' g')} raw />
+      </View>
+    </View>
+  );
+}
+
+function Metric(props: { label: string; value: string; raw?: boolean; alert?: boolean }) {
+  return (
+    <View style={s.metric}>
+      <Text style={s.metricLabel}>{props.label}</Text>
+      <Text
+        style={[
+          s.metricValue,
+          props.raw && s.metricValueRaw,
+          props.alert && s.metricValueAlert,
+        ]}
+      >
+        {props.value}
+      </Text>
+    </View>
+  );
+}
+
 // ── STATE 1: READY ─────────────────────────────────────────────────────────
 function ReadyView(props: {
+  vitals: WristVitals;
   typing: boolean;
   typedText: string;
   audioOn: boolean;
@@ -450,6 +542,8 @@ function ReadyView(props: {
         <Text style={s.brand}>GHOST MEDIC</Text>
         <Text style={s.tagline}>offline survival assistant</Text>
       </View>
+
+      <VitalsMonitor vitals={props.vitals} />
 
       <View style={s.readyCenter}>
         <TouchableOpacity
@@ -770,6 +864,32 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   reviewCancelLabel: { fontFamily: MONO, color: RED, fontSize: 15, letterSpacing: 2, fontWeight: '700' },
+
+  // LIVE SENSOR MONITOR
+  monitor: {
+    borderWidth: 1,
+    borderColor: '#27331f',
+    borderRadius: 8,
+    backgroundColor: '#0d160d',
+    padding: 12,
+    marginTop: 14,
+    gap: 6,
+  },
+  monitorTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  monitorStatus: { fontFamily: MONO, fontSize: 13, letterSpacing: 2, fontWeight: '700' },
+  monitorTitle: { fontFamily: MONO, color: DIM, fontSize: 11, letterSpacing: 2 },
+  monitorGroupLabel: { fontFamily: MONO, color: DIM, fontSize: 10, letterSpacing: 2, marginTop: 2 },
+  monitorRow: { flexDirection: 'row', gap: 10 },
+  metric: { flex: 1 },
+  metricLabel: { fontFamily: MONO, color: DIM, fontSize: 10, letterSpacing: 1 },
+  metricValue: { fontFamily: MONO, color: WHITE, fontSize: 15, fontWeight: '700', marginTop: 2 },
+  metricValueRaw: { color: DIM, fontWeight: '600' },
+  metricValueAlert: { color: RED },
 
   // READY
   readyRoot: { flex: 1, paddingHorizontal: 20, paddingBottom: 16 },

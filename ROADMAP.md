@@ -20,6 +20,34 @@ for the wire contract.
 
 ---
 
+## Locked Decisions (confirmed by owner — do not relitigate)
+
+1. **What it is:** an offline, wearable AI **first-aid assistant prototype**. A
+   wrist-worn sensor hub captures motion, altitude/environment, and raw optical
+   signals, streams them to a **local (no-internet) LLM** that combines them with
+   voice + image input to speak numbered first-aid guidance.
+2. **What the app shows:** altitude, temperature, and fall-status as
+   honestly-derived values; raw optical (red/IR) and acceleration as
+   clearly-labeled **raw signal** (live trace). **No heart-rate / SpO2 / BPM number
+   anywhere.** Raw vs. derived is visually distinguished.
+3. **What the site proves:** a full offline pipeline (firmware-grade sensor data →
+   bridge → app → local LLM → spoken advice) runs end-to-end and *responds to its
+   inputs*, with every real-vs-simulated boundary labeled. The physical-hardware
+   run is shown separately as a scoped video artifact.
+4. **Build order:** Phase 1 bridge+app → Phase 2 sensor-changes-advice →
+   Phase 3 hardware video → Phase 4 website.
+
+### Out of scope (committed — do NOT build)
+- No HR / SpO2 / BPM computation.
+- No real BLE — the wired local WebSocket bridge is the honest stand-in.
+- No dedicated "pack" hardware — **laptop = pack**; the topology is a documented
+  tradeoff study, not a device to build now.
+- No real speech-to-text or wound vision — both are **stubs**.
+- No PCB fabrication.
+- No medical-validity claims.
+
+---
+
 ## Status legend
 🟢 done · 🟡 in progress · ⬜ not started · 🧊 deferred (don't do yet)
 
@@ -34,13 +62,18 @@ for the wire contract.
 
 ## Phase 1 — The spine (the bridge)  🟡 IN PROGRESS
 *Make sensor data actually reach the app. Highest leverage.*
-- ⬜ Node bridge: reads NDJSON, re-broadcasts unchanged over `ws://localhost:8080`.
-  `--source ∈ {serial, sim, file}`. Ship `file` (replay a capture at 10 Hz) first.
-  Skip lines without `t_ms`. Deps: `ws` (+ `serialport` only in serial mode).
-  *(Being built in a separate session — spec is in `DATA_FORMAT.md`.)*
-- ⬜ Wire the app to `ws://localhost:8080`: parse NDJSON per `DATA_FORMAT.md`,
-  replace the simulated vitals source (`services/biosensorService.ts`) with the
-  live stream. Gate every field behind its `ok` flag.
+- 🟢 Node bridge: reads NDJSON, re-broadcasts unchanged over `ws://localhost:8080`.
+  `--source ∈ {serial, sim, file}`; `file` mode shipped (+ `--loop` for continuous
+  replay), `serial` stubbed with a clear message. Drops lines without `t_ms`.
+  Dep: `ws` only. Verified: `test-client.js` receives the 4 data lines, boot line
+  dropped, loops correctly. (`bridge/`, spec in `DATA_FORMAT.md`.)
+- 🟢 App wired to `ws://localhost:8080/stream`: `services/useWristVitals.ts` +
+  `services/wristVitalsParser.ts` parse NDJSON per `DATA_FORMAT.md` (every field
+  gated on its `ok` flag), consumed by `app/index.tsx`'s `VitalsMonitor` on the
+  READY screen with a ●LIVE/○DISCONNECTED indicator. Honest: raw vs. derived split,
+  nulls render "—", no HR/SpO2. Verified: `npx tsc --noEmit` clean; the compiled
+  parser maps the live bridge stream to correct values (incl. `ok:false` → "—").
+  *Not yet verified: React actually painting the values in a running browser.*
 - ⬜ **Upgrade the `sim` source** to generate the stream from the firmware's *own*
   pure C (`firmware/bmp280_compensation.c`, `firmware/fall_detection.c`) compiled
   on the host — so the test data is the shipping code, not a reimplementation.
