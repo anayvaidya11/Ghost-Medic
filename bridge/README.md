@@ -65,7 +65,9 @@ node bridge.js --source=sim
 node bridge.js --source=serial   # exits with a clear "not implemented" message
 ```
 
-Options: `--port=8080` (default), `--hz=10` (file replay rate).
+Options: `--port=8080` (default), `--hz=10` (file replay rate), `--loop`
+(file mode only — replay the file from the top forever, for continuous app
+testing without hardware; without it, file mode stops after one pass).
 
 ## Endpoints
 

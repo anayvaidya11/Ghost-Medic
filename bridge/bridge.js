@@ -32,7 +32,7 @@ const { WebSocketServer } = require('ws');
 
 // ── CLI args ────────────────────────────────────────────────────────────────
 function parseArgs(argv) {
-  const args = { source: null, file: null, port: 8080, hz: 10 };
+  const args = { source: null, file: null, port: 8080, hz: 10, loop: false };
   for (const a of argv.slice(2)) {
     const m = a.match(/^--([^=]+)(?:=(.*))?$/);
     if (!m) continue;
@@ -41,6 +41,7 @@ function parseArgs(argv) {
     else if (key === 'file') args.file = val;
     else if (key === 'port') args.port = parseInt(val, 10);
     else if (key === 'hz') args.hz = parseFloat(val);
+    else if (key === 'loop') args.loop = true;
     else if (key === 'help') args.help = true;
   }
   return args;
@@ -51,7 +52,7 @@ function usage() {
 
 Usage:
   node bridge.js --source=sim   [--port=8080]
-  node bridge.js --source=file  --file=sample.ndjson [--hz=10] [--port=8080]
+  node bridge.js --source=file  --file=sample.ndjson [--hz=10] [--loop] [--port=8080]
   node bridge.js --source=serial   (not implemented yet)
 
 Consumers (the app / a test client) connect to:   ws://localhost:<port>/stream
@@ -112,7 +113,7 @@ function makeHub() {
 // is never dumped to an empty room. (Live sources — sim/serial — stream
 // continuously instead; a late consumer just joins mid-stream, like real hw.)
 // Returns a begin() to be called once, on first consumer connection.
-function makeFileSource(hub, filePath, hz) {
+function makeFileSource(hub, filePath, hz, loop) {
   const abs = path.resolve(filePath);
   const raw = fs.readFileSync(abs, 'utf8');
   const lines = raw.split('\n').filter((l) => l.trim().length > 0);
@@ -121,15 +122,23 @@ function makeFileSource(hub, filePath, hz) {
     `[bridge] file source: ${abs}\n` +
       `[bridge] ${lines.length} non-empty line(s); ` +
       `${withTMs} have t_ms, ${lines.length - withTMs} lack t_ms (will be dropped)\n` +
+      `[bridge] mode: ${loop ? 'LOOP (replay forever)' : 'once (stop at end)'}\n` +
       `[bridge] waiting for a consumer on /stream before replaying...`
   );
 
   const periodMs = 1000 / hz;
   return function begin(consumers) {
-    console.log(`[bridge] consumer present — replaying ${lines.length} line(s) at ${hz} Hz`);
+    console.log(
+      `[bridge] consumer present — replaying ${lines.length} line(s) at ${hz} Hz` +
+        (loop ? ' (looping)' : '')
+    );
     let i = 0;
     const timer = setInterval(() => {
       if (i >= lines.length) {
+        if (loop) {
+          i = 0; // restart from the top, same interval — continuous stream
+          return;
+        }
         clearInterval(timer);
         const { forwarded, dropped } = hub.stats();
         console.log(
@@ -224,7 +233,7 @@ function main() {
         console.error('[bridge] --source=file requires --file=<path>');
         process.exit(1);
       }
-      beginOnFirstConsumer = makeFileSource(hub, args.file, args.hz);
+      beginOnFirstConsumer = makeFileSource(hub, args.file, args.hz, args.loop);
     } else if (args.source === 'sim') {
       announceSimSource(args.port);
     } else if (args.source === 'serial') {
