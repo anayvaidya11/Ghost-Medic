@@ -1,0 +1,5 @@
+{"boot":true,"max30102_init":true,"bmp280_init":true,"lis3dh_init":true}
+{"t_ms":100,"max30102":{"ok":true,"red":10240,"ir":10390},"bmp280":{"ok":true,"temp_c":21.0,"press_pa":101325.0,"alt_m":0.0},"lis3dh":{"ok":true,"x_g":0.00,"y_g":0.00,"z_g":1.00,"mag_g":1.00},"fall_detected":false}
+{"t_ms":200,"max30102":{"ok":true,"red":10251,"ir":10402},"bmp280":{"ok":true,"temp_c":21.0,"press_pa":101300.2,"alt_m":2.1},"lis3dh":{"ok":true,"x_g":0.02,"y_g":-0.01,"z_g":0.03,"mag_g":0.04},"fall_detected":false}
+{"t_ms":300,"max30102":{"ok":true,"red":10249,"ir":10398},"bmp280":{"ok":true,"temp_c":21.0,"press_pa":101300.2,"alt_m":2.1},"lis3dh":{"ok":true,"x_g":1.80,"y_g":1.50,"z_g":1.20,"mag_g":2.62},"fall_detected":true}
+{"t_ms":400,"max30102":{"ok":false},"bmp280":{"ok":true,"temp_c":21.1,"press_pa":101299.0,"alt_m":2.2},"lis3dh":{"ok":true,"x_g":0.01,"y_g":0.00,"z_g":0.99,"mag_g":0.99},"fall_detected":false}

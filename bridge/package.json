@@ -1,0 +1,18 @@
+{
+  "name": "ghost-medic-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dumb NDJSON->WebSocket pipe: forwards wrist-unit telemetry lines to the app. Local/USB-serial stand-in for the eventual wrist->pack BLE link.",
+  "type": "commonjs",
+  "bin": {
+    "ghost-medic-bridge": "bridge.js"
+  },
+  "scripts": {
+    "start:sim": "node bridge.js --source=sim",
+    "start:file": "node bridge.js --source=file --file=sample.ndjson",
+    "test-client": "node test-client.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

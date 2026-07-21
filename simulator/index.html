@@ -287,6 +287,27 @@
 
 <script>
 "use strict";
+
+/* ---- OPTIONAL bridge output (OPT-IN, hardware-free testing) ----------
+ * Standalone by default: with no "?bridge" in the URL the page opens NO
+ * WebSocket and makes NO network calls, so it runs with zero console
+ * errors whether or not the bridge is running.
+ *
+ * Add "?bridge=1" to the URL (e.g. index.html?bridge=1) to forward each
+ * emitted line to a running bridge at ws://localhost:8080/sim-input, so
+ * the app can consume this simulator exactly as it would a real Pico.
+ * (A failed connection there is expected/opt-in, not a standalone bug.) */
+let bridgeSock = null;
+function connectBridge(){
+  if (!new URLSearchParams(location.search).has('bridge')) return; // default: silent
+  try {
+    bridgeSock = new WebSocket('ws://localhost:8080/sim-input');
+    bridgeSock.onclose = () => { bridgeSock = null; };
+    bridgeSock.onerror = () => {};
+  } catch (_) { bridgeSock = null; }
+}
+connectBridge();
+
 /* =====================================================================
  * Ghost Medic — Wrist Unit Simulator
  *
@@ -469,6 +490,9 @@ function emitLine(o){
     '"bmp280":{"ok":true,"temp_c":'+f2(o.bmp280.temp_c)+',"press_pa":'+f1(o.bmp280.press_pa)+',"alt_m":'+f1(o.bmp280.alt_m)+'},' +
     '"lis3dh":{"ok":true,"x_g":'+f3(o.lis3dh.x_g)+',"y_g":'+f3(o.lis3dh.y_g)+',"z_g":'+f3(o.lis3dh.z_g)+',"mag_g":'+f3(o.lis3dh.mag_g)+'},' +
     '"fall_detected":'+(o.fall_detected?'true':'false')+'}';
+
+  // Optional: forward the exact same line to the bridge if it's connected.
+  if (bridgeSock && bridgeSock.readyState === WebSocket.OPEN) bridgeSock.send(str);
 
   const div = document.createElement('div');
   div.className = 'line';
