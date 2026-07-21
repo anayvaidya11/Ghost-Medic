@@ -34,3 +34,7 @@ Thumbs.db
 # NOTE: ghost_medic_firmware.uf2 is intentionally TRACKED (checked in on purpose
 # as proof the firmware compiles), so it is deliberately NOT ignored here.
 # The *.bin/*.hex/*.elf rules above never match .uf2, so no exception is needed.
+
+# compiled host-test executables (built by firmware/tests/Makefile)
+tests/test_bmp280
+tests/test_fall

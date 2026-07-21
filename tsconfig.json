@@ -5,7 +5,6 @@
     "baseUrl": ".",
     "ignoreDeprecations": "5.0",
     "paths": {
-      "@/*": ["src/*"],
       "@services/*": ["services/*"]
     },
     "resolveJsonModule": true,
@@ -17,6 +16,8 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "legacy",
+    "firmware"
   ]
 }
