@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works · Ghost Medic</title>
+<meta name="description" content="The four parts of Ghost Medic in plain language: what the wrist unit senses, how the readings travel, what the offline language model does with them, and what each part is standing in for.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-nav"><div>
+  <a class="wordmark" href="index.html">Ghost&nbsp;Medic</a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a>
+    <a href="how-it-works.html" aria-current="page">How it works</a>
+    <a href="hardware.html">Hardware</a>
+    <a href="proof.html">Proof</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
+  </nav>
+</div></header>
+
+<main id="main">
+
+  <section id="intro" class="col">
+    <p class="eyebrow">How it works</p>
+    <h1>Four parts, one line of text between them.</h1>
+    <p class="lead">Sensing happens on the wrist. Thinking happens in the pack. Speaking
+    happens wherever you can hear it. Between them runs one line of plain text, ten times a
+    second. This page walks the whole path and stops at each point where something is standing
+    in for the real thing.</p>
+  </section>
+
+  <!-- ═══════════ THE DIAGRAM ═══════════ -->
+  <section id="diagram" class="col-w">
+    <figure>
+      <svg class="pipeline" viewBox="0 0 880 300" role="img"
+           aria-label="Diagram: a wrist unit sends one line of readings to a link, which forwards it to a pack computer running a language model, which sends spoken steps to an interface. The wrist unit and the pack computer are drawn with dashed outlines because neither is a purpose-built device today.">
+
+        <text class="stage" x="100" y="26" text-anchor="middle">01</text>
+        <text class="stage" x="325" y="26" text-anchor="middle">02</text>
+        <text class="stage" x="550" y="26" text-anchor="middle">03</text>
+        <text class="stage" x="775" y="26" text-anchor="middle">04</text>
+
+        <rect class="box-concept" x="10" y="40" width="180" height="104" rx="2"/>
+        <text class="lbl" x="26" y="66">Wrist unit</text>
+        <text class="sub" x="26" y="86">RP2040 and three sensors</text>
+        <text class="sub" x="26" y="100">air pressure · motion · light</text>
+        <text class="sub" x="26" y="114">prints one line, 10× / sec</text>
+        <text class="note" x="26" y="134">demo data is simulated</text>
+
+        <rect class="box" x="235" y="40" width="180" height="104" rx="2"/>
+        <text class="lbl" x="251" y="66">The link</text>
+        <text class="sub" x="251" y="86">carries each line, unchanged,</text>
+        <text class="sub" x="251" y="100">to whatever is listening</text>
+        <text class="note" x="251" y="126">a cable, standing in</text>
+        <text class="note" x="251" y="138">for a radio</text>
+
+        <rect class="box-concept" x="460" y="40" width="180" height="104" rx="2"/>
+        <text class="lbl" x="476" y="66">Pack computer</text>
+        <text class="sub" x="476" y="86">a language model running</text>
+        <text class="sub" x="476" y="100">on the machine you carry,</text>
+        <text class="sub" x="476" y="114">no internet involved</text>
+        <text class="note" x="476" y="134">a laptop stands in</text>
+
+        <rect class="box" x="685" y="40" width="180" height="104" rx="2"/>
+        <text class="lbl" x="701" y="66">Interface</text>
+        <text class="sub" x="701" y="86">shows the readings and</text>
+        <text class="sub" x="701" y="100">speaks the steps aloud</text>
+        <text class="note" x="701" y="126">voice input and photos</text>
+        <text class="note" x="701" y="138">are placeholders</text>
+
+        <path class="wire" d="M 100 144 V 205 H 775 V 144"/>
+        <path class="wire" d="M 325 144 V 205"/>
+        <path class="wire" d="M 550 144 V 205"/>
+        <circle class="packet" r="4.5" cx="100" cy="205"/>
+
+        <text class="sub" x="100" y="232">one line of plain text · ten times a second · the only agreement between the four</text>
+
+        <rect class="box" x="100" y="258" width="18" height="12" rx="2"/>
+        <text class="sub" x="126" y="268">runs today</text>
+        <rect class="box-concept" x="230" y="258" width="18" height="12" rx="2"/>
+        <text class="sub" x="256" y="268">something is standing in</text>
+      </svg>
+      <figcaption>The dot is illustrative pacing, not live data. Two boxes are dashed because
+      nothing purpose-built fills those roles yet: the demo telemetry is simulated, and the
+      pack computer is a laptop.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ═══════════ 01 ═══════════ -->
+  <section id="wrist" class="col">
+    <p class="eyebrow">01 · The wrist unit</p>
+    <h2>Three sensors, and one thing it refuses to report</h2>
+    <p>The wrist unit carries three parts that each answer a different question. It is
+    programmed in C that runs directly on the chip, with no operating system underneath it.</p>
+
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>The part</th><th>What it measures</th><th>What that is good for</th></tr></thead>
+      <tbody>
+        <tr><td>BMP280</td><td>Air pressure and temperature</td><td>Air thins predictably as you climb, so pressure gives you altitude. The temperature is the <em>air</em> around the device, not your body.</td></tr>
+        <tr><td>LIS3DH</td><td>Acceleration, three directions</td><td>Motion, and the particular signature of a fall.</td></tr>
+        <tr><td>MAX30102</td><td>Light reflected off skin</td><td>Raw light readings, and deliberately nothing more. See below.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Height from air pressure</h3>
+    <p>Air gets thinner the higher you go, predictably enough that you can run the relationship
+    backwards: measure the pressure, calculate the height. This is the line of firmware that
+    does it.</p>
+
+    <div class="translate">
+      <pre class="artifact">float bmp280_pressure_to_altitude(float pressure_pa) {
+    return 44330.0f *
+        (1.0f - powf(pressure_pa / BMP280_SEA_LEVEL_PA, 0.1903f));
+}</pre>
+      <div class="plain">
+        <p>Take the pressure you just measured, compare it to standard pressure at sea level,
+        and the standard atmospheric formula turns that ratio into metres.</p>
+        <p><strong>The catch, which the code and this site both state:</strong> "standard
+        pressure at sea level" is a fixed number, and real sea-level pressure moves with the
+        weather. So this figure is trustworthy for <em>change</em>, meaning "you have climbed
+        300 metres", and not for absolute elevation. It is not GPS and does not pretend to be.</p>
+      </div>
+    </div>
+
+    <h3>What a fall looks like to a machine</h3>
+    <p>While you are falling, an accelerometer reads close to nothing, because in free fall
+    nothing is pushing against it. Then you land and it reads a sharp spike. Either signal on
+    its own is ordinary: sitting down hard gives you the spike, waving your arm gives you the
+    lull. The firmware only calls it a fall when it sees both, in that order, within 400
+    milliseconds.</p>
+    <div class="gap">
+      <p class="eyebrow">Label</p>
+      <p>This is a demonstration, not a medical-grade fall detector. The thresholds are
+      textbook values that have never been tuned against real falls, and the source code says
+      so in the same words.</p>
+    </div>
+
+    <h3>No heart rate</h3>
+    <p>The optical sensor shines light through your skin and measures what comes back. That
+    signal does contain a pulse, but extracting it takes signal processing this project does
+    not implement. So the site shows the raw light readings and calls them exactly that.</p>
+    <p>This is not a footnote. It is enforced in four places: the firmware only reports counts,
+    the app has no field to put a heart rate in, the text sent to the model explicitly forbids
+    inferring one, and a test fails if a heart rate ever appears. An invented vital sign is
+    worse than no vital sign, because someone might act on it.</p>
+  </section>
+
+  <!-- ═══════════ 02 ═══════════ -->
+  <section id="link" class="col">
+    <p class="eyebrow">02 · The link</p>
+    <h2>A cable doing a radio's job</h2>
+    <p>In the finished idea, the wrist unit talks to the pack over a short-range radio. That
+    radio does not exist yet. What exists instead is a small program that reads lines over a
+    wire and hands them to anything that asks for them. Same job, minus the radio.</p>
+    <p>It is deliberately stupid. It does not interpret, reshape, average, or fix anything. A
+    line goes in and the identical line comes out. That is what makes the substitution honest:
+    the parts downstream cannot tell whether a line came from a board, the browser simulator,
+    or a recording, because there is genuinely no difference in what arrives.</p>
+    <p>It drops exactly one thing. When the board powers on it prints a greeting reporting
+    which sensors woke up, and that greeting has no timestamp. Anything without a timestamp is
+    not a reading, so it never reaches the rest of the system.</p>
+  </section>
+
+  <!-- ═══════════ 03 ═══════════ -->
+  <section id="brain" class="col">
+    <p class="eyebrow">03 · The pack computer</p>
+    <h2>The model is told what the sensors saw, and what not to conclude</h2>
+    <p>The language model is ordinary and off the shelf: a small open model running locally
+    with no internet connection. The engineering is not the model. It is what the model is
+    told, and what it is forbidden from doing.</p>
+    <p>Every question sent to it carries a block of sensor readings written out in words, with
+    each qualification attached to the reading it qualifies:</p>
+
+    <div class="translate">
+      <pre class="artifact">DERIVED READINGS:
+- Altitude: 2.1 m (pressure-derived vs a fixed 101325 Pa sea-level
+  reference; reliable for RELATIVE change only — NOT GPS or true elevation)
+- Temperature: 21.0 °C (AMBIENT air at the device — NOT body temperature)
+- Fall detected: YES (accelerometer free-fall→impact heuristic,
+  not medical-grade)
+
+RAW SIGNALS (non-diagnostic):
+- Optical counts: red 10249, ir 10398. These are raw photodiode counts
+  from the optical sensor. No pulse-extraction algorithm runs on this
+  device: heart rate and blood-oxygen saturation (SpO2) are NOT
+  available and must not be inferred from these numbers.</pre>
+      <div class="plain">
+        <p>Each number arrives with its own limits attached, so the model cannot treat the
+        altitude as GPS or the air temperature as a fever. The last paragraph does the most
+        work: it tells the model, inside the request itself, that the light readings are not
+        vital signs and must not be turned into a pulse.</p>
+        <p>If a sensor has failed, its line reads <strong>"unavailable"</strong> rather than
+        zero. A zero is a reading. "Unavailable" is the truth.</p>
+      </div>
+    </div>
+    <p class="caption">That is the real output of <code>services/sensorContext.ts</code>,
+    wrapped here to fit the column and shown without its opening and closing markers. The app
+    can show you the exact bytes it sent, on request.</p>
+
+    <p>One rule sits above all of it: if the readings disagree with what the person says, the
+    person wins. A sensor on a wrist knows less than someone looking at their own leg.</p>
+
+    <h3>When the wristband speaks first</h3>
+    <p>If the accelerometer sees the signature of a fall, the assistant does not wait to be
+    asked. It starts the conversation itself, with guidance for someone who may have just hit
+    their head. That behaviour needs one guard.</p>
+
+    <div class="translate">
+      <pre class="artifact">const risingEdge = fallDetected &amp;&amp; !prevFall;
+prevFall = fallDetected;
+
+if (!risingEdge) return false;
+if (suppressed) return false; // consumed, not queued
+if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
+      <div class="plain">
+        <p>The wristband reports ten times a second, so one fall arrives as a long run of
+        identical "fall detected" readings. Firing on each one would ask the model forty
+        questions about a single stumble.</p>
+        <p>So it fires on the moment the answer changes from no to yes, not on every yes, then
+        stays quiet for thirty seconds. One fall, one question. Measured against a live model
+        during a looping replay: two requests thirty seconds apart, where the naive version
+        would have made about sixty.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 04 ═══════════ -->
+  <section id="interface" class="col">
+    <p class="eyebrow">04 · The interface</p>
+    <h2>Six steps, and one line that matters more than the rest</h2>
+    <p>The answer comes back as at most six steps, one sentence each, because the person
+    reading it may be frightened, cold, and alone. It always ends with a line about evacuation,
+    meaning whether to call for rescue, and the app pulls that line out and displays it
+    separately. It is the most consequential thing on the screen.</p>
+    <p>The screen keeps two kinds of number apart. <strong>Derived</strong> values, meaning
+    altitude, temperature, and whether a fall was seen, are conclusions the system drew.
+    <strong>Raw</strong> values, meaning the light readings and the acceleration, are shown as
+    what they are with no interpretation. A reading that failed shows a dash, never a zero.</p>
+
+    <div class="gap">
+      <p class="eyebrow">Placeholders</p>
+      <p>You can hold a button and record your voice, and the recording is real, but nothing
+      turns it into text yet. You can photograph a wound, and the photo is real, but nothing
+      looks at it yet. Both are wired up and do nothing, and are marked as such in the code.</p>
+      <p>The path that works end to end is typed text plus sensor readings, to the local model,
+      to a parsed and spoken answer.</p>
+    </div>
+
+    <div class="gap">
+      <p class="eyebrow">One more thing about the interface</p>
+      <p>The answer appears on screen word by word, which looks like the model thinking aloud.
+      It is not. The complete answer arrives first and the app reveals it at a readable pace.
+      Real word-by-word generation is separate work that has not been done.</p>
+    </div>
+  </section>
+
+  <section id="next" class="col">
+    <hr class="rule">
+    <p><a href="proof.html"><strong>Next: the receipts →</strong></a> test output you can
+    re-run, a recorded conversation with the model, and the complete list of what is real and
+    what is standing in.</p>
+  </section>
+
+</main>
+
+<footer class="site-foot"><div class="col-w">
+  <div class="links">
+    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">Architecture</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/DATA_FORMAT.md">Wire format</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">Board</a>
+  </div>
+  <p>Ghost Medic is an engineering prototype built by one self-taught person. It is not a
+  medical device, it has not been clinically evaluated, and nothing it says should be treated
+  as medical advice. There is no heart rate or blood-oxygen reading anywhere in this project,
+  by design.</p>
+</div></footer>
+
+</body>
+</html>

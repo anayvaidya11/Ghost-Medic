@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proof · Ghost Medic</title>
+<meta name="description" content="Test output you can re-run, a recorded conversation showing sensor readings changing the model's answer, and the complete list of what is real and what is standing in.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-nav"><div>
+  <a class="wordmark" href="index.html">Ghost&nbsp;Medic</a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="hardware.html">Hardware</a>
+    <a href="proof.html" aria-current="page">Proof</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
+  </nav>
+</div></header>
+
+<main id="main">
+
+  <section id="intro" class="col">
+    <p class="eyebrow">Proof</p>
+    <h1>Check it yourself.</h1>
+    <p class="lead">Everything on this page can be re-run by anyone with the repository and a
+    laptop. That is the strongest claim software can make, so it is the one this project
+    leans on.</p>
+    <p>Three grades of evidence appear below, and they are never mixed. <strong>Live</strong>
+    means it ran in your browser a moment ago. <strong>Recorded</strong> means it really
+    happened on a real machine and you are reading the output. <strong>Reproducible</strong>
+    means here are the commands, go and see for yourself.</p>
+  </section>
+
+  <!-- ═══════════ TESTS ═══════════ -->
+  <section id="tests" class="col">
+    <p class="eyebrow">Reproducible, one command</p>
+    <h2>The tests, and what they are guarding</h2>
+    <p>Each one exists to stop a specific way this project could quietly start lying: reporting
+    a dead sensor as zero, inventing a vital sign, or asking the model forty questions about a
+    single stumble. Reading the list tells you what the system promises.</p>
+
+    <div class="translate">
+      <pre class="artifact">npm test</pre>
+      <div class="plain">
+        <p>No installation, no test framework, no build step. The runner is built into Node
+        itself, and the tests import the same TypeScript files the app runs.</p>
+      </div>
+    </div>
+
+    <pre class="receipt"><span class="c">$ npm test        # output below is verbatim, 22 July 2026</span>
+
+<span class="ok">✔</span> default cooldown is the 30 s documented in ARCHITECTURE.md and on the site
+<span class="ok">✔</span> one fall fires exactly once, however many readings it spans
+<span class="ok">✔</span> the fire lands on the first true reading, not a later one
+<span class="ok">✔</span> a stream that starts already-true still fires (a fall in progress counts)
+<span class="ok">✔</span> quiet readings never fire
+<span class="ok">✔</span> a second fall inside the cooldown is ignored
+<span class="ok">✔</span> a fall after the cooldown expires fires again
+<span class="ok">✔</span> a looping replay of the sample capture fires once per cooldown, not once per loop
+<span class="ok">✔</span> a fall while suppressed is dropped, not queued for later
+<span class="ok">✔</span> suppression does not burn the cooldown, so the next real fall still fires
+<span class="ok">✔</span> un-suppressing mid-fall does not fire until the next fall begins
+<span class="ok">✔</span> each trigger keeps its own state
+<span class="ok">✔</span> block is always delimited, so the model and the UI agree on its bounds
+<span class="ok">✔</span> healthy snapshot reports every derived reading with its qualifier
+<span class="ok">✔</span> healthy snapshot reports raw signals, labelled non-diagnostic
+<span class="ok">✔</span> snapshot uptime is carried through so the model knows how fresh it is
+<span class="ok">✔</span> fall flag renders as YES / no, never as a bare boolean
+<span class="ok">✔</span> the user outranks the sensors, and the block says so
+<span class="ok">✔</span> a failed optical sensor reads "unavailable", never 0
+<span class="ok">✔</span> a failed barometer reads "unavailable" for both altitude and temperature
+<span class="ok">✔</span> a failed accelerometer reads "unavailable" for magnitude
+<span class="ok">✔</span> one dead sensor does not suppress the others
+<span class="ok">✔</span> every sensor failing still yields a complete, honest block
+<span class="ok">✔</span> a disconnected bridge yields an explicit no-data block, not stale readings
+<span class="ok">✔</span> "connecting" is distinguished from "disconnected" in the stated reason
+<span class="ok">✔</span> a live link with no data line yet is treated as no data, not as zeroes
+<span class="ok">✔</span> the block always forbids inferring heart rate or SpO2 from raw counts
+<span class="ok">✔</span> the block never states a heart rate, pulse or SpO2 value
+<span class="ok">✔</span> a healthy line parses every field at its documented precision
+<span class="ok">✔</span> the impact line carries the fall flag and the high-g magnitude
+<span class="ok">✔</span> a real reading of zero is preserved, not mistaken for a missing one
+<span class="ok">✔</span> a failed sensor yields null, never 0
+<span class="ok">✔</span> a failed sensor does not take down the rest of the line
+<span class="ok">✔</span> ok:false wins even if the sender contradicts itself and includes values
+<span class="ok">✔</span> a missing sensor block entirely is not-ok with null readings
+<span class="ok">✔</span> the boot line is rejected: it has no t_ms, so it is not a data line
+<span class="ok">✔</span> malformed input is rejected rather than throwing
+<span class="ok">✔</span> the parsed shape has no heart-rate, pulse or SpO2 field to fill in
+<span class="ok">✔</span> optical counts stay raw integers, with no scaling and no derived value
+
+ℹ tests 39
+ℹ <span class="ok">pass 39</span>
+ℹ fail 0</pre>
+    <p class="caption">Source:
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/tests">tests/</a>.
+    Requires Node 22.6 or newer and nothing else.</p>
+
+    <h3>The firmware's maths, checked against the manufacturer's own numbers</h3>
+    <p>The sensor calculations live in C files with no hardware in them, so the same source
+    compiles both into the firmware and into an ordinary program that runs on a laptop. The
+    tests below are not a copy of the logic. They compile the same source files the firmware is
+    built from.</p>
+    <p>The pressure test is the interesting one. The chip's manufacturer publishes a worked
+    example in its datasheet: given these raw inputs, a correct implementation produces these
+    outputs. The test feeds in their numbers and checks the answer against theirs.</p>
+
+    <pre class="receipt"><span class="c">$ cd firmware/tests &amp;&amp; make        # verbatim, rebuilt 22 July 2026</span>
+
+== BMP280 compensation math (host tests) ==
+
+-- compensation against Bosch reference example --
+  <span class="ok">PASS</span>  temperature ~= 25.08 C     got 25.0825 (want 25.0800 +/- 0.1000)
+  <span class="ok">PASS</span>  pressure ~= 100653 Pa      got 100653.2656 (want 100653.0000 +/- 50.0000)
+
+-- altitude helper sanity checks --
+  <span class="ok">PASS</span>  sea-level pressure -&gt; ~0 m      got 0.0000
+  <span class="ok">PASS</span>  ~89875 Pa -&gt; ~1000 m            got 1000.1350
+  <span class="ok">PASS</span>  lower pressure =&gt; higher altitude
+  <span class="ok">PASS</span>  all altitudes above sea level &gt;= 0
+
+== BMP280: 6 checks, 0 failed ==
+
+== Fall-detection state machine (host tests) ==
+
+  <span class="ok">PASS</span>  A: free-fall then impact within window   =&gt; FALL flagged
+  <span class="ok">PASS</span>  B: impact with NO prior free-fall        =&gt; NOT flagged
+  <span class="ok">PASS</span>  C: impact AFTER the 400 ms window        =&gt; NOT flagged
+
+== Fall: 3 checks, 0 failed ==
+
+All host tests passed.</pre>
+
+    <div class="gap">
+      <p class="eyebrow">What these tests do not prove</p>
+      <p>They check the maths against published reference values and scripted scenarios. They
+      do not check it against a physical sensor. Miswired pins, timing mistakes and misread
+      datasheets get caught on a bench, and there has been no bench.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ THE MODEL ═══════════ -->
+  <section id="model" class="col">
+    <p class="eyebrow">Recorded, a real run on a real machine</p>
+    <h2>The sensor readings change the answer</h2>
+    <p>This is the claim the project rests on, so here is the experiment. The same person says
+    the same thing, <em>"I feel a bit dizzy"</em>, twice. The only difference is what the wrist
+    unit reports. The model and the wording of the question are held constant.</p>
+
+    <div class="gap">
+      <p class="eyebrow">Label</p>
+      <p>What follows is recorded output from a real run of a small open model running locally,
+      using the app's own prompt construction. It is <strong>not a live model answering you
+      now</strong>. Your browser cannot run a language model, and pretending otherwise would be
+      exactly the kind of thing this site exists not to do. The run was seeded so it
+      reproduces.</p>
+      <p>Both answers are reproduced word for word, including the model's own asterisks and its
+      wobbly grammar. Nothing has been tidied up, shortened, or picked from several attempts.</p>
+    </div>
+
+    <h3>Run one, no fall detected</h3>
+    <p>The wrist unit reports a normal 1.00 g and no fall. The model gives ordinary dizziness
+    care:</p>
+    <pre class="receipt">**IMMEDIATE ACTION REQUIRED**
+
+Since the user reports feeling dizzy, it's essential to assess their
+condition and take action to ensure their safety.
+
+1. **Find a safe place to sit or lie down**: Immediately move to a flat
+   surface where you can sit or lie down without any obstacles.
+2. **Remove any constrictive items**: Take off any tight clothing,
+   watches, or jewelry that may be causing discomfort or restricting
+   blood flow.
+3. **Loosen tight clothing around the neck and chest**: If the user is
+   wearing a backpack or other gear that's too tight, help them loosen
+   it to improve circulation.
+4. **Elevate your legs (if possible)**: If you're sitting, try to
+   elevate your legs 12-18 inches above the level of your heart to
+   reduce swelling and promote blood flow.
+5. **Stay calm and reassure yourself**: Take slow, deep breaths and
+   focus on staying calm. Try to relax and conserve energy.
+
+**EVACUATION LINE:** Call for help now. If you have a phone or two-way
+radio with you, call emergency services or contact a trusted friend or
+family member to let them know your situation.</pre>
+
+    <h3>Run two, same words, fall detected</h3>
+    <p>Now the accelerometer has seen 2.62 g and flagged a fall. Same sentence from the user,
+    same model, same wording of the question. The guidance changes:</p>
+    <pre class="receipt">**IMMEDIATE ACTION REQUIRED**
+
+1. Find a safe place to sit or lie down, away from any hazards or
+   obstacles that could cause further injury.
+2. Remove your backpack or any other gear that may be constricting your
+   neck or head.
+3. <span class="ok">Check yourself for injuries, especially to the head, neck, and spine.</span>
+   <span class="ok">If you have any visible wounds or signs of trauma, get help as soon</span>
+   <span class="ok">as possible.</span>
+4. Take slow, deep breaths and try to relax. Dizziness can be caused by
+   dehydration, low blood sugar, or other factors that can be easily
+   treated.
+5. Try to rehydrate by drinking water from your hydration bladder or a
+   nearby water source (if available).
+6. If you're unable to stand or feel unsteady, stay put and wait for
+   help to arrive.
+
+**EVACUATION: CALL FOR HELP NOW**
+
+Please call for emergency assistance immediately, as your situation may
+be more serious than initially reported.</pre>
+
+    <p>The difference is step 3 and the escalation at the end: a head, neck and spine check
+    that the first answer never mentions. <strong>Nobody typed the word "fall".</strong> An
+    accelerometer reading became a question about spinal injury.</p>
+    <p class="caption">Both transcripts, plus the exact sensor blocks that produced them, are in
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md">the session report</a>.
+    Compare them line by line if you like.</p>
+
+    <h3>The honesty probe, including the part that went badly</h3>
+    <p>The model was then asked directly: <em>"What is my heart rate right now?"</em>, the
+    question the whole design forbids it from answering.</p>
+    <p><strong>It did not invent a number.</strong> The hard rule held. But it also did not
+    plainly say "this device cannot measure your heart rate", which is what the instructions
+    tell it to say. It changed the subject to general first aid, and over-dramatised a question
+    from someone who never said they were hurt.</p>
+    <p>That is a real limitation of a small model following instructions. It is recorded here
+    rather than left out.</p>
+  </section>
+
+  <!-- ═══════════ RUN IT ═══════════ -->
+  <section id="run" class="col">
+    <p class="eyebrow">Reproducible</p>
+    <h2>Run the whole pipeline yourself</h2>
+    <p>Your browser cannot run the link program or a language model, so a live end-to-end demo
+    is not something this site can host. Here is the substitute: the actual commands, on your
+    own machine, with no accounts and nothing sent anywhere.</p>
+
+    <pre class="block">git clone https://github.com/anayvaidya11/Ghost-Medic &amp;&amp; cd Ghost-Medic
+npm install
+cd bridge &amp;&amp; npm install &amp;&amp; cd ..
+cp services/llmConfig.example.ts services/llmConfig.ts
+cp services/bridgeConfig.example.ts services/bridgeConfig.ts
+ollama pull llama3.2:3b &amp;&amp; ollama serve
+
+<span class="c"># Terminal 1: replay recorded telemetry containing a fall:</span>
+cd bridge &amp;&amp; node bridge.js --source=file --file=sample.ndjson --loop
+
+<span class="c"># Terminal 2: the app</span>
+npm run web</pre>
+
+    <p>Watch for three things: the sensor panel switching to live, the fall triggering exactly
+    one question rather than a flood, and the reply carrying a chip that shows you the precise
+    text the model was given.</p>
+  </section>
+
+  <!-- ═══════════ THE TABLE ═══════════ -->
+  <section id="table" class="col-w">
+    <div class="col" style="padding:0">
+      <p class="eyebrow">The whole list</p>
+      <h2>What is real, and what is standing in</h2>
+      <p>Most projects put this in a footnote, if they write it at all. It is the most useful
+      thing on the site, so it gets a section.</p>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>Claim</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Firmware compiles for the real chip with no warnings and produces a flashable file</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td><a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/firmware/README.md">firmware/README.md</a></td>
+        </tr>
+        <tr>
+          <td>Firmware sensor maths passes tests on a laptop</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td>6/6 and 3/3, rebuilt 22 Jul 2026, output above</td>
+        </tr>
+        <tr>
+          <td>The modules deciding what the model is told are tested</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td>39/39, <code>npm test</code>, output above</td>
+        </tr>
+        <tr>
+          <td>Sensor readings reach the app live and move the numbers on screen</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td>22 Jul 2026, replay into the browser</td>
+        </tr>
+        <tr>
+          <td>Sensor readings change what the model advises</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td>Recorded transcript above</td>
+        </tr>
+        <tr>
+          <td>App to local model to spoken numbered guidance</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td>Local, offline, no external service</td>
+        </tr>
+        <tr>
+          <td>Circuit board designed and routed in KiCad</td>
+          <td><span class="mark mark-yes">Verified</span></td>
+          <td><a href="hardware.html">Hardware page</a>, source files in the repository</td>
+        </tr>
+        <tr>
+          <td>Firmware readings checked against real sensors on a bench</td>
+          <td><span class="mark mark-no">Not done</span></td>
+          <td>Maths verified against datasheet values only</td>
+        </tr>
+        <tr>
+          <td>Sensor data used in every demo on this site</td>
+          <td><span class="mark mark-no">Simulated</span></td>
+          <td>Labelled wherever it appears</td>
+        </tr>
+        <tr>
+          <td>Wireless link from wrist to pack</td>
+          <td><span class="mark mark-part">Stands in</span></td>
+          <td>A cable, deliberately</td>
+        </tr>
+        <tr>
+          <td>Dedicated pack computer</td>
+          <td><span class="mark mark-part">Stands in</span></td>
+          <td>A laptop</td>
+        </tr>
+        <tr>
+          <td>Speech-to-text and wound-photo analysis</td>
+          <td><span class="mark mark-no">Placeholders</span></td>
+          <td>Wired up, do nothing</td>
+        </tr>
+        <tr>
+          <td>Answer appearing word by word</td>
+          <td><span class="mark mark-no">Cosmetic</span></td>
+          <td>Complete answer, revealed at reading pace</td>
+        </tr>
+        <tr>
+          <td>Heart rate, blood oxygen, pulse</td>
+          <td><span class="mark mark-no">Not computed</span></td>
+          <td>Deliberately absent. Raw light readings only</td>
+        </tr>
+        <tr>
+          <td>Medical validity of any guidance</td>
+          <td><span class="mark mark-no">Not claimed</span></td>
+          <td>Never tested. Engineering prototype only</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="caption">Mirrors the table in
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a>.
+    If the repository and this page ever disagree, the repository is right.</p>
+  </section>
+
+</main>
+
+<footer class="site-foot"><div class="col-w">
+  <div class="links">
+    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">Architecture</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/DATA_FORMAT.md">Wire format</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/tests">Tests</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a>
+  </div>
+  <p>Ghost Medic is an engineering prototype built by one self-taught person. It is not a
+  medical device, it has not been clinically evaluated, and nothing it says should be treated
+  as medical advice. Simulated data is labelled simulated. Placeholders are labelled
+  placeholders. There is no heart rate or blood-oxygen reading anywhere in this project, by
+  design.</p>
+</div></footer>
+
+</body>
+</html>

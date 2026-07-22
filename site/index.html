@@ -3,528 +3,168 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ghost Medic — an offline AI first-aid assistant prototype</title>
-<meta name="description" content="An honest engineering proof: firmware-format sensor telemetry → bridge → app → local LLM → spoken first-aid guidance, fully offline. Every real-vs-simulated boundary labeled.">
-<style>
-  :root{
-    --bg:#0a0d0a; --panel:#11150f; --edge:#1e2a1a; --ink:#c8d6c0; --dim:#7f8f78;
-    --amber:#ffb000; --amber-dim:#a06c00; --green:#3dff7a; --green-dim:#1f7a3c;
-    --red:#ff3b30; --code-bg:#060806;
-    --mono: ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
-  }
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#0f160e 0%,var(--bg) 60%),var(--bg);
-    color:var(--ink);font-family:var(--mono);font-size:15px;line-height:1.55;
-    -webkit-font-smoothing:antialiased}
-  .wrap{max-width:980px;margin:0 auto;padding:0 20px}
-  a{color:var(--amber);text-decoration:none}
-  a:hover{text-decoration:underline}
-  h1,h2,h3{line-height:1.2}
-  h2{font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:var(--green);
-    border-bottom:1px solid var(--edge);padding-bottom:10px;margin:70px 0 18px}
-  h3{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin:28px 0 10px}
-  p{margin:0 0 14px}
-  section{scroll-margin-top:70px}
-
-  /* nav */
-  nav{position:sticky;top:0;z-index:50;background:#0a0d0aee;backdrop-filter:blur(4px);
-    border-bottom:1px solid var(--edge);padding:9px 0;font-size:11.5px;letter-spacing:.08em}
-  nav .wrap{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-  nav b{color:var(--green);letter-spacing:.2em;margin-right:6px}
-  nav a{color:var(--dim)} nav a:hover{color:var(--amber);text-decoration:none}
-
-  /* hero */
-  .hero{padding:64px 0 8px}
-  .hero h1{font-size:34px;letter-spacing:.22em;color:var(--amber);margin:0;
-    text-shadow:0 0 18px rgba(255,176,0,.25)}
-  .hero h1 .ghost{color:var(--green)}
-  .hero .sub{color:var(--ink);font-size:16px;margin-top:14px;max-width:56em}
-
-  /* honesty banner */
-  .banner{border:1px dashed var(--amber-dim);
-    background:repeating-linear-gradient(45deg,#1a1405 0 10px,#181203 10px 20px);
-    color:#ffce6b;padding:12px 14px;border-radius:5px;font-size:13px;margin:20px 0;
-    display:flex;gap:10px;align-items:flex-start}
-  .banner .tag{flex:none;background:var(--amber);color:#181000;font-weight:700;
-    padding:1px 8px;border-radius:3px;letter-spacing:.1em;font-size:11px}
-  .banner b{color:var(--amber)}
-
-  .gapbox{border:1px solid #3a2a0c;background:#171105;color:#e8d9b0;border-radius:5px;
-    padding:12px 14px;font-size:13px;margin:14px 0}
-  .gapbox b{color:var(--amber)}
-
-  .panel{border:1px solid var(--edge);background:linear-gradient(180deg,#0f130d,#0b0f0a);
-    border-radius:6px;padding:16px;margin:16px 0;box-shadow:inset 0 0 0 1px #000}
-
-  pre{background:var(--code-bg);border:1px solid #000;border-radius:5px;padding:12px 14px;
-    overflow-x:auto;font-size:12.5px;line-height:1.5;color:#9fc4a4;margin:12px 0;
-    box-shadow:inset 0 0 24px #000c}
-  pre.ascii{color:var(--dim);font-size:11.5px}
-  pre .c{color:#5d6f58}       /* comment */
-  code{background:#131a11;border:1px solid var(--edge);border-radius:3px;padding:1px 5px;font-size:12.5px}
-
-  table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}
-  th,td{border:1px solid var(--edge);padding:8px 10px;text-align:left;vertical-align:top}
-  th{color:var(--dim);letter-spacing:.1em;font-size:11px;text-transform:uppercase;background:#0d110c}
-  td b.ok{color:var(--green)} td b.no{color:var(--red)} td b.warn{color:var(--amber)}
-
-  .receipt{border-left:3px solid var(--green-dim)}
-  .transcript{border-left:3px solid var(--amber-dim)}
-
-  iframe{width:100%;height:760px;border:1px solid var(--edge);border-radius:6px;background:#0a0d0a}
-
-  img.board{max-width:100%;border:1px solid var(--edge);border-radius:6px;background:#0d110c}
-
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:800px){.cols{grid-template-columns:1fr}}
-
-  /* interactive altitude widget */
-  .widget{display:flex;flex-direction:column;gap:10px}
-  .widget input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;
-    background:linear-gradient(90deg,var(--green-dim),var(--amber-dim));
-    border:1px solid #000;border-radius:3px;cursor:pointer}
-  .widget input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:26px;
-    border-radius:3px;background:linear-gradient(180deg,#e8e2d0,#8b8574);border:1px solid #000;cursor:grab}
-  .widget .out{display:flex;gap:26px;flex-wrap:wrap;font-size:14px}
-  .widget .out b{color:var(--green);font-size:18px}
-  .widget .out small{color:var(--dim)}
-
-  .anno{color:var(--dim);font-size:12.5px;border-left:2px solid var(--edge);padding-left:10px;margin:8px 0}
-  .anno b{color:var(--ink)}
-
-  footer{margin:80px 0 40px;color:var(--dim);font-size:12px;border-top:1px solid var(--edge);padding-top:18px}
-  footer a{color:var(--dim);text-decoration:underline}
-</style>
+<title>Ghost Medic · offline AI first-aid assistant prototype</title>
+<meta name="description" content="A prototype wearable first-aid assistant that works with no internet: a wrist sensor unit, a language model running on hardware you carry, and spoken first-aid steps.">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav><div class="wrap">
-  <b>GHOST&nbsp;MEDIC</b>
-  <a href="#how">System</a>
-  <a href="#sim">Simulator</a>
-  <a href="#physics">Physics</a>
-  <a href="#proof">End-to-end</a>
-  <a href="#firmware">Firmware</a>
-  <a href="#hardware">Hardware</a>
-  <a href="#ai">AI</a>
-  <a href="#real">Real vs simulated</a>
-  <a href="https://github.com/anayvaidya11/Ghost-Medic">GitHub ↗</a>
-</div></nav>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="wrap">
+<header class="site-nav"><div>
+  <a class="wordmark" href="index.html">Ghost&nbsp;Medic</a>
+  <nav aria-label="Sections">
+    <a href="index.html" aria-current="page">Overview</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="hardware.html">Hardware</a>
+    <a href="proof.html">Proof</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
+  </nav>
+</div></header>
 
-<!-- ══════════════ HERO ══════════════ -->
-<header class="hero">
-  <h1><span class="ghost">GHOST</span> MEDIC</h1>
-  <p class="sub">An <b>offline AI first-aid assistant prototype</b> for the backcountry:
-  a wrist-worn sensor hub streams motion, environment, and raw optical data to a
-  <b>local</b> language model — no internet — which combines it with what you say
-  and speaks numbered first-aid guidance.</p>
-  <div class="banner"><span class="tag">HONESTY</span>
-    <span><b>This is a working engineering proof, not a product and not a medical
-    device.</b> The firmware compiles and its math passes host tests, but it has
-    <b>never run on physical hardware</b>. The circuit board is <b>designed, never
-    fabricated</b>. Demo sensor data is <b>simulated and labeled as such</b>. Every
-    real-vs-simulated boundary on this page is <a href="#real">stated explicitly</a>,
-    and every claim links to files in the
-    <a href="https://github.com/anayvaidya11/Ghost-Medic">public repo</a> you can check.</span>
-  </div>
-</header>
+<main id="main">
 
-<!-- ══════════════ PROBLEM ══════════════ -->
-<section id="problem">
-  <h2>The problem</h2>
-  <p>You're injured, alone, hours from help, with no signal. Every consumer
-  assistant assumes a network. Ghost Medic's premise: the sensing, the reasoning,
-  and the voice all have to live <em>with you</em> — a sensor hub on the wrist, a
-  local LLM in the pack, a voice-and-screen interface — working entirely offline.</p>
-</section>
+  <!-- ═══════════ THE PITCH ═══════════ -->
+  <section id="pitch" class="col">
+    <p class="eyebrow">Prototype</p>
+    <h1>A first-aid assistant that works with no signal.</h1>
+    <p class="lead">Ghost Medic is a prototype for people who are hours from help and have no
+    connection. A unit on the wrist tracks movement and the air around you. A language model
+    running on hardware in your own pack reads those numbers together with what you tell it,
+    then speaks back numbered first-aid steps. Nothing is sent anywhere. There is no network
+    to send it through.</p>
+  </section>
 
-<!-- ══════════════ HOW IT WORKS ══════════════ -->
-<section id="how">
-  <h2>How it works</h2>
-  <p>Four roles. In the shipping concept they're separate devices; in today's demo
-  some collapse onto a laptop — that mapping is documented, not hidden:</p>
-<pre class="ascii">
- ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
- │  BIOSENSOR /     │   │   WEARABLE       │   │    PACK BRAIN    │   │   INTERFACE      │
- │  WRIST UNIT      │   │   (sensor hub)   │   │   (compute)      │   │   (voice+screen) │
- │                  │   │                  │   │                  │   │                  │
- │  MAX30102  raw PPG   │  RP2040 / Pico   │   │  local LLM       │   │  React Native /  │
- │  BMP280    baro  │──▶│  reads I²C @10Hz │──▶│  (Ollama today)  │──▶│  Expo app        │
- │  LIS3DH    accel │   │  emits NDJSON    │   │  + vision/voice  │   │  speaks steps    │
- │  (custom PCB)    │   │  over USB serial │   │                  │   │                  │
- └──────────────────┘   └──────────────────┘   └──────────────────┘   └──────────────────┘
-                                 │                      ▲
-                    ══════════ THE BRIDGE ══════════════┘
-                    NDJSON source → WebSocket relay (wired stand-in
-                    for the eventual wrist→pack BLE link — NOT BLE)
-</pre>
-  <p>One JSON line format is the contract between every stage
-  (<a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/DATA_FORMAT.md">DATA_FORMAT.md</a>).
-  Because a line looks identical whether it came from a real Pico, the browser
-  simulator, or a replayed capture, any producer can replace any other without
-  touching the consumers. That's what lets the whole pipeline be proven today,
-  hardware-free, and lets a real flashed Pico slot in later by changing one flag.</p>
-  <div class="gapbox"><b>What runs where, today:</b> the "pack brain" is a laptop
-  running Ollama — no dedicated compute device has been built or selected (a
-  Jetson-class target is a documented tradeoff study, nothing more). The wireless
-  wrist→pack link is replaced by a <b>wired local WebSocket bridge</b>. Speech-to-text
-  and wound-photo vision are <b>stubs</b>.</div>
-</section>
+  <!-- ═══════════ STATUS, UP FRONT ═══════════ -->
+  <section id="status" class="col">
+    <p class="eyebrow">Where the project stands</p>
+    <ul class="ledger">
+      <li>
+        <span class="mark mark-yes">Working</span>
+        <div>
+          <p>The software chain runs end to end, offline, on one laptop. Sensor readings
+          arrive, the model reads them, and its answer changes because of them.</p>
+          <p>Verified 22 July 2026 against a local model. <a href="proof.html">The receipts are on the Proof page.</a></p>
+        </div>
+      </li>
+      <li>
+        <span class="mark mark-yes">Working</span>
+        <div>
+          <p>The firmware compiles for the real chip and its sensor maths passes tests against
+          the manufacturer's own reference numbers.</p>
+          <p>6 checks on the pressure maths, 3 on fall detection, 39 on the software that
+          talks to the model.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mark mark-part">Stands in</span>
+        <div>
+          <p>A laptop does the job of the pack computer. A cable does the job of the wireless
+          link. Both are deliberate substitutions, and both are labelled everywhere they
+          appear.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mark mark-no">Simulated</span>
+        <div>
+          <p>Every sensor reading on this site is generated rather than measured, and says so
+          wherever it appears. Speech-to-text and wound-photo analysis are placeholders that
+          do nothing yet.</p>
+        </div>
+      </li>
+    </ul>
+    <p class="caption">Every claim here points at a file in the public repository. If you find
+    one that does not, that is a bug worth telling me about.</p>
+  </section>
 
-<!-- ══════════════ SIMULATOR ══════════════ -->
-<section id="sim">
-  <h2>Live: the wrist-unit simulator</h2>
-  <p>This is real and interactive, right here in the page. It runs the <b>same
-  physics and fall-detection formulas as the firmware</b> (a JavaScript mirror of
-  the C shown below — same constants, same state machine; compare them yourself)
-  and emits the <b>identical JSON line format</b> a flashed Pico would print.
-  Drag the sliders; press <b>⚠ Simulate Fall</b>; toggle a sensor failure and watch
-  the wire format handle it honestly (<code>"ok":false</code>, fields omitted, never a fake 0).</p>
-  <p class="anno"><b>Label:</b> this is a <b>simulator</b> — no sensors are connected,
-  and it says so in its own banner. What it proves is the data contract and the
-  math, not hardware.</p>
-  <iframe src="simulator/index.html" title="Ghost Medic wrist-unit simulator" loading="lazy"></iframe>
-</section>
+  <!-- ═══════════ THE THESIS: ONE LINE OF TEXT ═══════════ -->
+  <section id="wire" class="col">
+    <h2>The whole system is held together by one line of text</h2>
+    <p>Ten times a second, the wrist unit prints a single line describing everything it can
+    currently sense. That line is the only agreement between the parts, which means any one of
+    them can be swapped out without touching the others, and you can read it with your own eyes
+    while debugging. Here is a real one, from the moment of a fall:</p>
 
-<!-- ══════════════ PHYSICS ══════════════ -->
-<section id="physics">
-  <h2>The physics — same C math, compiled twice</h2>
-  <p>The firmware's sensor math lives in <b>pure C modules with no hardware
-  dependency</b>, so the exact same source files compile into the RP2040 firmware
-  <em>and</em> into ordinary laptop test binaries. The tests below aren't a copy of
-  the logic — they link the shipping files themselves.</p>
-
-  <h3>Barometric altitude</h3>
-  <p>Air pressure drops predictably with height. The firmware inverts that with the
-  international barometric formula: altitude = 44330 × (1 − (P/101325)<sup>0.1903</sup>),
-  where 101325 Pa is standard sea-level pressure. This is the actual implementation,
-  from <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/firmware/bmp280_compensation.c">firmware/bmp280_compensation.c</a>:</p>
-<pre>float bmp280_pressure_to_altitude(float pressure_pa) {
-    return 44330.0f *
-        (1.0f - powf(pressure_pa / BMP280_SEA_LEVEL_PA, 0.1903f));
-}</pre>
-  <p class="anno"><b>Honest limit</b> (stated in the code and docs too): the
-  sea-level reference is <em>fixed</em>, but real sea-level pressure drifts with
-  weather. So the altitude is trustworthy for <b>relative change</b> — "you've
-  climbed 300 m" — not survey-grade absolute elevation.</p>
-
-  <p>Before that formula can run, the BMP280's raw ADC readings must be corrected
-  with Bosch's per-chip calibration math (datasheet §3.11.3). The firmware
-  transcribes Bosch's floating-point reference implementation, keeping Bosch's own
-  variable names (<code>t_fine</code>, <code>var1</code>, <code>dig_T1</code>…) so a
-  reviewer can diff it line-by-line against the datasheet.</p>
-
-  <div class="panel widget">
-    <h3 style="margin-top:0">Try the formula (runs in your browser, same math)</h3>
-    <input type="range" id="pSlider" min="55000" max="103000" step="100" value="101325">
-    <div class="out">
-      <span>pressure <b id="pOut">101325</b> <small>Pa</small></span>
-      <span>→ altitude <b id="aOut">0.0</b> <small>m (vs fixed 101325 Pa reference)</small></span>
+    <div class="translate">
+      <pre class="artifact">{"t_ms":300,
+ "max30102":{"ok":true,"red":10249,"ir":10398},
+ "bmp280":{"ok":true,"temp_c":21.0,"press_pa":101300.2,"alt_m":2.1},
+ "lis3dh":{"ok":true,"x_g":1.80,"y_g":1.50,"z_g":1.20,"mag_g":2.62},
+ "fall_detected":true}</pre>
+      <div class="plain">
+        <p class="eyebrow" style="color:var(--forest)">In plain English</p>
+        <p>Three tenths of a second after switching on: the optical sensor is working and
+        returning these two light readings. The pressure sensor is working, it is 21 °C, and
+        you are 2.1 metres above where you started. The accelerometer is working and just felt
+        2.62 g, which is more than two and a half times normal gravity. Putting those last
+        numbers together: <strong>that looked like a fall.</strong></p>
+      </div>
     </div>
-    <p class="anno" style="margin:0"><b>Label:</b> this widget re-implements the one-line
-    formula above in JavaScript so you can touch it — it is <em>not</em> the C
-    binary running. The C version of the same formula is what the host tests below
-    execute.</p>
+
+    <p>Two details in there carry most of the design. Each sensor reports its own
+    <code>"ok"</code> first, so a sensor that has failed says so instead of quietly reporting
+    zero. A fabricated zero is more dangerous than a blank, because someone might act on it.</p>
+    <p>And the two light readings stay exactly what they are: raw light readings. Turning them
+    into a heart rate takes signal processing this project does not do, so this project does
+    not show a heart rate anywhere.</p>
+  </section>
+
+  <!-- ═══════════ THE LIVE THING ═══════════ -->
+  <section id="simulator" class="col-w">
+    <div class="col" style="padding:0">
+      <p class="eyebrow">Live in this page</p>
+      <h2>Drive the wrist unit yourself</h2>
+      <p>This is the real thing running in your browser, not a video. Move the sliders and
+      watch the readings change. Press <strong>Simulate fall</strong> and watch the last value
+      flip. Switch a sensor off and watch the line report the failure instead of inventing a
+      number.</p>
+      <p>It runs the same altitude and fall-detection formulas as the firmware, with the same
+      constants, and prints the identical line format the board would print. That is why the
+      rest of the system cannot tell the difference.</p>
+      <div class="gap">
+        <p class="eyebrow">Label</p>
+        <p>This is a simulator. No sensor is attached to your computer, and the panel says so
+        itself. What it demonstrates is the data format and the maths, not hardware.</p>
+      </div>
+    </div>
+    <iframe class="embed" src="simulator/index.html" title="Ghost Medic wrist-unit simulator, interactive" loading="lazy"></iframe>
+  </section>
+
+  <!-- ═══════════ WHERE TO GO ═══════════ -->
+  <section id="more" class="col">
+    <h2>The rest of it</h2>
+    <ul class="next">
+      <li><a href="how-it-works.html">
+        <span class="t">How it works</span>
+        <span class="d">The four parts, what runs where today, and what each one is standing in for.</span>
+      </a></li>
+      <li><a href="hardware.html">
+        <span class="t">Hardware</span>
+        <span class="d">The circuit board in 3D, the routing, and why each chip is on it.</span>
+      </a></li>
+      <li><a href="proof.html">
+        <span class="t">Proof</span>
+        <span class="d">Test output, the recorded conversation with the model, and the full list of what is real and what is standing in.</span>
+      </a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-foot"><div class="col-w">
+  <div class="links">
+    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">Architecture</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/DATA_FORMAT.md">Wire format</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a>
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">Board</a>
   </div>
+  <p>Ghost Medic is an engineering prototype built by one self-taught person. It is not a
+  medical device, it has not been clinically evaluated, and nothing it says should be treated
+  as medical advice. Simulated data is labelled simulated. Placeholders are labelled
+  placeholders. There is no heart rate or blood-oxygen reading anywhere in this project, by
+  design.</p>
+</div></footer>
 
-  <h3>Fall detection — a two-phase state machine</h3>
-  <p>When a body is in free fall, an accelerometer briefly reads ≈0 g (nothing is
-  pushing on it). When the fall is arrested, there's a high-g spike. The firmware
-  flags a fall only when both happen in order, within 400 ms. Full source,
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/firmware/fall_detection.c">firmware/fall_detection.c</a>:</p>
-<pre>bool fall_update(fall_state_t *state, float magnitude_g, uint32_t now_ms) {
-    float m = magnitude_g;
-
-    <span class="c">/* Detect entry into a free-fall event. */</span>
-    if (m &lt; FREEFALL_THRESHOLD_G) {           <span class="c">/* &lt; 0.35 g */</span>
-        state-&gt;in_freefall_window = true;
-        state-&gt;freefall_start_ms  = now_ms;
-        return false;   <span class="c">/* free-fall alone is not yet a fall */</span>
-    }
-
-    <span class="c">/* Within the watch window after free-fall, look for impact. */</span>
-    if (state-&gt;in_freefall_window) {
-        if (now_ms - state-&gt;freefall_start_ms &gt; FALL_IMPACT_WINDOW_MS) {
-            state-&gt;in_freefall_window = false;   <span class="c">/* window expired */</span>
-        } else if (m &gt; IMPACT_THRESHOLD_G) {     <span class="c">/* &gt; 2.5 g */</span>
-            state-&gt;in_freefall_window = false;
-            state-&gt;fall_detected = true;
-            return true;
-        }
-    }
-    return false;
-}</pre>
-  <p class="anno"><b>Label</b> (also in the source): this is an <b>illustrative
-  heuristic with untuned textbook thresholds</b> — a demonstration that the data is
-  being <em>used</em>, not a validated or medical-grade fall detector.</p>
-
-  <h3>The receipts — host test runs (regenerated 2026-07-22)</h3>
-  <p>Both outputs below are from actually running
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware/tests">firmware/tests/</a>
-  on a laptop (<code>make</code>), freshly rebuilt. The BMP280 test checks the math
-  against the <b>datasheet's own worked example</b>; the fall test drives the three
-  canonical scenarios.</p>
-  <div class="cols">
-<pre class="receipt">== BMP280 compensation math (host tests) ==
-
--- compensation against Bosch reference example --
-  PASS  temperature ~= 25.08 C     got 25.0825
-  PASS  pressure ~= 100653 Pa      got 100653.2656
-
--- altitude helper sanity checks --
-  PASS  sea-level pressure -&gt; ~0 m      got 0.0000
-  PASS  ~89875 Pa -&gt; ~1000 m            got 1000.1350
-  PASS  lower pressure =&gt; higher altitude
-  PASS  all altitudes above sea level &gt;= 0
-
-== BMP280: 6 checks, 0 failed ==</pre>
-<pre class="receipt">== Fall-detection state machine (host tests) ==
-
-  PASS  A: free-fall then impact within window
-           =&gt; FALL flagged
-  PASS  B: impact with NO prior free-fall
-           =&gt; NOT flagged
-  PASS  C: impact AFTER the 400 ms window
-           =&gt; NOT flagged
-
-== Fall: 3 checks, 0 failed ==
-
-All host tests passed.</pre>
-  </div>
-  <div class="gapbox"><b>The gap, stated plainly:</b> this math is verified against
-  datasheet reference values and scripted scenarios — <b>not against physical
-  sensors</b>. Transcription errors, timing issues, and datasheet misreadings can
-  only be caught on a bench, which hasn't happened yet.</div>
-</section>
-
-<!-- ══════════════ END-TO-END PROOF ══════════════ -->
-<section id="proof">
-  <h2>End-to-end: sensor data changes what the AI says</h2>
-  <p>The full chain — <code>sensor line → bridge → app → sensor-context block →
-  local LLM → guidance</code> — runs today, offline, on one laptop. A visitor's
-  browser can't run the Node bridge or a local LLM, so this section is honest about
-  its three layers of evidence:</p>
-  <p><b>1 — Live (above):</b> the simulator you just used emits the exact wire format.<br>
-  <b>2 — Recorded (below):</b> a real transcript from a local run.<br>
-  <b>3 — Reproducible:</b> exact commands to run the live pipeline yourself.</p>
-
-  <h3>Recorded transcript — real local run, 2026-07-22</h3>
-  <p class="anno"><b>Label, unmistakably:</b> what follows is <b>recorded output from a
-  real run</b> of the local model (<code>llama3.2:3b</code> via Ollama) using the
-  app's exact prompt construction — it is <b>not a live model answering you now</b>.
-  The run was seeded for reproducibility. The sensor block shown is precisely what
-  the app injects; the same block is viewable in the app UI per request via its
-  "SENSOR CONTEXT ATTACHED" chip.</p>
-
-  <p>The app attaches a delimited sensor snapshot to every request. When the wrist
-  unit's accelerometer flags a fall, the app <b>auto-submits</b> a query (rising-edge
-  triggered, 30 s cooldown — measured live: one model call per fall event, not one
-  per replayed line). Sensor context sent with the fall query:</p>
-<pre class="transcript">[SENSOR CONTEXT — wrist unit telemetry — BEGIN]
-Snapshot taken at device uptime 300 ms. Readings are supplementary;
-if they conflict with what the user reports, the user's report wins.
-
-DERIVED READINGS:
-- Altitude: 2.1 m (pressure-derived vs a fixed 101325 Pa sea-level reference;
-  reliable for RELATIVE change only — NOT GPS or true elevation)
-- Temperature: 21.0 °C (AMBIENT air at the device — NOT body temperature)
-- Fall detected: YES (accelerometer free-fall→impact heuristic, not medical-grade)
-
-RAW SIGNALS (non-diagnostic):
-- Optical counts: red 10249, ir 10398. These are raw photodiode counts from the
-  optical sensor. No pulse-extraction algorithm runs on this device: heart rate
-  and blood-oxygen saturation (SpO2) are NOT available and must not be inferred
-  from these numbers.
-- Acceleration magnitude: 2.62 g (raw)
-[SENSOR CONTEXT — END]</pre>
-  <p>Model response to the auto-triggered fall query (recorded, verbatim):</p>
-<pre class="transcript">**IMMEDIATE ACTION REQUIRED**
-
-1. **Stop any bleeding**: Apply gentle pressure to the wound with a clean cloth
-   or bandage for at least 5 minutes if you see any bleeding.
-2. **Check for head, neck, and spine injury**: Look for signs of concussion,
-   broken neck, or spinal cord injury, such as numbness, tingling, weakness,
-   or difficulty moving your arms or legs.
-3. **Assess for hidden trauma**: Check for injuries that may not be immediately
-   visible, such as internal bleeding, broken ribs, or head trauma.
-4. **Look for breathing difficulties**: Check if you're having trouble breathing.
-5. **Check for movement and sensation**: Move each limb carefully to check for
-   numbness, tingling, or weakness.
-
-**EVACUATION LINE**: CALL FOR HELP NOW — GET MEDICAL ASSISTANCE AS SOON AS POSSIBLE.</pre>
-  <p>For contrast, the same user report ("I feel a bit dizzy") with a <b>no-fall</b>
-  sensor block produced generic dizziness care (sit down, loosen clothing, elevate
-  legs) with no spine/head assessment — the sensor state measurably changed the
-  guidance. The full four-case transcript, including an honesty probe where the
-  model is asked for heart rate (it did not invent one), is in the repo's session
-  reports.</p>
-
-  <h3>Run it yourself (the strongest claim in software)</h3>
-<pre>git clone https://github.com/anayvaidya11/Ghost-Medic && cd Ghost-Medic
-npm install                       # Expo app deps
-cd bridge && npm install && cd .. # bridge dep: 'ws' only
-cp services/llmConfig.example.ts services/llmConfig.ts     # point at your Ollama
-cp services/bridgeConfig.example.ts services/bridgeConfig.ts
-ollama pull llama3.2:3b && ollama serve                    # local model
-
-# Terminal 1 — replay firmware-format telemetry (contains a fall event):
-cd bridge && node bridge.js --source=file --file=sample.ndjson --loop
-
-# Terminal 2 — the app, on web:
-npm run web
-# Watch: the sensor monitor goes ● LIVE, the fall auto-triggers ONE query,
-# and the response carries a "SENSOR CONTEXT ATTACHED" chip showing the
-# exact block the model was given.</pre>
-  <p class="anno"><b>Honesty note on "streaming":</b> the app's response appears
-  word-by-word, but that is <b>display pacing of an already-complete response</b>
-  (<code>stream:false</code>), not model token streaming. The code and
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a>
-  say the same.</p>
-</section>
-
-<!-- ══════════════ FIRMWARE ══════════════ -->
-<section id="firmware">
-  <h2>The firmware</h2>
-  <p>Bare-metal C for the RP2040 (Raspberry Pi Pico SDK): initializes three I²C
-  sensors on one bus, loops at 10 Hz, prints one JSON object per line over USB
-  serial. Structured deliberately: hardware drivers (<code>bmp280.c</code>,
-  <code>lis3dh.c</code>, <code>max30102.c</code>) are separated from <b>pure math
-  modules</b> (<code>bmp280_compensation.c</code>, <code>fall_detection.c</code>)
-  precisely so the math is host-testable — the tests you saw above.</p>
-  <table>
-    <tr><th>Claim</th><th>Status</th></tr>
-    <tr><td>Compiles against the real Pico SDK, zero warnings under <code>-Wall -Wextra</code> at <code>-O3</code></td><td><b class="ok">✅ Verified</b> — build recorded in <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/firmware/README.md">firmware/README.md</a></td></tr>
-    <tr><td>Produces a flashable <code>ghost_medic_firmware.uf2</code></td><td><b class="ok">✅ Verified</b> — file in repo</td></tr>
-    <tr><td>Sensor math passes host unit tests</td><td><b class="ok">✅ Verified</b> — 6/6 + 3/3, rerun 2026-07-22</td></tr>
-    <tr><td>Flashed and run on a physical Pico</td><td><b class="no">❌ Not done</b></td></tr>
-    <tr><td>Readings checked against real sensors</td><td><b class="no">❌ Not done</b></td></tr>
-  </table>
-  <p class="anno">The MAX30102 driver reads <b>raw RED/IR FIFO counts only</b> —
-  there is no heart-rate or SpO₂ algorithm anywhere in this project, by design.</p>
-</section>
-
-<!-- ══════════════ HARDWARE ══════════════ -->
-<section id="hardware">
-  <h2>The hardware — designed, not built</h2>
-  <div class="gapbox"><b>Read this first: the board below is designed and routed in
-  KiCad and has never been fabricated, assembled, or powered.</b> No physical copy
-  exists. The image is KiCad's own 3D viewer rendering the layout — a design tool's
-  output, not a photograph. Nothing on this page claims hardware validation.</div>
-  <img class="board" src="assets/ghostmedic-sensor-hub-3d-top.png"
-       alt="KiCad 3D render (top view) of the Ghost Medic sensor-hub PCB — a design render, not a photo of a real board">
-  <p style="margin-top:10px">A single-board wrist unit, editable source in
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">hardware/</a>
-  (KiCad 10; 35 footprints, ~477 routed track segments) ·
-  <a href="assets/ghostmedic-sensor-hub-schematic.pdf">schematic PDF</a>.</p>
-  <h3>Design decisions</h3>
-  <table>
-    <tr><th>Choice</th><th>Why</th></tr>
-    <tr><td>RP2040 + W25Q128 QSPI flash</td><td>The firmware already targets the Pico SDK; the discrete RP2040 needs external flash, and the 12 MHz crystal matches the SDK's default clocking.</td></tr>
-    <tr><td>MAX30102 + BMP280 + LIS3DH on one I²C bus</td><td>The three sensors the firmware drives, sharing one bus with a single 4.7 kΩ pull-up pair — same topology the firmware's pin assignment (SDA=GPIO4, SCL=GPIO5) was written for.</td></tr>
-    <tr><td>USB-C + AMS1117-3.3</td><td>Power and flashing over one connector; simple linear regulation from VBUS to the 3.3 V rail. BOOT/RUN push buttons for flashing without a debugger.</td></tr>
-    <tr><td>3-pin SWD header</td><td>Debug/recovery path if USB flashing isn't enough.</td></tr>
-  </table>
-  <p class="anno">A hardware bring-up (flash a Pico dev board on a breadboard,
-  film it streaming real JSON) is the roadmap's next credibility step — it is
-  <b>not done yet</b>, and this page will say so until it is.</p>
-</section>
-
-<!-- ══════════════ AI ══════════════ -->
-<section id="ai">
-  <h2>The AI — prompt engineering you can read</h2>
-  <p>The model is off-the-shelf (<code>llama3.2:3b</code> under Ollama, fully local).
-  The engineering is in the <b>system prompt</b>, the <b>enforced output contract</b>,
-  and the <b>sensor-context injection</b> — all in
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/services/llmService.ts">services/llmService.ts</a>.</p>
-  <h3>The system prompt (verbatim), annotated</h3>
-<pre>You are GHOST MEDIC — an offline AI survival assistant for solo backcountry
-users... Follow wilderness medicine principles (PAS, ABCDE, WMS guidelines).
-Always assess scene safety first. Be direct. Use simple words. No medical
-jargon. Each step must be one sentence. Maximum 6 steps. Always end with an
-EVACUATION line...</pre>
-  <p class="anno"><b>Why these choices:</b> scene safety first is real wilderness
-  doctrine (PAS); ≤6 one-sentence steps is a usability decision for a panicking
-  reader; the mandatory EVACUATION line exists because "do I call for rescue?" is
-  the single most consequential output, and the app <em>parses</em> that line into
-  its own highlighted UI element — prompt + parser together form a structured
-  interface to the model, not a chat box.</p>
-<pre>SENSOR CONTEXT: messages may include a block delimited by [SENSOR CONTEXT...]
-- Altitude is pressure-derived and RELATIVE... do not trust the absolute number.
-- Temperature is AMBIENT air at the device, never body temperature...
-- "Fall detected: YES" is a mechanism-of-injury signal... not a diagnosis.
-- Raw optical counts are NOT vital signs. NEVER infer, estimate, or state a
-  heart rate, pulse, or oxygen saturation from them...
-- Sensor context is supplementary. If it conflicts with what the user reports,
-  the user's report wins...</pre>
-  <p class="anno"><b>The load-bearing honesty rule, taught to the model itself:</b>
-  the optical sensor yields raw photodiode counts, and no pulse-extraction
-  algorithm runs — so the prompt forbids the model from ever inventing a heart
-  rate or SpO₂. In recorded testing the model did not fabricate one. (Observed
-  limit of the small model: it avoids inventing vitals but doesn't always
-  <em>explain</em> that it can't measure them.)</p>
-  <p class="anno"><b>Stub labels:</b> voice capture is real but speech-to-text is a
-  <b>stub</b>; the wound-photo path captures a real image but vision analysis is a
-  <b>stub</b>. The fully-real end-to-end path is: typed text + sensor context →
-  local LLM → parsed, spoken response.</p>
-</section>
-
-<!-- ══════════════ REAL VS SIMULATED ══════════════ -->
-<section id="real">
-  <h2>What's real vs. simulated</h2>
-  <p>The whole table, no burying. Mirrors
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a>.</p>
-  <table>
-    <tr><th>Claim</th><th>Real?</th></tr>
-    <tr><td>Firmware compiles against the real Pico SDK, zero warnings, valid <code>.uf2</code></td><td><b class="ok">✅ Verified</b></td></tr>
-    <tr><td>Firmware sensor math (BMP280 compensation, fall detection) unit-tested on host</td><td><b class="ok">✅ Verified</b> (6/6, 3/3 — rerun 2026-07-22)</td></tr>
-    <tr><td>PCB designed &amp; routed (KiCad source in repo)</td><td><b class="ok">✅ Real design</b> — <b class="no">not fabricated/assembled</b></td></tr>
-    <tr><td>Firmware run on physical hardware / real sensors</td><td><b class="no">❌ Not yet</b></td></tr>
-    <tr><td>App → local LLM → spoken numbered advice</td><td><b class="ok">✅ Works</b> (Ollama, local)</td></tr>
-    <tr><td>Live sensor data actually driving the app</td><td><b class="ok">✅ Verified 2026-07-22</b> (bridge replay → browser app)</td></tr>
-    <tr><td>Sensor readings influencing the LLM's advice</td><td><b class="ok">✅ Verified 2026-07-22</b> (fall auto-trigger, one call per 30 s cooldown, live local Ollama)</td></tr>
-    <tr><td>BLE wrist→pack radio link</td><td><b class="no">❌ Simulated</b> by the wired WebSocket bridge, on purpose</td></tr>
-    <tr><td>Speech-to-text, wound vision</td><td><b class="no">❌ Stubs</b></td></tr>
-    <tr><td>Dedicated "pack" compute device</td><td><b class="no">❌ Laptop stands in</b></td></tr>
-    <tr><td>Model token streaming in the UI</td><td><b class="warn">⚠ Simulated</b> — display pacing of a complete response</td></tr>
-    <tr><td>Medical validity of any guidance</td><td><b class="no">❌ Not claimed, not tested</b> — engineering prototype only</td></tr>
-  </table>
-</section>
-
-<footer>
-  Ghost Medic — an honest engineering proof by a solo, self-taught builder.
-  <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository</a> ·
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">Architecture</a> ·
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/DATA_FORMAT.md">Wire format</a> ·
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a> ·
-  <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">Hardware</a>
-  <br>Simulated data is labeled simulated. Raw signals are labeled raw. Stubs are
-  labeled stubs. No heart rate, SpO₂, or medical-validity claims anywhere.
-</footer>
-
-</div><!-- /wrap -->
-
-<script>
-"use strict";
-/* Interactive altitude widget — deliberately the same one-line formula as
- * firmware/bmp280_compensation.c :: bmp280_pressure_to_altitude(), re-implemented
- * in JS so visitors can touch it. Labeled as such in the page. */
-(function(){
-  const SEA_LEVEL_PA = 101325.0;
-  const p = document.getElementById('pSlider');
-  const pOut = document.getElementById('pOut');
-  const aOut = document.getElementById('aOut');
-  function update(){
-    const pa = parseFloat(p.value);
-    const alt = 44330.0 * (1.0 - Math.pow(pa / SEA_LEVEL_PA, 0.1903));
-    pOut.textContent = pa.toFixed(0);
-    aOut.textContent = alt.toFixed(1);
-  }
-  p.addEventListener('input', update);
-  update();
-})();
-</script>
 </body>
 </html>

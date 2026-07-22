@@ -1,0 +1,309 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   GHOST MEDIC, shared stylesheet for the four-page proof site.
+
+   The design brief, in one line: a serious engineering document that happens to
+   be beautiful. So this reads as a printed field report, not a landing page,
+   a real serif at a real reading size, wide margins, one hairline where a card
+   would normally go, and almost no colour.
+
+   The two devices that carry the whole site:
+
+   1. THE TRANSLATION PAIR (.translate). Every technical artifact, a line of
+      telemetry, a C function, a command, is followed immediately by what it
+      means in English. The site's job is translation, so translation is the
+      structure, not a garnish.
+
+   2. THE LEDGER MARK (.mark). Three states, and only three:
+        mark-yes  (forest, filled)  works today, with evidence
+        mark-part (clay, half)      something is standing in for the real thing
+        mark-no   (grey, hollow)    simulated, or a placeholder that does nothing
+      They are not decoration. A mark is a claim about evidence, and every mark
+      on this site has a file behind it.
+
+   Colour discipline: forest green is the working ink. Clay is reserved
+   *exclusively* for the states where something is standing in. It never appears
+   as decoration, so when a reader sees clay it always means the same thing.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* earth, sand, stone, clay, deep forest */
+  --stone:   #E8E3D8;
+  --paper:   #F4F1E9;
+  --ink:     #1F241D;
+  --ink-2:   #5D655B;
+  --ink-3:   #8A9086;
+  --forest:  #2C4630;
+  --forest-2:#3F6045;
+  --clay:    #9C4F28;
+  --line:    #D6CFC0;
+  --line-2:  #BFB7A4;
+
+  --serif: "Iowan Old Style", Charter, "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+  --mono:  ui-monospace, "SF Mono", Menlo, "JetBrains Mono", Consolas, monospace;
+
+  --measure: 34rem;   /* prose column, about 68 characters */
+  --wide:    58rem;   /* diagrams, tables, the simulator */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--stone);
+  color: var(--ink);
+  font: 400 19px/1.62 var(--serif);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── layout ──────────────────────────────────────────────────────────────── */
+
+.col   { width: min(100% - 3rem, var(--measure)); margin-inline: auto; }
+.col-w { width: min(100% - 3rem, var(--wide));    margin-inline: auto; }
+
+main { padding-bottom: 7rem; }
+
+section { margin-top: 5.5rem; scroll-margin-top: 4.5rem; }
+section:first-of-type { margin-top: 3.5rem; }
+
+/* ── type ────────────────────────────────────────────────────────────────── */
+
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.012em; text-wrap: balance; }
+
+h1 { font-size: clamp(2rem, 1.3rem + 2.6vw, 3.15rem); line-height: 1.08; margin: 0 0 1.4rem; }
+h2 { font-size: clamp(1.45rem, 1.2rem + 1vw, 1.9rem);  line-height: 1.18; margin: 0 0 1rem; }
+h3 { font-size: 1.16rem; line-height: 1.3; margin: 2.6rem 0 .6rem; }
+
+p { margin: 0 0 1.15rem; }
+p.lead { font-size: 1.2rem; line-height: 1.55; color: var(--ink); }
+
+a { color: var(--forest); text-underline-offset: 3px; text-decoration-thickness: 1px;
+    text-decoration-color: var(--line-2); }
+a:hover { text-decoration-color: var(--forest); }
+
+strong, b { font-weight: 700; }
+em { font-style: italic; }
+
+:focus-visible { outline: 2px solid var(--forest); outline-offset: 3px; border-radius: 2px; }
+
+.skip {
+  position: absolute; left: -9999px; top: 0; background: var(--forest); color: var(--paper);
+  padding: .6rem 1rem; z-index: 100; font: 600 13px/1 var(--mono);
+}
+.skip:focus { left: 0; }
+
+/* the small mono voice: eyebrows, labels, captions, data */
+.eyebrow {
+  font: 600 11.5px/1.4 var(--mono);
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 .7rem;
+}
+.caption {
+  font: 400 13.5px/1.5 var(--mono); color: var(--ink-2); margin: .6rem 0 0;
+}
+
+/* ── nav ─────────────────────────────────────────────────────────────────── */
+
+.site-nav {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--stone) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.site-nav > div {
+  width: min(100% - 3rem, var(--wide)); margin-inline: auto;
+  display: flex; align-items: baseline; gap: 1.6rem; flex-wrap: wrap;
+  padding: .85rem 0;
+}
+.site-nav a { text-decoration: none; }
+.wordmark {
+  font: 600 12px/1 var(--mono); letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink); margin-right: auto;
+}
+.site-nav nav { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+.site-nav nav a {
+  font: 400 12.5px/1 var(--mono); letter-spacing: .07em; color: var(--ink-2);
+  padding-bottom: 2px; border-bottom: 1px solid transparent;
+}
+.site-nav nav a:hover { color: var(--ink); border-bottom-color: var(--line-2); }
+.site-nav nav a[aria-current="page"] { color: var(--forest); border-bottom-color: var(--forest); }
+
+/* ── the ledger mark ─────────────────────────────────────────────────────── */
+
+.mark {
+  display: inline-flex; align-items: baseline; gap: .45em;
+  font: 600 11px/1.4 var(--mono); letter-spacing: .13em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.mark::before { font-size: 1.1em; line-height: 1; }
+.mark-yes  { color: var(--forest); }
+.mark-yes::before  { content: "●"; }
+.mark-part { color: var(--clay); }
+.mark-part::before { content: "◐"; }
+.mark-no   { color: var(--ink-3); }
+.mark-no::before   { content: "○"; }
+
+/* The status ledger, the first thing a visitor reads, by design. */
+.ledger { list-style: none; margin: 0; padding: 0; }
+.ledger > li {
+  display: grid; grid-template-columns: 8.5rem 1fr; gap: 0 2.2rem;
+  padding: 1.15rem 0; border-top: 1px solid var(--line);
+}
+.ledger > li:last-child { border-bottom: 1px solid var(--line); }
+.ledger .mark {
+  padding-top: .42em; white-space: normal; align-items: flex-start;
+  line-height: 1.5;
+}
+.ledger p { margin: 0; font-size: 1.06rem; line-height: 1.5; }
+.ledger p + p { margin-top: .45rem; color: var(--ink-2); font-size: .95rem; }
+@media (max-width: 34rem) {
+  .ledger > li { grid-template-columns: 1fr; gap: .5rem; }
+}
+
+/* ── the translation pair ────────────────────────────────────────────────── */
+
+.translate { margin: 1.9rem 0; }
+.translate .artifact {
+  margin: 0; padding: .95rem 1.1rem;
+  background: var(--paper); border: 1px solid var(--line);
+  font: 400 13px/1.65 var(--mono); color: var(--ink);
+  overflow-x: auto; white-space: pre;
+}
+.translate .plain {
+  margin: 0; padding: .85rem 0 0 1.1rem;
+  border-left: 2px solid var(--forest); margin-left: 1.1rem;
+  font-size: 1.02rem; line-height: 1.55;
+}
+.translate .plain > :last-child { margin-bottom: 0; }
+
+/* ── plain code / receipts ───────────────────────────────────────────────── */
+
+pre.block, .receipt {
+  margin: 1.4rem 0; padding: 1rem 1.15rem;
+  background: var(--paper); border: 1px solid var(--line);
+  font: 400 13px/1.65 var(--mono); color: var(--ink);
+  overflow-x: auto;
+}
+.receipt { border-left: 2px solid var(--forest); }
+pre.block .c, .receipt .c { color: var(--ink-3); }
+.receipt .ok { color: var(--forest); font-weight: 600; }
+
+code {
+  font: 400 .84em/1.4 var(--mono);
+  background: var(--paper); border: 1px solid var(--line);
+  padding: .08em .34em; border-radius: 2px;
+}
+a code { color: inherit; }
+
+/* ── the gap box: where something isn't real ─────────────────────────────── */
+
+.gap {
+  margin: 1.8rem 0; padding: 1.1rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--clay) 34%, var(--line));
+  border-left: 3px solid var(--clay);
+  background: color-mix(in srgb, var(--clay) 4%, var(--paper));
+}
+.gap .eyebrow { color: var(--clay); }
+.gap p { margin: 0; font-size: 1.02rem; line-height: 1.55; }
+.gap p + p { margin-top: .7rem; }
+
+/* ── tables ──────────────────────────────────────────────────────────────── */
+
+.table-scroll { overflow-x: auto; margin: 1.6rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { text-align: left; vertical-align: top; padding: .72rem .9rem .72rem 0; border-bottom: 1px solid var(--line); }
+th {
+  font: 600 11px/1.4 var(--mono); letter-spacing: .13em; text-transform: uppercase;
+  color: var(--ink-3); border-bottom-color: var(--line-2); padding-bottom: .55rem;
+}
+td:last-child, th:last-child { padding-right: 0; }
+tbody tr:last-child td { border-bottom: 1px solid var(--line-2); }
+
+/* ── figures, embeds ─────────────────────────────────────────────────────── */
+
+figure { margin: 2rem 0; }
+figure img, figure svg { display: block; max-width: 100%; height: auto; }
+figcaption {
+  font: 400 13px/1.55 var(--mono); color: var(--ink-2);
+  margin-top: .8rem; max-width: 44rem;
+}
+
+.frame { background: var(--paper); border: 1px solid var(--line); padding: .5rem; }
+
+.embed { width: 100%; height: 780px; border: 1px solid var(--line); background: var(--paper); display: block; }
+
+/* ── board viewer ────────────────────────────────────────────────────────── */
+
+.board-viewer { position: relative; background: var(--paper); border: 1px solid var(--line); padding: .5rem; }
+.board-canvas { display: block; width: 100%; touch-action: pan-y; cursor: grab; }
+.board-canvas:active { cursor: grabbing; }
+.board-viewer.is-3d img { display: none; }
+/* Same aspect the canvas will take, so swapping the still render for the live
+   model doesn't shove the rest of the page down mid-read. */
+.board-viewer img { display: block; width: 100%; aspect-ratio: 1 / 0.62; object-fit: contain; }
+
+.board-bar { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-top: .7rem; }
+.board-status { font: 400 13px/1.5 var(--mono); color: var(--ink-2); margin: .7rem 0 0; min-height: 1.2em; }
+button.ghost {
+  font: 600 11px/1 var(--mono); letter-spacing: .13em; text-transform: uppercase;
+  color: var(--ink-2); background: none; border: 1px solid var(--line-2);
+  padding: .5rem .75rem; cursor: pointer;
+}
+button.ghost:hover { color: var(--forest); border-color: var(--forest); }
+
+/* front-copper plate, the export is black artwork on transparent, so it sits
+   on the paper as a technical plate with no recolouring needed */
+.copper { width: 100%; height: auto; padding: 1.5rem; }
+
+/* ── the pipeline diagram ────────────────────────────────────────────────── */
+
+.pipeline { width: 100%; height: auto; }
+.pipeline .box  { fill: var(--paper); stroke: var(--line-2); stroke-width: 1; }
+.pipeline .box-concept { fill: none; stroke: var(--clay); stroke-width: 1; stroke-dasharray: 4 3; }
+.pipeline .lbl  { font: 600 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; fill: var(--ink); }
+.pipeline .sub  { font: 400 8px var(--mono); fill: var(--ink-2); }
+.pipeline .note { font: 400 8px var(--mono); fill: var(--clay); }
+.pipeline .wire { stroke: var(--line-2); stroke-width: 1.25; fill: none; }
+.pipeline .packet { fill: var(--forest); }
+.pipeline .stage { font: 600 9px var(--mono); fill: var(--ink-3); }
+
+/* The packet travels the wire by plain transform rather than an offset-path, so
+   that a browser without motion support leaves it parked at the wrist unit
+   instead of dumping it in the corner. */
+.pipeline .packet { transform-box: view-box; transform-origin: 0 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .pipeline .packet { animation: flow 5.2s linear infinite; }
+}
+@keyframes flow {
+  from { transform: translateX(0); }
+  to   { transform: translateX(675px); }
+}
+
+/* ── page links ──────────────────────────────────────────────────────────── */
+
+.next { list-style: none; margin: 0; padding: 0; }
+.next li { border-top: 1px solid var(--line); }
+.next li:last-child { border-bottom: 1px solid var(--line); }
+.next a { display: block; padding: 1.15rem 0; text-decoration: none; }
+.next a:hover .t { text-decoration: underline; text-decoration-color: var(--forest); }
+.next .t { font-size: 1.15rem; font-weight: 600; color: var(--forest); }
+.next .d { display: block; color: var(--ink-2); font-size: .98rem; margin-top: .2rem; }
+
+/* ── footer ──────────────────────────────────────────────────────────────── */
+
+.site-foot {
+  border-top: 1px solid var(--line-2); margin-top: 6rem; padding: 2rem 0 4rem;
+  font: 400 13.5px/1.7 var(--mono); color: var(--ink-2);
+}
+.site-foot a { color: var(--ink-2); }
+.site-foot a:hover { color: var(--forest); }
+.site-foot .links { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.site-foot p { margin: 0; max-width: 46rem; }
+
+hr.rule { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
