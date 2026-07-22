@@ -82,8 +82,8 @@ wrist unit later by changing one flag.
 | PCB designed & routed (RP2040 + 3 sensors, KiCad) — source in [`hardware/`](hardware/) | ✅ Real design (not fabricated/assembled) |
 | Firmware run on physical hardware / real sensors | ❌ Not yet |
 | App → local LLM → spoken numbered advice | ✅ Works (Ollama) |
-| Live sensor data actually driving the app | 🔜 Phase 1 (the bridge) |
-| Vitals influencing the LLM's advice | 🔜 Phase 2 |
+| Live sensor data actually driving the app | ✅ Verified 2026-07-22 (bridge replay → browser app; connection observed server-side) |
+| Sensor readings influencing the LLM's advice | ✅ Verified 2026-07-22 (sensor-context injection; fall auto-trigger fired once per 30 s cooldown against live local Ollama) |
 | BLE wrist→pack link | ❌ Simulated by the wired bridge (on purpose) |
 | Speech-to-text, wound vision | ❌ Stubs (`services/transcriptionService.ts`, `services/visionService.ts`) |
 | Dedicated "pack" compute device | ❌ Laptop stands in |
