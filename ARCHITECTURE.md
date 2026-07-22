@@ -79,7 +79,7 @@ wrist unit later by changing one flag.
 |---|---|
 | Firmware compiles against the real Pico SDK, zero warnings, valid `.uf2` | ✅ Verified |
 | Firmware sensor math (BMP280 compensation, fall detection) is unit-tested | ✅ Verified (host tests pass) |
-| PCB designed (RP2040 + 3 sensors, KiCad) | ✅ Real design |
+| PCB designed & routed (RP2040 + 3 sensors, KiCad) — source in [`hardware/`](hardware/) | ✅ Real design (not fabricated/assembled) |
 | Firmware run on physical hardware / real sensors | ❌ Not yet |
 | App → local LLM → spoken numbered advice | ✅ Works (Ollama) |
 | Live sensor data actually driving the app | 🔜 Phase 1 (the bridge) |

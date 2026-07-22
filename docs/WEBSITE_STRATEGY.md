@@ -54,34 +54,26 @@ actually in the repo today, and the one place the repo currently over-claims.
   `services/visionService.ts`).
 - **No dedicated "pack brain" compute device** — a laptop stands in.
 
-### ⚠️ The one real problem: the PCB claim isn't backed by files
+### ✅ RESOLVED (2026-07-21): the PCB design is now committed
 
 **A PCB is a "printed circuit board" — the physical green board that parts get
 soldered onto. "KiCad" is the free software used to design one (the schematic =
 wiring diagram, and the board layout = physical placement of parts and copper
 traces).**
 
-`ARCHITECTURE.md` line 82 currently says:
+*This used to be the biggest honesty risk on the site:* `ARCHITECTURE.md` claimed
+a "PCB designed … ✅ Real design" but no KiCad files were in the repo. **That is
+now fixed** — the real KiCad 10.x source (schematic + routed board + project file)
+lives in [`../hardware/`](../hardware/), alongside an exported schematic PDF and a
+3D render generated from that source. It resolves via option 1 below.
 
-> `PCB designed (RP2040 + 3 sensors, KiCad) — ✅ Real design`
+So on the site, the wrist unit can now use its **strongest** visual honestly (see
+Part 2a): the KiCad 3D render + a schematic excerpt, backed by openable files.
 
-and the READMEs mention a "custom Ghost Medic PCB." **But there are no KiCad
-files, schematics, or board layouts anywhere in the repo.** I searched for every
-CAD/PCB extension — nothing.
-
-This is the biggest honesty risk on the whole site, because it's exactly the kind
-of claim a reviewer will click to verify and find missing. **Resolve it one of
-two ways before the website goes near it:**
-
-1. **If a KiCad design actually exists** somewhere off-repo → commit it to
-   `hardware/` (schematic + board + a 3D render). Then it's real and becomes one
-   of your strongest visuals (see Part 2a).
-2. **If it doesn't exist yet** → downgrade the claim everywhere to the truth,
-   e.g. *"PCB: planned. Firmware pin assignments (SDA=GPIO4, SCL=GPIO5) are
-   chosen for it, but the board is not yet designed."* The firmware already
-   documents those pin choices, so this is still a credible, honest statement.
-
-Everything in Part 2a below is written to handle **both** outcomes.
+**The claim that remains, and must stay labeled:** the board is **designed and
+routed, NOT fabricated, assembled, or bench-tested** — no physical copy exists.
+`hardware/README.md` and the `ARCHITECTURE.md` table both state this. Keep that
+line wherever the board appears; "designed" must never quietly become "built."
 
 ---
 
