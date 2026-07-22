@@ -20,7 +20,9 @@ the "custom PCB" claim is backed by files you can open, not just a screenshot.
 | `ghostmedic-sensor-hub.kicad_pcb` | Routed board layout (35 footprints, ~477 track segments) |
 | `ghostmedic-sensor-hub.kicad_pro` | KiCad project file |
 | `exports/ghostmedic-sensor-hub-schematic.pdf` | Schematic, exported for viewing without KiCad |
-| `exports/ghostmedic-sensor-hub-3d-top.png` | 3D board render (KiCad 3D viewer, top) |
+| `exports/ghostmedic-sensor-hub-3d-top.png` | 3D board render (KiCad 3D viewer, top) — the still fallback on the website |
+| `exports/ghostmedic-sensor-hub.glb` | 3D board model for the website's interactive viewer |
+| `exports/ghostmedic-sensor-hub-front-copper.svg` | Front copper layer as 2D artwork |
 
 The `exports/` images are **generated from the source in this folder** — see
 "Regenerating the images" below. They are the design's own tool output, not photos:
@@ -50,19 +52,55 @@ same shared-bus topology described in `../README.md` and `../DATA_FORMAT.md`. Th
 MAX30102 label here matches the rest of the repo: it is a **raw optical front-end**,
 and the firmware exposes raw red/IR counts, **not** a computed heart rate or SpO₂.
 
-## Regenerating the images
+## Regenerating the exports
 
-Both files in `exports/` are reproducible from the source (KiCad 10.x):
+Everything in `exports/` is reproducible from the source in this folder with
+KiCad 10.x. `kicad-cli` ships inside KiCad — on macOS it lives at
+`/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli`, which is not on `PATH`
+by default:
 
 ```sh
-kicad-cli sch export pdf ghostmedic-sensor-hub.kicad_sch \
+KC=/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli
+
+# 1 — schematic PDF
+$KC sch export pdf ghostmedic-sensor-hub.kicad_sch \
   -o exports/ghostmedic-sensor-hub-schematic.pdf
 
-kicad-cli pcb render ghostmedic-sensor-hub.kicad_pcb \
+# 2 — still 3D render (the website's fallback when WebGL is unavailable)
+$KC pcb render ghostmedic-sensor-hub.kicad_pcb \
   -o exports/ghostmedic-sensor-hub-3d-top.png --side top --quality high
+
+# 3 — 3D model for the website's interactive viewer
+$KC pcb export glb ghostmedic-sensor-hub.kicad_pcb \
+  -o exports/ghostmedic-sensor-hub.glb --force \
+  --include-silkscreen --include-soldermask
+
+# 4 — front copper as 2D artwork (black on transparent)
+$KC pcb export svg ghostmedic-sensor-hub.kicad_pcb \
+  -o exports/ghostmedic-sensor-hub-front-copper.svg \
+  --layers F.Cu,Edge.Cuts --mode-single --exclude-drawing-sheet \
+  --fit-page-to-board --black-and-white
 ```
 
+Then copy the four outputs into `../site/assets/`.
+
 Or open `ghostmedic-sensor-hub.kicad_pro` in KiCad and use **View → 3D Viewer**.
+
+### Notes on those choices, so they aren't silently re-litigated
+
+- **GLB, not VRML or STEP.** `kicad-cli` can emit all three; GLB is binary glTF,
+  which three.js loads natively via `GLTFLoader` with materials intact and no
+  conversion step.
+- **Silkscreen and soldermask only — no `--include-tracks/-pads/-zones`.** Adding
+  those triples the file (1.8 MB → 6.1 MB) and quadruples the draw calls for
+  geometry you cannot see: the soldermask renders opaque, so the copper is hidden
+  in the 3D view exactly as it is on a real board. Export 4 above is how the
+  routing is actually shown.
+- **One model is missing.** The MAX30102's package (`Maxim_OLGA-14_3.3x5.6mm_P0.8mm`)
+  has no STEP model in the standard library, so U4 has no body in the render and
+  `kicad-cli` prints `File not found:` for it. The part is present in the
+  schematic and routed on the board; only its 3D shape is absent. The website
+  says so rather than substituting a stand-in shape.
 
 ## Where this sits in the project
 
