@@ -79,10 +79,30 @@ for the wire contract.
   on the host — so the test data is the shipping code, not a reimplementation.
 - **DONE WHEN:** replayed/generated sensor lines make the numbers in the app move, live.
 
-## Phase 2 — Close the loop  ⬜
+## Phase 2 — Close the loop  🟡 NEARLY DONE (2026-07-22)
 *Sensor data changes the AI's answer.*
-- ⬜ Feed live vitals + `fall_detected` into the LLM prompt alongside image + text.
-- **DONE WHEN:** a fall event or an abnormal vital *visibly changes* the advice.
+- 🟢 Sensor context injection: `services/sensorContext.ts` (pure, 16/16 headless
+  tests) builds a delimited block — derived values qualified (altitude relative,
+  temp ambient-not-body), raw optical labeled non-diagnostic, `ok:false` →
+  "unavailable" never 0, disconnected → honest "no sensor data". Appended to
+  every LLM request in `app/index.tsx`; the exact sent block is viewable in the
+  UI ("SENSOR CONTEXT ATTACHED" chip). System prompt extended with reasoning
+  rules incl. NEVER inferring HR/SpO2 from raw counts.
+- 🟢 Fall auto-trigger: `services/fallTrigger.ts` (rising edge + 30 s cooldown +
+  suppression; 6/6 headless tests — 1 fire per replay loop, not 4). Auto-submits
+  post-fall guidance, labeled "SENSOR-TRIGGERED (not typed by user)"; toggleable.
+- 🟢 Simulator upgraded as demo instrument: temp-offset + per-sensor `ok:false`
+  failure toggles (headless-verified against the app parser); bpm display
+  removed (Decision 2).
+- 🟢 **DONE-WHEN evidence:** real Ollama (llama3.2:3b, local) called with the
+  app's exact payload construction — the fall-context response adds head/neck/
+  spine + hidden-trauma assessment absent from the no-fall response; the model
+  did not invent HR/SpO2 when probed. (Seeded proof harness; transcript in the
+  2026-07-22 session report.)
+- ⬜ Remaining: visually confirm the full loop in a running browser/app (same
+  outstanding gap as Phase 1's "numbers move live" — everything up to the React
+  render is verified headless). Known limit: the 3B model avoids inventing HR
+  but doesn't always *state* it can't measure it, as the prompt instructs.
 
 ## Phase 3 — Hardware truth  ⬜ (gated on parts: a Pico + the 3 breakout sensors)
 *The single highest-credibility artifact.*
