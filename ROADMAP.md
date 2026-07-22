@@ -164,6 +164,28 @@ smell exaggeration but is not an embedded engineer.*
   real defect: the model transcripts had been condensed while being presented as
   recorded output. They are now verbatim.
 
+### Phase 4c — product concept, charts, interface demo  🟢 (2026-07-22)
+- 🟢 **3D product concept on the overview page** (owner-directed, overriding the
+  earlier no-concept-renders rule): wrist unit (open tapered band, case with a
+  display) wired to a curved belt pack. Placeholder shapes built in code, not
+  CAD, labelled as concept on the page and in the source. Numbered markers map
+  where the finished parts live; an inline 2D SVG is the no-WebGL fallback.
+- 🟢 **The concept display is labelled concept-only** in the legend AND as a row
+  in the Proof page's real-vs-simulated table: the built board has no screen.
+- 🟢 The concept's cable is wired on purpose, captioned with `bridge/README.md`'s
+  wording: a wired, local stand-in for the eventual wrist→pack BLE link.
+- 🟢 **Three chart plates** (`site/assets/charts/`, pipeline in `tools/charts/`):
+  fall signature and altitude curve computed by the firmware's own C, trigger
+  debounce computed by the app's own `fallTrigger.ts` (2 calls vs 150). Data
+  from shipping code; matplotlib only draws it (build-time tool on the dev
+  machine, not a project dependency).
+- 🟢 **Scripted interface demo** on How it works: a phone-frame replay of the
+  fall auto-trigger showing the verbatim recorded response, labelled "no model
+  is running in this page".
+- 🟢 Layered desert-oasis background, prose tightened toward ~1 minute of text
+  per page, and hand-designed-PCB authorship stated on Hardware and in the
+  concept caption.
+
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).
 - 🧊 Real BLE wrist→pack link (the wired bridge is the honest stand-in).

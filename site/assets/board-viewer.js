@@ -1,5 +1,5 @@
 /**
- * BOARD VIEWER — the Ghost Medic wrist-unit PCB, in 3D, in the browser.
+ * BOARD VIEWER: the Ghost Medic wrist-unit PCB, in 3D, in the browser.
  *
  * The model is ghostmedic-sensor-hub.glb, exported straight from the committed
  * KiCad source with kicad-cli (exact command in hardware/README.md). Nothing here
@@ -16,7 +16,7 @@
  *  2. Draw calls. KiCad exports the board as 7282 separate primitives, which is
  *     a lot of draw calls for one static object. They are merged by material at
  *     load time, which collapses it to roughly the material count. If merging
- *     fails for any reason the unmerged scene renders anyway — slower, correct.
+ *     fails for any reason the unmerged scene renders anyway: slower, correct.
  */
 
 import * as THREE from 'three';
@@ -60,7 +60,7 @@ export function mountBoardViewer({ mount, model, status, controls }) {
 
   const scene = new THREE.Scene();
 
-  // A procedural studio environment — no external HDR file to fetch. Without it
+  // A procedural studio environment: no external HDR file to fetch. Without it
   // the gold pads and the black chip packages render as flat, dead surfaces,
   // because metals have nothing to reflect.
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -88,7 +88,7 @@ export function mountBoardViewer({ mount, model, status, controls }) {
   controlsObj.autoRotate = !reduceMotion;
   controlsObj.autoRotateSpeed = 0.55;
 
-  // Stop the idle spin the moment someone takes over — it is an invitation, not
+  // Stop the idle spin the moment someone takes over: it is an invitation, not
   // an animation to sit through.
   let userEngaged = false;
   const stopSpin = () => { userEngaged = true; controlsObj.autoRotate = false; };
@@ -192,7 +192,7 @@ export function mountBoardViewer({ mount, model, status, controls }) {
     requestAnimationFrame(resize);
   }).observe(mount);
 
-  // Only render while the viewer is actually on screen — an off-screen canvas
+  // Only render while the viewer is actually on screen: an off-screen canvas
   // spinning at 60 fps is a laptop fan for no reason.
   let visible = true;
   new IntersectionObserver(
@@ -210,7 +210,7 @@ export function mountBoardViewer({ mount, model, status, controls }) {
 /**
  * Collapse the export's thousands of primitives into one mesh per material.
  * Returns the original scene untouched if anything about the geometry resists
- * merging — a slow correct board beats no board.
+ * merging: a slow correct board beats no board.
  */
 function merged(source) {
   try {

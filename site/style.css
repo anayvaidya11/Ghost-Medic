@@ -55,7 +55,17 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: var(--stone);
+  /* Desert-oasis ground: soft washes of sand and pale green layered down the
+     page, so long scrolls alternate warm and cool without touching the text. */
+  background:
+    radial-gradient(90rem 44rem at 85% 6%,  #EDE6D0 0%, transparent 62%),
+    radial-gradient(74rem 38rem at 6% 30%,  #DCE3CF 0%, transparent 64%),
+    radial-gradient(80rem 42rem at 94% 58%, #E8DFC7 0%, transparent 62%),
+    radial-gradient(70rem 40rem at 10% 86%, #D9E0CD 0%, transparent 64%),
+    linear-gradient(180deg,
+      #E9E4D6 0%, #E4E2D0 20%, #DEE3D1 36%,
+      #E8E2CF 54%, #DBE1CE 72%, #E6E2D3 100%);
+  background-color: var(--stone);
   color: var(--ink);
   font: 400 19px/1.62 var(--serif);
   -webkit-font-smoothing: antialiased;
@@ -243,7 +253,24 @@ figcaption {
 .board-viewer { position: relative; background: var(--paper); border: 1px solid var(--line); padding: .5rem; }
 .board-canvas { display: block; width: 100%; touch-action: pan-y; cursor: grab; }
 .board-canvas:active { cursor: grabbing; }
-.board-viewer.is-3d img { display: none; }
+.board-viewer.is-3d img, .board-viewer.is-3d .concept-2d { display: none; }
+.concept-2d { display: block; width: 100%; height: auto; padding: 1rem; }
+
+/* numbered legend under the concept viewer */
+.legend { list-style: none; margin: 1.2rem 0 0; padding: 0; }
+.legend li {
+  display: grid; grid-template-columns: 2rem 1fr; gap: 0 .9rem;
+  padding: .55rem 0; border-top: 1px solid var(--line);
+  font-size: .98rem; line-height: 1.5;
+}
+.legend li:last-child { border-bottom: 1px solid var(--line); }
+.legend .num {
+  width: 1.55rem; height: 1.55rem; border: 2px solid var(--forest); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font: 700 12px/1 var(--mono); color: var(--forest); background: var(--paper);
+  margin-top: .15rem;
+}
+.legend b { font-weight: 700; }
 /* Same aspect the canvas will take, so swapping the still render for the live
    model doesn't shove the rest of the page down mid-read. */
 .board-viewer img { display: block; width: 100%; aspect-ratio: 1 / 0.62; object-fit: contain; }
@@ -307,3 +334,57 @@ button.ghost:hover { color: var(--forest); border-color: var(--forest); }
 .site-foot p { margin: 0; max-width: 46rem; }
 
 hr.rule { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
+
+/* ── chart plates ────────────────────────────────────────────────────────── */
+
+.chart img { display: block; width: 100%; height: auto; padding: .8rem .4rem; }
+
+/* ── the scripted interface demo ─────────────────────────────────────────── */
+
+.phone {
+  max-width: 350px; margin: 1.8rem auto .8rem;
+  background: #181a16; border: 1px solid #2c3028; border-radius: 22px;
+  padding: 16px 14px 14px; color: #c9d3c0;
+  font: 400 12.5px/1.55 var(--mono);
+  box-shadow: 0 18px 40px -18px rgba(31, 36, 29, .45);
+}
+.pd-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 10px; letter-spacing: .2em; color: #8a9086;
+}
+.pd-live { color: #7fb069; letter-spacing: .12em; }
+.pd-ticker {
+  margin: 12px 0 8px; padding: 7px 10px; border-radius: 7px;
+  background: #101310; color: #9fb59a; font-size: 11px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent;
+}
+.pd-ticker.is-fall { color: #e0a071; border-color: #9c4f28; }
+.pd-alert {
+  margin: 8px 0 0; padding: 6px 10px; border-radius: 7px;
+  background: #2b1608; color: #e0a071; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em;
+}
+.pd-chip {
+  display: inline-block; margin: 8px 0 0; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid #4b5346; color: #8a9086; font-size: 9.5px; letter-spacing: .12em;
+}
+.pd-body {
+  height: 230px; overflow-y: auto; margin: 10px 0;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.pd-body p { margin: 0; font-size: 12px; }
+.pd-body strong { color: #dce5d4; letter-spacing: .04em; }
+.pd-evac {
+  padding: 8px 11px; border-radius: 8px;
+  background: #9c4f28; color: #f4f1e9; font-weight: 700; font-size: 12px;
+}
+.pd-evac::before {
+  content: "EVACUATION"; display: block; font-size: 9px; letter-spacing: .2em;
+  font-weight: 600; opacity: .8; margin-bottom: 2px;
+}
+.pd-replay {
+  margin-top: 10px; font: 600 10px/1 var(--mono); letter-spacing: .13em;
+  text-transform: uppercase; color: #9fb59a; background: none;
+  border: 1px solid #4b5346; border-radius: 6px; padding: .5rem .75rem; cursor: pointer;
+}
+.pd-replay:hover { color: #dce5d4; border-color: #9fb59a; }

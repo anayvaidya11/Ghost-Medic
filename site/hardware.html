@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hardware · Ghost Medic</title>
 <meta name="description" content="The Ghost Medic wrist-unit circuit board: a two-layer KiCad design with 35 components and 477 copper segments. Orbit it in 3D, see the routing, and read why each chip is there.">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -28,8 +28,9 @@
     <p class="eyebrow">Hardware</p>
     <h1>The wrist unit, routed down to the last trace.</h1>
     <p class="lead">A two-layer board carrying an RP2040 and three sensors: 35 components, 477
-    copper segments, 63 vias, powered and programmed over one USB-C connector. The schematic
-    and layout files are in the repository and open in KiCad, which is free.</p>
+    copper segments, 63 vias, powered and programmed over one USB-C connector. I designed this
+    board by hand in KiCad: I drew the schematic myself, placed every part, and routed every
+    trace. The files are in the repository and open in KiCad, which is free.</p>
   </section>
 
   <!-- ═══════════ THE 3D BOARD ═══════════ -->
@@ -73,9 +74,9 @@
   <section id="routing" class="col-w">
     <div class="col" style="padding:0">
       <p class="eyebrow">The routing</p>
-      <h2>Every connection placed one at a time</h2>
-      <p>This is the front copper: 477 individual segments carrying power and signals between
-      35 components, plus 63 vias. A via is a small plated hole that lets a connection pass
+      <h2>Every connection placed by hand, one at a time</h2>
+      <p>This is the front copper: 477 individual segments I routed by hand between 35
+      components, plus 63 vias. A via is a small plated hole that lets a connection pass
       through to the other side of the board when its path is blocked.</p>
     </div>
     <figure>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ghost Medic · offline AI first-aid assistant prototype</title>
 <meta name="description" content="A prototype wearable first-aid assistant that works with no internet: a wrist sensor unit, a language model running on hardware you carry, and spoken first-aid steps.">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -28,11 +28,10 @@
   <section id="pitch" class="col">
     <p class="eyebrow">Prototype</p>
     <h1>A first-aid assistant that works with no signal.</h1>
-    <p class="lead">Ghost Medic is a prototype for people who are hours from help and have no
-    connection. A unit on the wrist tracks movement and the air around you. A language model
-    running on hardware in your own pack reads those numbers together with what you tell it,
-    then speaks back numbered first-aid steps. Nothing is sent anywhere. There is no network
-    to send it through.</p>
+    <p class="lead">Ghost Medic is a prototype for people who are hours from help with no
+    connection. A wrist unit tracks movement and the air around you. A language model on
+    hardware in your own pack reads those numbers together with what you tell it, then speaks
+    numbered first-aid steps. Nothing is sent anywhere because there is no network.</p>
   </section>
 
   <!-- ═══════════ STATUS, UP FRONT ═══════════ -->
@@ -42,17 +41,16 @@
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>The software chain runs end to end, offline, on one laptop. Sensor readings
-          arrive, the model reads them, and its answer changes because of them.</p>
+          <p>The software chain runs end to end, offline, on one laptop: sensor readings
+          arrive and the model's answer changes because of them.</p>
           <p>Verified 22 July 2026 against a local model. <a href="proof.html">The receipts are on the Proof page.</a></p>
         </div>
       </li>
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>The firmware compiles for the real chip and its sensor maths passes tests against
-          the manufacturer's own reference numbers.</p>
-          <p>6 checks on the pressure maths, 3 on fall detection, 39 on the software that
+          <p>The firmware compiles for the real chip and its maths passes tests against the
+          manufacturer's own reference numbers: 6 + 3 checks, plus 39 on the software that
           talks to the model.</p>
         </div>
       </li>
@@ -77,13 +75,79 @@
     one that does not, that is a bug worth telling me about.</p>
   </section>
 
+  <!-- ═══════════ PRODUCT CONCEPT ═══════════ -->
+  <section id="product" class="col-w">
+    <div class="col" style="padding:0">
+      <p class="eyebrow">The product, as a concept</p>
+      <h2>What it would look like on you</h2>
+      <div class="gap">
+        <p class="eyebrow">Label</p>
+        <p>This is a concept illustration of how the system would be worn. It is built in
+        code, not CAD, and no physical version of it exists. The only hardware actually
+        designed is the circuit board, which I designed and routed by hand in KiCad. It is on
+        the <a href="hardware.html">Hardware page</a>. The markers show where the finished
+        parts of this project would live in the device.</p>
+      </div>
+    </div>
+
+    <div class="board-viewer" id="product-viewer">
+      <!-- 2D concept diagram: the fallback when WebGL is unavailable -->
+      <svg class="concept-2d" viewBox="0 0 880 340" role="img"
+           aria-label="Concept diagram: an open wrist band carrying a case with a screen, joined by a cable to a curved belt pack. Numbered markers match the legend below.">
+        <g fill="none" stroke="#5D655B" stroke-width="2">
+          <!-- wrist unit: open band arc, gap at the bottom -->
+          <path d="M 145 288 A 80 80 0 1 1 235 284" stroke-width="14" stroke-linecap="round"/>
+          <!-- case tangent at the top of the arc, screen inset with a bezel -->
+          <rect x="130" y="102" width="110" height="34" rx="10" fill="#F4F1E9" stroke="#2C4630"/>
+          <rect x="140" y="109" width="90" height="20" rx="5" stroke="#2C4630"/>
+          <line x1="148" y1="116" x2="204" y2="116" stroke="#2C4630"/>
+          <rect x="148" y="121" width="46" height="4" rx="2" stroke="#9C4F28"/>
+          <!-- belt pack: curved enclosure, belt strap through it -->
+          <path d="M 560 250 Q 660 232 760 250 L 756 130 Q 660 114 564 130 Z" fill="#F4F1E9"/>
+          <line x1="520" y1="176" x2="562" y2="172"/>
+          <line x1="758" y1="172" x2="800" y2="176"/>
+          <line x1="646" y1="126" x2="646" y2="243"/>
+          <line x1="686" y1="140" x2="712" y2="138"/>
+          <line x1="686" y1="148" x2="712" y2="146"/>
+          <line x1="686" y1="156" x2="712" y2="154"/>
+          <!-- the cable: solid, with slack -->
+          <path d="M 242 122 C 360 96, 430 190, 562 196" stroke="#2C4630" stroke-width="3"/>
+          <circle cx="242" cy="122" r="4" fill="#5D655B"/>
+          <circle cx="562" cy="196" r="4" fill="#5D655B"/>
+        </g>
+        <g font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#5D655B">
+          <text x="185" y="330" text-anchor="middle">wrist unit</text>
+          <text x="660" y="290" text-anchor="middle">belt pack: compute + battery</text>
+          <text x="410" y="230" text-anchor="middle">wired link</text>
+        </g>
+        <g font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="700">
+          <g><circle cx="96" cy="92" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="96" y="97" text-anchor="middle" fill="#2C4630">1</text></g>
+          <g><circle cx="185" cy="66" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="185" y="71" text-anchor="middle" fill="#2C4630">2</text></g>
+          <g><circle cx="410" cy="120" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="410" y="125" text-anchor="middle" fill="#2C4630">3</text></g>
+          <g><circle cx="800" cy="112" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="800" y="117" text-anchor="middle" fill="#2C4630">4</text></g>
+        </g>
+      </svg>
+    </div>
+    <p class="board-status" id="product-status" role="status"></p>
+
+    <div class="col" style="padding:0">
+      <ul class="legend">
+        <li><span class="num">1</span><div><b>Wrist case.</b> The sensor board and its firmware live here. Both exist: I designed and routed the board by hand in KiCad, and the firmware compiles with its maths tested.</div></li>
+        <li><span class="num">2</span><div><b>Display.</b> Concept only. The built board has no screen. Today the app shows the readings and speaks the steps.</div></li>
+        <li><span class="num">3</span><div><b>The cable.</b> The bridge software is real and carries every reading unchanged. It is a wired, local stand-in for the eventual wrist-to-pack BLE link.</div></li>
+        <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case. The LLM layer is real and runs fully offline. A laptop stands in for this enclosure.</div></li>
+      </ul>
+      <p class="caption">Drag to rotate, scroll to zoom. Without WebGL you get the flat diagram
+      instead, same markers.</p>
+    </div>
+  </section>
+
   <!-- ═══════════ THE THESIS: ONE LINE OF TEXT ═══════════ -->
   <section id="wire" class="col">
     <h2>The whole system is held together by one line of text</h2>
-    <p>Ten times a second, the wrist unit prints a single line describing everything it can
-    currently sense. That line is the only agreement between the parts, which means any one of
-    them can be swapped out without touching the others, and you can read it with your own eyes
-    while debugging. Here is a real one, from the moment of a fall:</p>
+    <p>Ten times a second the wrist unit prints one line describing everything it can sense.
+    That line is the only agreement between the parts, so any part can be swapped without
+    touching the others. Here is a real one, from the moment of a fall:</p>
 
     <div class="translate">
       <pre class="artifact">{"t_ms":300,
@@ -101,12 +165,10 @@
       </div>
     </div>
 
-    <p>Two details in there carry most of the design. Each sensor reports its own
-    <code>"ok"</code> first, so a sensor that has failed says so instead of quietly reporting
-    zero. A fabricated zero is more dangerous than a blank, because someone might act on it.</p>
-    <p>And the two light readings stay exactly what they are: raw light readings. Turning them
-    into a heart rate takes signal processing this project does not do, so this project does
-    not show a heart rate anywhere.</p>
+    <p>Two details carry most of the design. Each sensor reports its own <code>"ok"</code>
+    first, so a failed sensor says so instead of quietly reporting zero. And the light readings
+    stay raw light readings: turning them into a heart rate takes signal processing this
+    project does not do, so no heart rate appears anywhere.</p>
   </section>
 
   <!-- ═══════════ THE LIVE THING ═══════════ -->
@@ -114,13 +176,10 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">Live in this page</p>
       <h2>Drive the wrist unit yourself</h2>
-      <p>This is the real thing running in your browser, not a video. Move the sliders and
-      watch the readings change. Press <strong>Simulate fall</strong> and watch the last value
-      flip. Switch a sensor off and watch the line report the failure instead of inventing a
-      number.</p>
-      <p>It runs the same altitude and fall-detection formulas as the firmware, with the same
-      constants, and prints the identical line format the board would print. That is why the
-      rest of the system cannot tell the difference.</p>
+      <p>This runs in your browser right now, not as a video. Move the sliders, press
+      <strong>Simulate fall</strong>, switch a sensor off and watch the line report the failure
+      instead of inventing a number. It runs the same formulas as the firmware, with the same
+      constants, and prints the identical line format.</p>
       <div class="gap">
         <p class="eyebrow">Label</p>
         <p>This is a simulator. No sensor is attached to your computer, and the panel says so
@@ -150,6 +209,20 @@
   </section>
 
 </main>
+
+<script type="importmap">
+{"imports":{
+  "three": "./vendor/three/three.module.min.js",
+  "three/addons/": "./vendor/three/addons/"
+}}
+</script>
+<script type="module">
+  import { mountProductViewer } from './assets/product-viewer.js';
+  mountProductViewer({
+    mount:  document.getElementById('product-viewer'),
+    status: document.getElementById('product-status'),
+  });
+</script>
 
 <footer class="site-foot"><div class="col-w">
   <div class="links">

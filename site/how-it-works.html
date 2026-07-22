@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How it works · Ghost Medic</title>
 <meta name="description" content="The four parts of Ghost Medic in plain language: what the wrist unit senses, how the readings travel, what the offline language model does with them, and what each part is standing in for.">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -27,10 +27,9 @@
   <section id="intro" class="col">
     <p class="eyebrow">How it works</p>
     <h1>Four parts, one line of text between them.</h1>
-    <p class="lead">Sensing happens on the wrist. Thinking happens in the pack. Speaking
-    happens wherever you can hear it. Between them runs one line of plain text, ten times a
-    second. This page walks the whole path and stops at each point where something is standing
-    in for the real thing.</p>
+    <p class="lead">Sensing happens on the wrist. Thinking happens in the pack. Between them
+    runs one line of plain text, ten times a second. This page walks that path and flags every
+    stand-in.</p>
   </section>
 
   <!-- ═══════════ THE DIAGRAM ═══════════ -->
@@ -109,9 +108,8 @@
     </div>
 
     <h3>Height from air pressure</h3>
-    <p>Air gets thinner the higher you go, predictably enough that you can run the relationship
-    backwards: measure the pressure, calculate the height. This is the line of firmware that
-    does it.</p>
+    <p>Air gets thinner as you climb, predictably enough to run backwards: measure the
+    pressure, calculate the height. This is the firmware line that does it.</p>
 
     <div class="translate">
       <pre class="artifact">float bmp280_pressure_to_altitude(float pressure_pa) {
@@ -119,26 +117,36 @@
         (1.0f - powf(pressure_pa / BMP280_SEA_LEVEL_PA, 0.1903f));
 }</pre>
       <div class="plain">
-        <p>Take the pressure you just measured, compare it to standard pressure at sea level,
-        and the standard atmospheric formula turns that ratio into metres.</p>
-        <p><strong>The catch, which the code and this site both state:</strong> "standard
-        pressure at sea level" is a fixed number, and real sea-level pressure moves with the
-        weather. So this figure is trustworthy for <em>change</em>, meaning "you have climbed
-        300 metres", and not for absolute elevation. It is not GPS and does not pretend to be.</p>
+        <p><strong>The catch, stated in the code too:</strong> the sea-level reference is a
+        fixed number and real sea-level pressure moves with the weather. So the figure is
+        trustworthy for change, "you have climbed 300 metres", and not for absolute
+        elevation. It is not GPS.</p>
       </div>
     </div>
 
+    <figure class="chart">
+      <div class="frame"><img src="assets/charts/altitude-curve.svg"
+        alt="Chart: computed altitude against air pressure, a smooth curve from about 5000 metres at 55 kilopascals down to 0 at sea-level pressure, with the two host-test check points marked."></div>
+      <figcaption>The whole curve, computed by the shipping C function; the two marked points
+      are the values the host tests check.</figcaption>
+    </figure>
+
     <h3>What a fall looks like to a machine</h3>
-    <p>While you are falling, an accelerometer reads close to nothing, because in free fall
-    nothing is pushing against it. Then you land and it reads a sharp spike. Either signal on
-    its own is ordinary: sitting down hard gives you the spike, waving your arm gives you the
-    lull. The firmware only calls it a fall when it sees both, in that order, within 400
-    milliseconds.</p>
+    <p>In free fall an accelerometer reads near zero; on landing it reads a sharp spike.
+    Either alone is ordinary. The firmware only calls it a fall when it sees both, in that
+    order, within 400 milliseconds.</p>
+
+    <figure class="chart">
+      <div class="frame"><img src="assets/charts/fall-signature.svg"
+        alt="Chart: acceleration over four seconds. A steady line near 1 g dips below the 0.35 g free-fall threshold, then spikes past the 2.5 g impact threshold inside a shaded 400 millisecond window, where the fall is flagged."></div>
+      <figcaption>A synthetic motion trace fed through the shipping C state machine; the flag
+      fires exactly where the real code fires it.</figcaption>
+    </figure>
+
     <div class="gap">
       <p class="eyebrow">Label</p>
-      <p>This is a demonstration, not a medical-grade fall detector. The thresholds are
-      textbook values that have never been tuned against real falls, and the source code says
-      so in the same words.</p>
+      <p>A demonstration, not a medical-grade fall detector. The thresholds are untuned
+      textbook values, and the source code says so in the same words.</p>
     </div>
 
     <h3>No heart rate</h3>
@@ -156,26 +164,21 @@
     <p class="eyebrow">02 · The link</p>
     <h2>A cable doing a radio's job</h2>
     <p>In the finished idea, the wrist unit talks to the pack over a short-range radio. That
-    radio does not exist yet. What exists instead is a small program that reads lines over a
-    wire and hands them to anything that asks for them. Same job, minus the radio.</p>
-    <p>It is deliberately stupid. It does not interpret, reshape, average, or fix anything. A
-    line goes in and the identical line comes out. That is what makes the substitution honest:
-    the parts downstream cannot tell whether a line came from a board, the browser simulator,
-    or a recording, because there is genuinely no difference in what arrives.</p>
-    <p>It drops exactly one thing. When the board powers on it prints a greeting reporting
-    which sensors woke up, and that greeting has no timestamp. Anything without a timestamp is
-    not a reading, so it never reaches the rest of the system.</p>
+    radio does not exist yet. A small program does the same job over a wire: a line goes in
+    and the identical line comes out, with no interpreting, reshaping, or fixing. Because the
+    line is unchanged, the parts downstream genuinely cannot tell whether it came from a
+    board, the browser simulator, or a recording.</p>
+    <p>It drops one thing only: the greeting the board prints at power-on, which has no
+    timestamp and is therefore not a reading.</p>
   </section>
 
   <!-- ═══════════ 03 ═══════════ -->
   <section id="brain" class="col">
     <p class="eyebrow">03 · The pack computer</p>
     <h2>The model is told what the sensors saw, and what not to conclude</h2>
-    <p>The language model is ordinary and off the shelf: a small open model running locally
-    with no internet connection. The engineering is not the model. It is what the model is
-    told, and what it is forbidden from doing.</p>
-    <p>Every question sent to it carries a block of sensor readings written out in words, with
-    each qualification attached to the reading it qualifies:</p>
+    <p>The model is a small open one running locally with no internet. The engineering is what
+    it is told, and what it is forbidden from doing. Every question carries a block of sensor
+    readings written out in words, each with its limits attached:</p>
 
     <div class="translate">
       <pre class="artifact">DERIVED READINGS:
@@ -191,12 +194,9 @@ RAW SIGNALS (non-diagnostic):
   device: heart rate and blood-oxygen saturation (SpO2) are NOT
   available and must not be inferred from these numbers.</pre>
       <div class="plain">
-        <p>Each number arrives with its own limits attached, so the model cannot treat the
-        altitude as GPS or the air temperature as a fever. The last paragraph does the most
-        work: it tells the model, inside the request itself, that the light readings are not
-        vital signs and must not be turned into a pulse.</p>
-        <p>If a sensor has failed, its line reads <strong>"unavailable"</strong> rather than
-        zero. A zero is a reading. "Unavailable" is the truth.</p>
+        <p>The last paragraph does the most work: it tells the model, inside the request
+        itself, that the light readings are not vital signs and must not be turned into a
+        pulse. A failed sensor reads <strong>"unavailable"</strong>, never zero.</p>
       </div>
     </div>
     <p class="caption">That is the real output of <code>services/sensorContext.ts</code>,
@@ -207,9 +207,11 @@ RAW SIGNALS (non-diagnostic):
     person wins. A sensor on a wrist knows less than someone looking at their own leg.</p>
 
     <h3>When the wristband speaks first</h3>
-    <p>If the accelerometer sees the signature of a fall, the assistant does not wait to be
-    asked. It starts the conversation itself, with guidance for someone who may have just hit
-    their head. That behaviour needs one guard.</p>
+    <p>If the accelerometer flags a fall, the assistant starts the conversation itself, with
+    guidance for someone who may have just hit their head. One guard makes that workable: the
+    wristband reports ten times a second, so a single fall arrives as a long run of identical
+    "fall detected" readings. The trigger fires only when the answer changes from no to yes,
+    then stays quiet for thirty seconds. One fall, one question.</p>
 
     <div class="translate">
       <pre class="artifact">const risingEdge = fallDetected &amp;&amp; !prevFall;
@@ -219,13 +221,8 @@ if (!risingEdge) return false;
 if (suppressed) return false; // consumed, not queued
 if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
       <div class="plain">
-        <p>The wristband reports ten times a second, so one fall arrives as a long run of
-        identical "fall detected" readings. Firing on each one would ask the model forty
-        questions about a single stumble.</p>
-        <p>So it fires on the moment the answer changes from no to yes, not on every yes, then
-        stays quiet for thirty seconds. One fall, one question. Measured against a live model
-        during a looping replay: two requests thirty seconds apart, where the naive version
-        would have made about sixty.</p>
+        <p>The real trigger code. The chart on the Proof page shows what it saves: 2 model
+        calls instead of 150 over a minute of replay.</p>
       </div>
     </div>
   </section>
@@ -234,29 +231,31 @@ if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
   <section id="interface" class="col">
     <p class="eyebrow">04 · The interface</p>
     <h2>Six steps, and one line that matters more than the rest</h2>
-    <p>The answer comes back as at most six steps, one sentence each, because the person
-    reading it may be frightened, cold, and alone. It always ends with a line about evacuation,
-    meaning whether to call for rescue, and the app pulls that line out and displays it
-    separately. It is the most consequential thing on the screen.</p>
-    <p>The screen keeps two kinds of number apart. <strong>Derived</strong> values, meaning
-    altitude, temperature, and whether a fall was seen, are conclusions the system drew.
-    <strong>Raw</strong> values, meaning the light readings and the acceleration, are shown as
-    what they are with no interpretation. A reading that failed shows a dash, never a zero.</p>
+    <p>The answer comes back as at most six one-sentence steps, because the reader may be
+    frightened, cold, and alone. It always ends with an evacuation line, and the app pulls
+    that line out and displays it separately. Derived values and raw signals are kept visibly
+    apart, and a failed reading shows a dash, never a zero.</p>
+    <p>Here is that behaviour, replayed:</p>
+
+    <div class="phone" id="app-demo">
+      <div class="pd-head"><span>GHOST MEDIC</span><span class="pd-live">● LIVE</span></div>
+      <div class="pd-ticker">…</div>
+      <div class="pd-alert" hidden>FALL DETECTED · asking for guidance</div>
+      <span class="pd-chip" hidden>SENSOR-TRIGGERED · NOT TYPED BY THE USER</span>
+      <div class="pd-body" aria-live="polite"></div>
+      <div class="pd-evac" hidden></div>
+      <button type="button" class="pd-replay" hidden>Replay</button>
+    </div>
+    <p class="caption" style="text-align:center">A scripted replay of the app's screen. The
+    response is the verbatim recorded output of the real local run; no model is running in
+    this page.</p>
 
     <div class="gap">
       <p class="eyebrow">Placeholders</p>
-      <p>You can hold a button and record your voice, and the recording is real, but nothing
-      turns it into text yet. You can photograph a wound, and the photo is real, but nothing
-      looks at it yet. Both are wired up and do nothing, and are marked as such in the code.</p>
-      <p>The path that works end to end is typed text plus sensor readings, to the local model,
-      to a parsed and spoken answer.</p>
-    </div>
-
-    <div class="gap">
-      <p class="eyebrow">One more thing about the interface</p>
-      <p>The answer appears on screen word by word, which looks like the model thinking aloud.
-      It is not. The complete answer arrives first and the app reveals it at a readable pace.
-      Real word-by-word generation is separate work that has not been done.</p>
+      <p>Voice recording and wound photos are captured for real, but nothing transcribes or
+      analyses them yet. Both are marked as placeholders in the code. And the word-by-word
+      reveal above is display pacing: the complete answer arrives first, in the real app as
+      in this demo.</p>
     </div>
   </section>
 
@@ -268,6 +267,11 @@ if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
   </section>
 
 </main>
+
+<script type="module">
+  import { mountAppDemo } from './assets/app-demo.js';
+  mountAppDemo(document.getElementById('app-demo'));
+</script>
 
 <footer class="site-foot"><div class="col-w">
   <div class="links">

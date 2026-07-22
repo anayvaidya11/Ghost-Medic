@@ -27,6 +27,9 @@ the style, because their whole value is being unedited.
 | `style.css` | The whole design system. Two devices carry the site: the *translation pair* (`.translate`) and the *ledger mark* (`.mark`) |
 | `simulator/index.html` | **Byte-identical copy** of `../simulator/index.html`, embedded via iframe on the overview page |
 | `assets/board-viewer.js` | three.js board viewer, merges draw calls, falls back to the static render on any failure |
+| `assets/product-viewer.js` | three.js concept illustration of how the system would be worn. Placeholder shapes built in code, labelled as concept, falls back to the inline 2D SVG |
+| `assets/app-demo.js` | Scripted replay of the app's screen. The response text is the verbatim recorded run; no model runs in the page |
+| `assets/charts/*.svg` | Chart plates generated from the shipping code. See `../tools/charts/README.md` |
 | `assets/*.glb / *.svg / *.png / *.pdf` | Generated from `../hardware/` source, see below |
 | `vendor/three/` | three.js r185, MIT, vendored so the site has **zero external requests** |
 
@@ -46,6 +49,16 @@ cp ../hardware/exports/ghostmedic-sensor-hub-front-copper.svg   assets/
 cp ../hardware/exports/ghostmedic-sensor-hub-3d-top.png         assets/
 cp ../hardware/exports/ghostmedic-sensor-hub-schematic.pdf      assets/
 ```
+
+## Regenerating the charts
+
+The three SVGs in `assets/charts/` are drawn from data produced by the shipping
+C and TypeScript. Commands in [`../tools/charts/README.md`](../tools/charts/README.md).
+
+## The stylesheet version query
+
+Pages link `style.css?v=N`. Bump `N` whenever `style.css` changes, so cached
+copies don't serve a stale design.
 
 ## Keeping the simulator in sync
 
