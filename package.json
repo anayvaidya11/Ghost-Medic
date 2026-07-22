@@ -2,12 +2,16 @@
   "name": "ghost-medic",
   "version": "1.0.0",
   "main": "expo-router/entry",
+  "engines": {
+    "node": ">=22.6.0"
+  },
   "scripts": {
     "start": "expo start",
     "ios": "expo start --ios",
     "android": "expo start --android",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --test-reporter=spec \"tests/*.test.mjs\""
   },
   "dependencies": {
     "expo": "~54.0.0",

@@ -44,7 +44,7 @@ whole point — it's how we stay honest about what's proven.
 | **Biosensor + wrist unit** | Custom PCB: RP2040 + MAX30102 + BMP280 + LIS3DH | Same firmware, run on a Pico *or* replayed by the bridge | 🟢 Firmware built & compile-verified; ⚠️ not yet run on hardware |
 | **Pack brain (compute)** | Small efficient compute (e.g. Jetson Orin Nano / Pi 5) running a local LLM | **Laptop** running Ollama | 🟡 Works; not a dedicated device yet |
 | **Interface** | Wrist/phone/tablet voice + screen | Expo app on a phone or simulator | 🟢 Works against local LLM |
-| **The bridge** | Wrist → pack **BLE** link | Node WebSocket server, `--source ∈ {serial,sim,file}` | 🔴 Being built (the spine) |
+| **The bridge** | Wrist → pack **BLE** link | Node WebSocket server, `--source ∈ {serial,sim,file}` | 🟢 Works in `file` mode (verified end-to-end); `serial` stubbed pending hardware |
 
 **Do not rathole on the pack hardware now.** For every current goal, *laptop =
 pack brain*. Picking real compute silicon is a productization question; document
@@ -90,10 +90,17 @@ wrist unit later by changing one flag.
 
 See [`ROADMAP.md`](ROADMAP.md) for the sequence that turns the 🔜/❌ rows green.
 
-## Phase 2 — Sensor-Aware LLM (design — not yet built)
+## Phase 2 — Sensor-Aware LLM  ✅ BUILT (2026-07-22)
 
-*How live wrist telemetry will reach the model's reasoning. This is a design
-proposal (ROADMAP Phase 2); **no code implements it yet.***
+*How live wrist telemetry reaches the model's reasoning. This section was written
+as a design proposal and **is now implemented** — the design below was followed,
+so it doubles as the module's documentation:*
+
+- `services/sensorContext.ts` builds the delimited block (16 committed tests).
+- `services/fallTrigger.ts` implements the rising-edge auto-trigger (12 tests).
+- Both are wired into `app/index.tsx`; the exact block sent is viewable in the UI.
+- Run the tests with `npm test` (39 total, no dependencies — see `tests/README.md`).
+- Verified against live local Ollama: `docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md`.
 
 ### Where it plugs in today
 `services/llmService.ts` makes one call to Ollama `/api/generate` with:

@@ -53,6 +53,12 @@ then the consumers. The firmware is the source of truth.
 | `lis3dh.mag_g` | float | vector magnitude √(x²+y²+z²), g (~1.0 at rest) | 3 dp |
 | `fall_detected` | bool | free-fall→impact signature seen. **Illustrative heuristic, not medical-grade.** | — |
 
+**Producer invariant:** `fall_detected` is derived solely from the accelerometer,
+so the firmware only computes it on a valid LIS3DH read (`firmware/main.c`). When
+`lis3dh.ok` is `false`, `fall_detected` is always `false` — never a stale or
+carried-over `true`. It is a top-level field rather than a member of the `lis3dh`
+block because it is a *conclusion* about the readings, not a reading.
+
 ## ⚠️ The one parser gotcha: fields are OMITTED when a sensor fails
 
 When a sensor's `ok` is `false`, its numeric fields are **not present at all**

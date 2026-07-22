@@ -1,9 +1,14 @@
 # Ghost Medic
 
-An **offline AI first-aid assistant prototype for survival**. Ghost Medic reads your body
-and your environment from a wrist-worn sensor unit, reasons about them with a
-**local** language model (no internet required), and talks to you through a
-voice + screen interface. It's built for places with no signal, that still require cloud APIs. Financially aims to live between starlink and invariable survival pdfs. 
+An **offline AI first-aid assistant prototype for survival**. Ghost Medic reads your
+environment and motion from a wrist-worn sensor unit, reasons about them with a
+**local** language model, and talks to you through a voice + screen interface.
+
+It is built for the places where help is hours away and there is no signal — which
+is precisely where every other assistant stops working, because they all assume a
+network. The gap it aims at sits between a satellite messenger, which can reach
+help but cannot tell you what to do, and a printed wilderness-medicine manual,
+which knows what to do but cannot see your situation.
 
 The full system: 
 
@@ -42,11 +47,19 @@ the **honest validation status** (summarized below).
 > the reasoning (including why no simulator run) is in
 > [`firmware/README.md`](firmware/README.md).
 
-### 2. Pack brain — local LLM (concept-level)
+### 2. Pack brain — local LLM  → [`services/`](services/)
 A compute unit running a **local, off-the-shelf** language model that consumes the
-sensor stream plus the user's spoken input and produces survival guidance — all
-offline. This part is conceptual in this repo; the app's LLM plumbing lives in
-[`services/`](services/).
+sensor stream plus the user's input and produces survival guidance — all offline.
+
+**This works today** (verified 2026-07-22): the app sends its prompt plus a
+sensor-context block to `llama3.2:3b` running under Ollama on the same machine,
+and the sensor state measurably changes the guidance — a fall flag adds head,
+neck and spine assessment that the same question without it does not produce.
+Evidence: [`docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md`](docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md).
+
+**What is still concept-level is the *device*, not the software.** No dedicated
+compute unit has been built or chosen — a laptop stands in for the pack, and
+picking real silicon is deliberately deferred (see [`ROADMAP.md`](ROADMAP.md)).
 
 ### 3. Interface — voice + screen app  → repo root (this repo)
 The **React Native / Expo** app is the voice and screen surface the user actually
