@@ -185,6 +185,14 @@ smell exaggeration but is not an embedded engineer.*
 - 🟢 Layered desert-oasis background, prose tightened toward ~1 minute of text
   per page, and hand-designed-PCB authorship stated on Hardware and in the
   concept caption.
+- 🟢 Concept refined: thicker cable, moulded pack (parting seam, recessed port,
+  vents, softer fillets), larger display with a thinner bezel, softer shadow
+  falloff. Callout 4 now names the compute class. `ARCHITECTURE.md` line 45 says
+  "e.g. Jetson Orin Nano / Pi 5" and both docs defer the choice, and neither
+  states a wattage, so the 7-15 W figure is attributed to that module class's own
+  rating and the runtime is marked "on paper". The site says plainly that no
+  module has been selected and nothing has been measured.
+- 🟢 `site/about.html` added: who built it, two sentences, contact links.
 
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).

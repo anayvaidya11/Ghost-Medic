@@ -1,6 +1,6 @@
 # Ghost Medic proof website (`site/`)
 
-A **static site with no build step**: four hand-written HTML pages, one shared
+A **static site with no build step**: five hand-written HTML pages, one shared
 stylesheet, and one vendored library. Nothing to install, nothing to compile.
 This follows [`../docs/WEBSITE_STRATEGY.md`](../docs/WEBSITE_STRATEGY.md) §5
 (static-first, boring, maintainable) rather than a framework.
@@ -24,6 +24,7 @@ the style, because their whole value is being unedited.
 | `how-it-works.html` | **How it works**, the four stages in plain language, with an animated 2D pipeline diagram |
 | `hardware.html` | **Hardware**, the 3D board viewer, the copper routing, why each part is there |
 | `proof.html` | **Proof**, test output, the recorded model transcript, the real-vs-simulated table |
+| `about.html` | **About**, who built it, with links |
 | `style.css` | The whole design system. Two devices carry the site: the *translation pair* (`.translate`) and the *ledger mark* (`.mark`) |
 | `simulator/index.html` | **Byte-identical copy** of `../simulator/index.html`, embedded via iframe on the overview page |
 | `assets/board-viewer.js` | three.js board viewer, merges draw calls, falls back to the static render on any failure |

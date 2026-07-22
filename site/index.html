@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ghost Medic · offline AI first-aid assistant prototype</title>
 <meta name="description" content="A prototype wearable first-aid assistant that works with no internet: a wrist sensor unit, a language model running on hardware you carry, and spoken first-aid steps.">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -18,6 +18,7 @@
     <a href="how-it-works.html">How it works</a>
     <a href="hardware.html">Hardware</a>
     <a href="proof.html">Proof</a>
+    <a href="about.html">About</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
   </nav>
 </div></header>
@@ -28,10 +29,9 @@
   <section id="pitch" class="col">
     <p class="eyebrow">Prototype</p>
     <h1>A first-aid assistant that works with no signal.</h1>
-    <p class="lead">Ghost Medic is a prototype for people who are hours from help with no
-    connection. A wrist unit tracks movement and the air around you. A language model on
-    hardware in your own pack reads those numbers together with what you tell it, then speaks
-    numbered first-aid steps. Nothing is sent anywhere because there is no network.</p>
+    <p class="lead">A wrist unit tracks your movement and the air around you. A language model
+    on hardware in your own pack reads those numbers with what you tell it, then speaks
+    numbered first-aid steps. No network involved.</p>
   </section>
 
   <!-- ═══════════ STATUS, UP FRONT ═══════════ -->
@@ -57,17 +57,15 @@
       <li>
         <span class="mark mark-part">Stands in</span>
         <div>
-          <p>A laptop does the job of the pack computer. A cable does the job of the wireless
-          link. Both are deliberate substitutions, and both are labelled everywhere they
-          appear.</p>
+          <p>A laptop does the job of the pack computer, a cable the job of the wireless
+          link. Both are labelled everywhere they appear.</p>
         </div>
       </li>
       <li>
         <span class="mark mark-no">Simulated</span>
         <div>
-          <p>Every sensor reading on this site is generated rather than measured, and says so
-          wherever it appears. Speech-to-text and wound-photo analysis are placeholders that
-          do nothing yet.</p>
+          <p>Every sensor reading here is generated, not measured. Speech-to-text and
+          wound-photo analysis are placeholders that do nothing yet.</p>
         </div>
       </li>
     </ul>
@@ -82,11 +80,10 @@
       <h2>What it would look like on you</h2>
       <div class="gap">
         <p class="eyebrow">Label</p>
-        <p>This is a concept illustration of how the system would be worn. It is built in
-        code, not CAD, and no physical version of it exists. The only hardware actually
-        designed is the circuit board, which I designed and routed by hand in KiCad. It is on
-        the <a href="hardware.html">Hardware page</a>. The markers show where the finished
-        parts of this project would live in the device.</p>
+        <p>A concept illustration of how the system would be worn, built in code rather than
+        CAD. The only hardware actually designed is the circuit board, which I drew and routed
+        by hand in KiCad and which is on the <a href="hardware.html">Hardware page</a>. The
+        markers show where the finished parts would live.</p>
       </div>
     </div>
 
@@ -135,7 +132,7 @@
         <li><span class="num">1</span><div><b>Wrist case.</b> The sensor board and its firmware live here. Both exist: I designed and routed the board by hand in KiCad, and the firmware compiles with its maths tested.</div></li>
         <li><span class="num">2</span><div><b>Display.</b> Concept only. The built board has no screen. Today the app shows the readings and speaks the steps.</div></li>
         <li><span class="num">3</span><div><b>The cable.</b> The bridge software is real and carries every reading unchanged. It is a wired, local stand-in for the eventual wrist-to-pack BLE link.</div></li>
-        <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case. The LLM layer is real and runs fully offline. A laptop stands in for this enclosure.</div></li>
+        <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case, sized around a Jetson Orin Nano class module. That class is rated for 7 to 15 W power modes, so a USB-C power bank would run it for a few hours on paper. <b>No module has been selected and nothing has been measured.</b> The LLM layer is real and runs fully offline; a laptop stands in for this enclosure today.</div></li>
       </ul>
       <p class="caption">Drag to rotate, scroll to zoom. Without WebGL you get the flat diagram
       instead, same markers.</p>
@@ -146,8 +143,8 @@
   <section id="wire" class="col">
     <h2>The whole system is held together by one line of text</h2>
     <p>Ten times a second the wrist unit prints one line describing everything it can sense.
-    That line is the only agreement between the parts, so any part can be swapped without
-    touching the others. Here is a real one, from the moment of a fall:</p>
+    It is the only agreement between the parts, so any part can be swapped without touching
+    the others. Here is one, from the moment of a fall:</p>
 
     <div class="translate">
       <pre class="artifact">{"t_ms":300,
@@ -165,10 +162,9 @@
       </div>
     </div>
 
-    <p>Two details carry most of the design. Each sensor reports its own <code>"ok"</code>
-    first, so a failed sensor says so instead of quietly reporting zero. And the light readings
-    stay raw light readings: turning them into a heart rate takes signal processing this
-    project does not do, so no heart rate appears anywhere.</p>
+    <p>Each sensor reports its own <code>"ok"</code> first, so a failed sensor says so rather
+    than quietly reporting zero. And the light readings stay raw: turning them into a heart
+    rate takes signal processing this project does not do, so no heart rate appears anywhere.</p>
   </section>
 
   <!-- ═══════════ THE LIVE THING ═══════════ -->
@@ -176,14 +172,14 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">Live in this page</p>
       <h2>Drive the wrist unit yourself</h2>
-      <p>This runs in your browser right now, not as a video. Move the sliders, press
+      <p>Running in your browser right now, not a video. Move the sliders, press
       <strong>Simulate fall</strong>, switch a sensor off and watch the line report the failure
-      instead of inventing a number. It runs the same formulas as the firmware, with the same
-      constants, and prints the identical line format.</p>
+      instead of inventing a number. Same formulas and constants as the firmware, same line
+      format.</p>
       <div class="gap">
         <p class="eyebrow">Label</p>
-        <p>This is a simulator. No sensor is attached to your computer, and the panel says so
-        itself. What it demonstrates is the data format and the maths, not hardware.</p>
+        <p>A simulator. No sensor is attached to your computer. It demonstrates the data
+        format and the maths, not hardware.</p>
       </div>
     </div>
     <iframe class="embed" src="simulator/index.html" title="Ghost Medic wrist-unit simulator, interactive" loading="lazy"></iframe>

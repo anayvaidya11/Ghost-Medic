@@ -322,6 +322,28 @@ button.ghost:hover { color: var(--forest); border-color: var(--forest); }
 .next .t { font-size: 1.15rem; font-weight: 600; color: var(--forest); }
 .next .d { display: block; color: var(--ink-2); font-size: .98rem; margin-top: .2rem; }
 
+/* ── about ───────────────────────────────────────────────────────────────── */
+
+.bio { display: grid; grid-template-columns: 15rem 1fr; gap: 2.2rem; align-items: start; }
+.bio img {
+  width: 100%; height: auto; display: block;
+  border: 1px solid var(--line); background: var(--paper); padding: .4rem;
+}
+.bio > div > :first-child { margin-top: 0; }
+@media (max-width: 40rem) {
+  .bio { grid-template-columns: 1fr; gap: 1.4rem; }
+  .bio img { max-width: 15rem; }
+}
+
+.contact { list-style: none; margin: 1.6rem 0 0; padding: 0; }
+.contact li { border-top: 1px solid var(--line); }
+.contact li:last-child { border-bottom: 1px solid var(--line); }
+.contact a {
+  display: block; padding: .7rem 0; text-decoration: none;
+  font: 400 13.5px/1.4 var(--mono); letter-spacing: .04em; color: var(--forest);
+}
+.contact a:hover { text-decoration: underline; }
+
 /* ── footer ──────────────────────────────────────────────────────────────── */
 
 .site-foot {

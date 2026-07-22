@@ -58,12 +58,18 @@ export function mountProductViewer({ mount, status }) {
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.bias = -0.0005;
+  key.shadow.radius = 4.5;             // softer falloff, less of a hard cutout
   Object.assign(key.shadow.camera, { left: -160, right: 160, top: 160, bottom: -160, near: 10, far: 400 });
   key.shadow.camera.updateProjectionMatrix();
   scene.add(key);
   const rim = new THREE.DirectionalLight(0xdfe6e0, 0.55);
   rim.position.set(-80, 40, -60);
   scene.add(rim);
+  // A low fill from the front keeps the dark enclosures from going flat black
+  // where neither the key nor the rim reaches.
+  const fill = new THREE.DirectionalLight(0xf2ece0, 0.28);
+  fill.position.set(30, 20, 120);
+  scene.add(fill);
 
   const mat = (color, rough = 0.55, metal = 0.0) =>
     new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal, side: THREE.DoubleSide });
@@ -83,32 +89,33 @@ export function mountProductViewer({ mount, status }) {
   // Case: rounded slab sitting tangent on the band's outer surface at the top.
   // 48 along the arm (z), 40 across (x), 11 thick, 5 mm fillets.
   const CASE_Y = 29 + 5.5 - 0.8;          // band outer top + half height, seated 0.8
-  const kase = sh(new THREE.Mesh(new RoundedBoxGeometry(40, 11, 48, 4, 5), mat(GRAPHITE, 0.4, 0.2)));
+  const kase = sh(new THREE.Mesh(new RoundedBoxGeometry(40, 11, 48, 5, 5), mat(GRAPHITE, 0.38, 0.12)));
   kase.position.y = CASE_Y;
   wrist.add(kase);
 
-  // Concept display on the case face: dark glass with a uniform bezel and a
-  // few abstract guidance bars. No numbers, nothing that reads as a vital.
+  // Concept display on the case face: dark glass with a thin uniform bezel and
+  // a few abstract guidance bars. No numbers, nothing that reads as a vital.
+  // 37 x 44 on a 40 x 48 case leaves roughly a 1.5 mm bezel.
   const glass = new THREE.Mesh(
-    new RoundedBoxGeometry(34, 1.2, 42, 2, 1.5),
-    new THREE.MeshStandardMaterial({ color: 0x11150f, roughness: 0.2, emissive: 0x0c120b, emissiveIntensity: 0.6 }));
+    new RoundedBoxGeometry(37, 1.2, 44, 2, 1.5),
+    new THREE.MeshStandardMaterial({ color: 0x11150f, roughness: 0.18, emissive: 0x0c120b, emissiveIntensity: 0.6 }));
   glass.position.y = CASE_Y + 5.3;
   wrist.add(glass);
   for (let i = 0; i < 3; i++) {
     const bar = new THREE.Mesh(
-      new RoundedBoxGeometry(24 - (i % 2) * 5, 0.5, 2.2, 2, 0.7),
+      new RoundedBoxGeometry(27 - (i % 2) * 5, 0.5, 2.4, 2, 0.7),
       new THREE.MeshStandardMaterial({ color: MOSS, roughness: 0.5, emissive: 0x3f5c38, emissiveIntensity: 0.55 }));
-    bar.position.set(-2 + (i % 2) * 2.5, CASE_Y + 6.1, -13 + i * 6);
+    bar.position.set(-2 + (i % 2) * 2.5, CASE_Y + 6.1, -14 + i * 6.5);
     wrist.add(bar);
   }
   const alert = new THREE.Mesh(
-    new RoundedBoxGeometry(26, 0.5, 4.2, 2, 1.2),
+    new RoundedBoxGeometry(29, 0.5, 4.4, 2, 1.2),
     new THREE.MeshStandardMaterial({ color: CLAY, roughness: 0.5, emissive: 0x5e2a10, emissiveIntensity: 0.55 }));
-  alert.position.set(0, CASE_Y + 6.1, 13);
+  alert.position.set(0, CASE_Y + 6.1, 14);
   wrist.add(alert);
 
   // Cable connector boss on the case side facing the pack.
-  const wristBoss = sh(new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 4, 14), mat(STEEL, 0.35, 0.85)));
+  const wristBoss = sh(new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 4.5, 18), mat(STEEL, 0.3, 0.9)));
   wristBoss.rotation.z = Math.PI / 2;
   wristBoss.position.set(21, CASE_Y - 1.5, 0);
   wrist.add(wristBoss);
@@ -123,19 +130,29 @@ export function mountProductViewer({ mount, status }) {
   // concave against the waist.
   const pack = new THREE.Group();
 
-  const shellGeo = new RoundedBoxGeometry(120, 80, 25, 5, 6);
+  // Softer fillets and a slightly glossier finish so it reads as a moulded
+  // enclosure rather than an extruded rectangle.
+  const shellGeo = new RoundedBoxGeometry(120, 80, 25, 6, 8);
   bendAroundY(shellGeo, 150, 162.5);
   shellGeo.computeVertexNormals();
-  const shell = sh(new THREE.Mesh(shellGeo, mat(GRAPHITE, 0.55)));
+  const shell = sh(new THREE.Mesh(shellGeo, mat(GRAPHITE, 0.42, 0.08)));
   pack.add(shell);
 
-  // Seam hinting at the two-part interior: compute on one side, battery on
-  // the other. A vertical recessed line on the outer face.
+  // Parting seam running around the whole enclosure at mid-thickness, where
+  // the two halves of a moulded case would meet.
+  const seamGeo = new RoundedBoxGeometry(121, 1.1, 26, 3, 0.5);
+  bendAroundY(seamGeo, 150, 162.5);
+  seamGeo.computeVertexNormals();
+  const seam = sh(new THREE.Mesh(seamGeo, mat(CARBON, 0.75)));
+  pack.add(seam);
+
+  // Vertical seam on the outer face hinting at the two-part interior:
+  // compute on one side, battery on the other.
   pack.add(onOuterFace(new THREE.BoxGeometry(0.9, 70, 0.8), CARBON, 0.14, 0, 175.6, sh, mat));
 
-  // Passive vent slots near the top, compute side.
-  for (let i = 0; i < 3; i++) {
-    pack.add(onOuterFace(new THREE.BoxGeometry(11, 1.5, 0.8), CARBON, -0.16, 26 - i * 5, 175.6, sh, mat));
+  // Passive vent slots, compute side.
+  for (let i = 0; i < 5; i++) {
+    pack.add(onOuterFace(new THREE.BoxGeometry(13, 1.6, 0.9), CARBON, -0.16, 28 - i * 4.5, 175.6, sh, mat));
   }
 
   // Belt strap passing behind the inner face through two loops.
@@ -148,13 +165,18 @@ export function mountProductViewer({ mount, status }) {
     pack.add(onOuterFace(new THREE.BoxGeometry(13, 32, 2.5), GRAPHITE, th, 0, 143.2, sh, mat));
   }
 
-  // Cable connector boss on the outer face, wrist side.
+  // Cable connector: a recessed port sunk into the outer face with a metal
+  // collar around it, so the cable lands somewhere rather than into a flat wall.
   const packBossGroup = new THREE.Group();
-  const packBoss = sh(new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 5, 14), mat(STEEL, 0.35, 0.85)));
+  const well = sh(new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 2.4, 20), mat(0x0e100d, 0.8)));
+  well.rotation.x = Math.PI / 2;
+  well.position.set(0, 18, 174.6);
+  packBossGroup.add(well);
+  const packBoss = sh(new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.4, 5, 18), mat(STEEL, 0.3, 0.9)));
   packBoss.rotation.x = Math.PI / 2;
-  packBossGroup.rotation.y = -0.3;
   packBoss.position.set(0, 18, 176);
   packBossGroup.add(packBoss);
+  packBossGroup.rotation.y = -0.3;
   packBossGroup.position.z = -162.5;
   pack.add(packBossGroup);
 
@@ -173,7 +195,7 @@ export function mountProductViewer({ mount, status }) {
   m1.y = Math.max(8, Math.min(a.y, b.y) - 16);   // shallow sag, not taut, not an arc
   m2.y = Math.max(10, Math.min(a.y, b.y) - 10);
   const curve = new THREE.CatmullRomCurve3([a, m1, m2, b]);
-  const cable = sh(new THREE.Mesh(new THREE.TubeGeometry(curve, 64, 1.1, 10), mat(GRAPHITE, 0.7)));
+  const cable = sh(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 3.0, 14), mat(GRAPHITE, 0.62)));
   scene.add(cable);
 
   // ══ NUMBERED MARKERS ══════════════════════════════════════════════════════
@@ -203,7 +225,7 @@ export function mountProductViewer({ mount, status }) {
 
   // ground shadow
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(500, 500), new THREE.ShadowMaterial({ opacity: 0.16 }));
+    new THREE.PlaneGeometry(500, 500), new THREE.ShadowMaterial({ opacity: 0.13 }));
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);

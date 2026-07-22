@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How it works · Ghost Medic</title>
 <meta name="description" content="The four parts of Ghost Medic in plain language: what the wrist unit senses, how the readings travel, what the offline language model does with them, and what each part is standing in for.">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -18,6 +18,7 @@
     <a href="how-it-works.html" aria-current="page">How it works</a>
     <a href="hardware.html">Hardware</a>
     <a href="proof.html">Proof</a>
+    <a href="about.html">About</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
   </nav>
 </div></header>
@@ -27,9 +28,8 @@
   <section id="intro" class="col">
     <p class="eyebrow">How it works</p>
     <h1>Four parts, one line of text between them.</h1>
-    <p class="lead">Sensing happens on the wrist. Thinking happens in the pack. Between them
-    runs one line of plain text, ten times a second. This page walks that path and flags every
-    stand-in.</p>
+    <p class="lead">Sensing on the wrist, thinking in the pack, one line of plain text between
+    them ten times a second. This page walks that path and flags every stand-in.</p>
   </section>
 
   <!-- ═══════════ THE DIAGRAM ═══════════ -->
@@ -93,8 +93,8 @@
   <section id="wrist" class="col">
     <p class="eyebrow">01 · The wrist unit</p>
     <h2>Three sensors, and one thing it refuses to report</h2>
-    <p>The wrist unit carries three parts that each answer a different question. It is
-    programmed in C that runs directly on the chip, with no operating system underneath it.</p>
+    <p>Three parts, each answering a different question, driven by C running directly on the
+    chip with no operating system underneath.</p>
 
     <div class="table-scroll">
     <table>
@@ -108,8 +108,8 @@
     </div>
 
     <h3>Height from air pressure</h3>
-    <p>Air gets thinner as you climb, predictably enough to run backwards: measure the
-    pressure, calculate the height. This is the firmware line that does it.</p>
+    <p>Air thins predictably as you climb, so you can run it backwards: measure pressure, get
+    height. The firmware line that does it:</p>
 
     <div class="translate">
       <pre class="artifact">float bmp280_pressure_to_altitude(float pressure_pa) {
@@ -132,9 +132,8 @@
     </figure>
 
     <h3>What a fall looks like to a machine</h3>
-    <p>In free fall an accelerometer reads near zero; on landing it reads a sharp spike.
-    Either alone is ordinary. The firmware only calls it a fall when it sees both, in that
-    order, within 400 milliseconds.</p>
+    <p>In free fall an accelerometer reads near zero; on landing, a sharp spike. Either alone
+    is ordinary, so the firmware requires both, in that order, within 400 milliseconds.</p>
 
     <figure class="chart">
       <div class="frame"><img src="assets/charts/fall-signature.svg"
@@ -150,35 +149,32 @@
     </div>
 
     <h3>No heart rate</h3>
-    <p>The optical sensor shines light through your skin and measures what comes back. That
-    signal does contain a pulse, but extracting it takes signal processing this project does
-    not implement. So the site shows the raw light readings and calls them exactly that.</p>
-    <p>This is not a footnote. It is enforced in four places: the firmware only reports counts,
-    the app has no field to put a heart rate in, the text sent to the model explicitly forbids
-    inferring one, and a test fails if a heart rate ever appears. An invented vital sign is
-    worse than no vital sign, because someone might act on it.</p>
+    <p>The optical sensor measures light reflected off skin. That signal does contain a pulse,
+    but extracting it takes signal processing this project does not implement, so the raw
+    readings are shown as exactly that.</p>
+    <p>Enforced in four places: the firmware only reports counts, the app has no field for a
+    heart rate, the text sent to the model forbids inferring one, and a test fails if one ever
+    appears. An invented vital sign is worse than none, because someone might act on it.</p>
   </section>
 
   <!-- ═══════════ 02 ═══════════ -->
   <section id="link" class="col">
     <p class="eyebrow">02 · The link</p>
     <h2>A cable doing a radio's job</h2>
-    <p>In the finished idea, the wrist unit talks to the pack over a short-range radio. That
-    radio does not exist yet. A small program does the same job over a wire: a line goes in
-    and the identical line comes out, with no interpreting, reshaping, or fixing. Because the
-    line is unchanged, the parts downstream genuinely cannot tell whether it came from a
-    board, the browser simulator, or a recording.</p>
-    <p>It drops one thing only: the greeting the board prints at power-on, which has no
-    timestamp and is therefore not a reading.</p>
+    <p>The finished idea uses a short-range radio, which does not exist yet. A small program
+    does the same job over a wire: a line goes in, the identical line comes out, with no
+    interpreting or reshaping. Because it is unchanged, nothing downstream can tell whether it
+    came from a board, the simulator, or a recording. It drops one thing only: the greeting at
+    power-on, which has no timestamp and is therefore not a reading.</p>
   </section>
 
   <!-- ═══════════ 03 ═══════════ -->
   <section id="brain" class="col">
     <p class="eyebrow">03 · The pack computer</p>
     <h2>The model is told what the sensors saw, and what not to conclude</h2>
-    <p>The model is a small open one running locally with no internet. The engineering is what
-    it is told, and what it is forbidden from doing. Every question carries a block of sensor
-    readings written out in words, each with its limits attached:</p>
+    <p>The model is a small open one running locally. The engineering is what it is told and
+    what it is forbidden from doing. Every question carries the sensor readings in words, each
+    with its limits attached:</p>
 
     <div class="translate">
       <pre class="artifact">DERIVED READINGS:
@@ -199,19 +195,17 @@ RAW SIGNALS (non-diagnostic):
         pulse. A failed sensor reads <strong>"unavailable"</strong>, never zero.</p>
       </div>
     </div>
-    <p class="caption">That is the real output of <code>services/sensorContext.ts</code>,
-    wrapped here to fit the column and shown without its opening and closing markers. The app
-    can show you the exact bytes it sent, on request.</p>
+    <p class="caption">Real output of <code>services/sensorContext.ts</code>, wrapped to fit
+    and shown without its opening and closing markers.</p>
 
-    <p>One rule sits above all of it: if the readings disagree with what the person says, the
-    person wins. A sensor on a wrist knows less than someone looking at their own leg.</p>
+    <p>One rule sits above the rest: if the readings disagree with the person, the person wins.
+    A sensor on a wrist knows less than someone looking at their own leg.</p>
 
     <h3>When the wristband speaks first</h3>
-    <p>If the accelerometer flags a fall, the assistant starts the conversation itself, with
-    guidance for someone who may have just hit their head. One guard makes that workable: the
-    wristband reports ten times a second, so a single fall arrives as a long run of identical
-    "fall detected" readings. The trigger fires only when the answer changes from no to yes,
-    then stays quiet for thirty seconds. One fall, one question.</p>
+    <p>If the accelerometer flags a fall, the assistant starts the conversation itself. One
+    guard makes that workable: the wristband reports ten times a second, so a single fall
+    arrives as a long run of identical readings. The trigger fires only when the answer changes
+    from no to yes, then stays quiet for thirty seconds. One fall, one question.</p>
 
     <div class="translate">
       <pre class="artifact">const risingEdge = fallDetected &amp;&amp; !prevFall;
@@ -231,11 +225,9 @@ if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
   <section id="interface" class="col">
     <p class="eyebrow">04 · The interface</p>
     <h2>Six steps, and one line that matters more than the rest</h2>
-    <p>The answer comes back as at most six one-sentence steps, because the reader may be
-    frightened, cold, and alone. It always ends with an evacuation line, and the app pulls
-    that line out and displays it separately. Derived values and raw signals are kept visibly
-    apart, and a failed reading shows a dash, never a zero.</p>
-    <p>Here is that behaviour, replayed:</p>
+    <p>At most six one-sentence steps, because the reader may be frightened, cold, and alone.
+    It always ends with an evacuation line, which the app pulls out and displays separately.
+    Derived values and raw signals stay visibly apart, and a failed reading shows a dash.</p>
 
     <div class="phone" id="app-demo">
       <div class="pd-head"><span>GHOST MEDIC</span><span class="pd-live">● LIVE</span></div>
@@ -253,9 +245,8 @@ if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
     <div class="gap">
       <p class="eyebrow">Placeholders</p>
       <p>Voice recording and wound photos are captured for real, but nothing transcribes or
-      analyses them yet. Both are marked as placeholders in the code. And the word-by-word
-      reveal above is display pacing: the complete answer arrives first, in the real app as
-      in this demo.</p>
+      analyses them yet. The word-by-word reveal above is display pacing: the complete answer
+      arrives first, in the real app as in this demo.</p>
     </div>
   </section>
 
