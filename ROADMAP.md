@@ -112,12 +112,22 @@ for the wire contract.
 - ⬜ Save a real capture file; note any datasheet/timing bugs found on the bench.
 - **DONE WHEN:** one honest artifact proves the firmware runs on metal.
 
-## Phase 4 — The proof website  ⬜
+## Phase 4 — The proof website  🟡 BUILT, NOT YET DEPLOYED (2026-07-22)
 *The honest storytelling layer over everything above.*
-- ⬜ Next.js on Vercel: topology diagram → embedded live simulator → fall-detection
-  demo → compile/test receipts (clean `-Wall -Wextra -O3` build, passing host
-  tests) → the hardware video → deep links into this repo.
-- ⬜ Label real vs. simulated **everywhere** (reuse the table in `ARCHITECTURE.md`).
+- 🟢 **Stack decision:** zero-dependency static site in `site/` (per
+  `docs/WEBSITE_STRATEGY.md` §5 — static-first, no build step), NOT Next.js.
+  Deploys to Vercel with root dir = `site`; exact owner steps in `site/README.md`.
+- 🟢 Single scrolling page: topology → embedded live simulator (iframe, labeled)
+  → physics section (real C excerpts + regenerated test receipts + interactive
+  altitude formula widget, labeled as a JS mirror) → end-to-end section (recorded
+  fall-vs-no-fall transcript, labeled "recorded, not live"; run-it-yourself
+  commands) → firmware receipts → hardware page-section (KiCad render + designed-
+  not-built gap box first) → annotated system prompt → full real-vs-simulated
+  table. All self-contained, zero external resources.
+- 🟢 Evidence record backing the site's transcript claims:
+  `docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md`.
+- ⬜ Owner deploys to Vercel (steps in `site/README.md`) and eyeballs the page.
+- ⬜ Hardware-run video slot stays honestly empty until Phase 3 happens.
 - **DONE WHEN:** a stranger understands the engineering and sees it work in ~90 s.
 
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
@@ -137,7 +147,9 @@ for the wire contract.
 3. When unsure "is this real or simulated?", the answer goes in the label, not the code.
 
 ## Known cleanups (small, do when convenient)
-- `services/llmConfig.example.ts` currently has a syntax error (~line 120) and is
-  tracked — it breaks `npm run typecheck`. Fix the template or exclude `*.example.ts`.
+- ~~`services/llmConfig.example.ts` syntax error breaking typecheck~~ — **stale as
+  of 2026-07-22**: `npx tsc --noEmit` passes clean; the file is 46 lines and fine.
 - Consider lifting `legacy/src/scenarios/*.json` (wilderness vignettes) out for use
   as LLM demo/eval inputs.
+- If `simulator/index.html` changes, re-copy it to `site/simulator/index.html`
+  (the site embeds a byte-identical copy; see `site/README.md`).
