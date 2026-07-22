@@ -246,8 +246,34 @@
         </div>
         <input type="range" id="ex" min="0" max="100" step="1" value="0">
         <div class="derived">
-          → heart rate <b><span id="hrD">60</span> bpm</b>
-          <span>· MAX30102 raw IR <b><span id="irD">10500</span></b> / RED <b><span id="redD">10340</span></b></span>
+          → MAX30102 raw counts (photodiode, NOT heart rate)
+          <span>IR <b><span id="irD">10500</span></b> / RED <b><span id="redD">10340</span></b></span>
+        </div>
+      </div>
+
+      <!-- Temperature offset (independent of altitude lapse) -->
+      <div class="ctrl">
+        <div class="lab">
+          <span class="name">TEMP OFFSET</span>
+          <span class="val"><span id="toV">0</span> <small>°C</small></span>
+        </div>
+        <input type="range" id="toff" min="-40" max="20" step="1" value="0">
+        <div class="derived">
+          → emitted BMP280 temp <b><span id="tempOutD">15.0</span> °C</b>
+          (altitude lapse + offset — drag left to simulate a cold snap)
+        </div>
+      </div>
+
+      <!-- Sensor failure toggles: exercise the ok:false / fields-omitted path -->
+      <div class="ctrl">
+        <div class="lab">
+          <span class="name">SENSOR FAILURES</span>
+          <span class="val" style="font-size:11px;color:var(--ink-dim)">emit ok:false, fields omitted</span>
+        </div>
+        <div class="derived" style="gap:18px">
+          <label><input type="checkbox" id="failMax"> MAX30102</label>
+          <label><input type="checkbox" id="failBmp"> BMP280</label>
+          <label><input type="checkbox" id="failLis"> LIS3DH</label>
         </div>
       </div>
 
@@ -265,7 +291,7 @@
       <h2>Live Sensor Stream <span class="dot"></span></h2>
 
       <div class="tiles">
-        <div class="tile ok"><div class="k">MAX30102</div><div class="v"><span id="tHr">60</span><small> bpm</small></div></div>
+        <div class="tile ok"><div class="k">MAX30102 raw IR</div><div class="v"><span id="tIr">10500</span><small> cnt</small></div></div>
         <div class="tile ok"><div class="k">BMP280</div><div class="v"><span id="tAlt">0</span><small> m</small></div></div>
         <div class="tile ok"><div class="k">LIS3DH</div><div class="v"><span id="tMag">1.00</span><small> g</small></div></div>
       </div>
@@ -343,14 +369,21 @@ function altitudeToTempC(alt_m){
   return TEMP_SEA_LEVEL_C - TEMP_LAPSE_PER_M * alt_m;
 }
 
-/* ---- Exertion -> heart rate ----------------------------------------- */
-function exertionToHr(ex){ return 60 + (ex / 100) * 120; } // 60 resting .. 180 max
+/* ---- Exertion -> simulated pulse-rate driver -------------------------- *
+ * INTERNAL simulation parameter of the simulated wearer, used ONLY to shape
+ * the raw optical waveform below. It is never displayed and never emitted:
+ * the real device outputs raw counts, not heart rate (no HR/SpO2 anywhere). */
+function exertionToPulseDriver(ex){ return 60 + (ex / 100) * 120; }
 
 /* ---- State ---------------------------------------------------------- */
 const els = {
-  alt: document.getElementById('alt'),
-  g:   document.getElementById('g'),
-  ex:  document.getElementById('ex'),
+  alt:  document.getElementById('alt'),
+  g:    document.getElementById('g'),
+  ex:   document.getElementById('ex'),
+  toff: document.getElementById('toff'),
+  failMax: document.getElementById('failMax'),
+  failBmp: document.getElementById('failBmp'),
+  failLis: document.getElementById('failLis'),
 };
 let paused = false;
 let lineCount = 0;
@@ -440,13 +473,17 @@ function tick(){
   const dt_s = LOOP_PERIOD_MS / 1000;
 
   // --- Inputs ---
-  const altSlider = parseFloat(els.alt.value);
-  const gSlider   = parseFloat(els.g.value);
-  const exSlider  = parseFloat(els.ex.value);
+  const altSlider  = parseFloat(els.alt.value);
+  const gSlider    = parseFloat(els.g.value);
+  const exSlider   = parseFloat(els.ex.value);
+  const tempOffset = parseFloat(els.toff.value);
+  const failMax = els.failMax.checked;
+  const failBmp = els.failBmp.checked;
+  const failLis = els.failLis.checked;
 
   // --- BMP280 ---
   const press = altitudeToPressurePa(altSlider);
-  const baseTemp = altitudeToTempC(altSlider);
+  const baseTemp = altitudeToTempC(altSlider) + tempOffset;
   const temp = baseTemp + (Math.random()-0.5)*0.06;
   // altitude the firmware would REPORT back from that pressure (round-trip)
   const altReported = ALT_COEFF * (1 - Math.pow(press/SEA_LEVEL_PA, ALT_EXP));
@@ -459,24 +496,28 @@ function tick(){
     else { targetMag = scripted; }
   }
   const acc = accelFromMagnitude(targetMag);
-  const fall = updateFallDetection(acc.mag, t_ms);
+  // A failed accelerometer produces no reading, so no fall detection this tick
+  // (mirrors firmware: fall logic only runs on a successful LIS3DH read).
+  const fall = failLis ? false : updateFallDetection(acc.mag, t_ms);
   if (fall) alertHotUntil = now + 4000;
 
-  // --- MAX30102 ---
-  const hr = exertionToHr(exSlider);
-  const mc = maxCounts(hr, dt_s);
+  // --- MAX30102 raw counts (pulse driver is internal-only, never shown) ---
+  const pulse = exertionToPulseDriver(exSlider);
+  const mc = maxCounts(pulse, dt_s);
 
   // --- Assemble JSON exactly like main.c prints it ---
+  // Per DATA_FORMAT.md: a failed sensor emits {"ok":false} with its numeric
+  // fields OMITTED entirely — not null, not 0.
   const obj = {
     t_ms: t_ms,
-    max30102: { ok:true, red:mc.red, ir:mc.ir },
-    bmp280:   { ok:true, temp_c:parseFloat(f2(temp)), press_pa:parseFloat(f1(press)), alt_m:parseFloat(f1(altReported)) },
-    lis3dh:   { ok:true, x_g:parseFloat(f3(acc.x)), y_g:parseFloat(f3(acc.y)), z_g:parseFloat(f3(acc.z)), mag_g:parseFloat(f3(acc.mag)) },
+    max30102: failMax ? { ok:false } : { ok:true, red:mc.red, ir:mc.ir },
+    bmp280:   failBmp ? { ok:false } : { ok:true, temp_c:parseFloat(f2(temp)), press_pa:parseFloat(f1(press)), alt_m:parseFloat(f1(altReported)) },
+    lis3dh:   failLis ? { ok:false } : { ok:true, x_g:parseFloat(f3(acc.x)), y_g:parseFloat(f3(acc.y)), z_g:parseFloat(f3(acc.z)), mag_g:parseFloat(f3(acc.mag)) },
     fall_detected: fall
   };
 
   emitLine(obj);
-  updateTiles(hr, altReported, acc.mag);
+  updateTiles(failMax ? null : mc.ir, failBmp ? null : altReported, failLis ? null : acc.mag);
   updateAlert(now);
   document.getElementById('uptime').textContent = f1((now - t0)/1000);
 }
@@ -484,11 +525,18 @@ function tick(){
 /* ---- Render one JSON line into the scrolling feed ------------------- */
 function emitLine(o){
   // Build the exact single-line JSON string (field order matches firmware).
+  // A failed sensor prints {"ok":false} with its fields omitted (DATA_FORMAT.md).
+  const maxStr = o.max30102.ok
+    ? '"max30102":{"ok":true,"red":'+o.max30102.red+',"ir":'+o.max30102.ir+'}'
+    : '"max30102":{"ok":false}';
+  const bmpStr = o.bmp280.ok
+    ? '"bmp280":{"ok":true,"temp_c":'+f2(o.bmp280.temp_c)+',"press_pa":'+f1(o.bmp280.press_pa)+',"alt_m":'+f1(o.bmp280.alt_m)+'}'
+    : '"bmp280":{"ok":false}';
+  const lisStr = o.lis3dh.ok
+    ? '"lis3dh":{"ok":true,"x_g":'+f3(o.lis3dh.x_g)+',"y_g":'+f3(o.lis3dh.y_g)+',"z_g":'+f3(o.lis3dh.z_g)+',"mag_g":'+f3(o.lis3dh.mag_g)+'}'
+    : '"lis3dh":{"ok":false}';
   const str =
-    '{"t_ms":'+o.t_ms+',' +
-    '"max30102":{"ok":true,"red":'+o.max30102.red+',"ir":'+o.max30102.ir+'},' +
-    '"bmp280":{"ok":true,"temp_c":'+f2(o.bmp280.temp_c)+',"press_pa":'+f1(o.bmp280.press_pa)+',"alt_m":'+f1(o.bmp280.alt_m)+'},' +
-    '"lis3dh":{"ok":true,"x_g":'+f3(o.lis3dh.x_g)+',"y_g":'+f3(o.lis3dh.y_g)+',"z_g":'+f3(o.lis3dh.z_g)+',"mag_g":'+f3(o.lis3dh.mag_g)+'},' +
+    '{"t_ms":'+o.t_ms+',' + maxStr + ',' + bmpStr + ',' + lisStr + ',' +
     '"fall_detected":'+(o.fall_detected?'true':'false')+'}';
 
   // Optional: forward the exact same line to the bridge if it's connected.
@@ -521,11 +569,11 @@ function colorize(s){
   return h;
 }
 
-/* ---- Live tiles ----------------------------------------------------- */
-function updateTiles(hr, alt, mag){
-  document.getElementById('tHr').textContent  = Math.round(hr);
-  document.getElementById('tAlt').textContent = f1(alt);
-  document.getElementById('tMag').textContent = f2(mag);
+/* ---- Live tiles (null = sensor failed -> show em-dash, never a 0) ---- */
+function updateTiles(ir, alt, mag){
+  document.getElementById('tIr').textContent  = ir  === null ? '—' : Math.round(ir);
+  document.getElementById('tAlt').textContent = alt === null ? '—' : f1(alt);
+  document.getElementById('tMag').textContent = mag === null ? '—' : f2(mag);
 }
 
 /* ---- Fall alert banner ---------------------------------------------- */
@@ -543,21 +591,24 @@ function updateAlert(now){
 
 /* ---- Derived-value labels under the sliders (live, pre-stream) ------- */
 function refreshDerived(){
-  const alt = parseFloat(els.alt.value);
-  const g   = parseFloat(els.g.value);
-  const ex  = parseFloat(els.ex.value);
+  const alt  = parseFloat(els.alt.value);
+  const g    = parseFloat(els.g.value);
+  const ex   = parseFloat(els.ex.value);
+  const toff = parseFloat(els.toff.value);
   document.getElementById('altV').textContent  = alt;
   document.getElementById('pressD').textContent= f1(altitudeToPressurePa(alt));
   document.getElementById('tempD').textContent = f1(altitudeToTempC(alt));
   document.getElementById('gV').textContent    = f2(g);
   document.getElementById('magD').textContent  = f3(g);
   document.getElementById('exV').textContent   = ex;
-  const hr = exertionToHr(ex);
-  document.getElementById('hrD').textContent   = Math.round(hr);
-  document.getElementById('irD').textContent   = Math.round(10440 + (180+hr*1.2)*0.5);
-  document.getElementById('redD').textContent  = Math.round(10180 + (180+hr*1.2)*0.48);
+  document.getElementById('toV').textContent   = toff;
+  document.getElementById('tempOutD').textContent = f1(altitudeToTempC(alt) + toff);
+  // Preview of the raw counts only — the pulse driver itself is never shown.
+  const pulse = exertionToPulseDriver(ex);
+  document.getElementById('irD').textContent   = Math.round(10440 + (180+pulse*1.2)*0.5);
+  document.getElementById('redD').textContent  = Math.round(10180 + (180+pulse*1.2)*0.48);
 }
-['alt','g','ex'].forEach(id => els[id].addEventListener('input', refreshDerived));
+['alt','g','ex','toff'].forEach(id => els[id].addEventListener('input', refreshDerived));
 
 /* ---- Buttons -------------------------------------------------------- */
 document.getElementById('fallBtn').addEventListener('click', () => {
