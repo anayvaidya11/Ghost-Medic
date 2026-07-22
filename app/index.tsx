@@ -41,6 +41,8 @@ import { streamTCCCGuidance } from '@services/llmService';
 import { transcribeAudio } from '@services/transcriptionService';
 import { useWristVitals } from '@services/useWristVitals';
 import type { WristVitals } from '@services/wristVitalsParser';
+import { buildSensorContext } from '@services/sensorContext';
+import { createFallTrigger, FALL_TRIGGER_COOLDOWN_MS } from '@services/fallTrigger';
 
 // ── PALETTE (per spec) ───────────────────────────────────────────────────────
 const BG = '#0a0f0a';
@@ -93,6 +95,22 @@ export default function GhostMedic() {
   // derived altitude/temp/fall. No HR/SpO2 anywhere (Decision 2). When the bridge
   // isn't running this stays DISCONNECTED and the UI shows "—", never a fake 0.
   const vitals = useWristVitals();
+  // Ref mirror so submit() reads the snapshot at submit time without re-creating
+  // every callback at the 10 Hz vitals update rate.
+  const vitalsRef = useRef(vitals);
+  vitalsRef.current = vitals;
+
+  // The exact sensor-context block sent with the last LLM request (Phase 2).
+  // Kept in state so the UI can show the user precisely what the model was given.
+  const [sentSensorBlock, setSentSensorBlock] = useState<string | null>(null);
+  const [sensorBlockExpanded, setSensorBlockExpanded] = useState(false);
+
+  // Fall auto-query (Phase 2 demo moment): a false→true fall_detected edge
+  // auto-submits a post-fall guidance query. Toggleable; debounced in the pure
+  // fallTrigger module (rising edge + wall-clock cooldown + busy suppression).
+  const [fallAutoOn, setFallAutoOn] = useState(true);
+  const [autoTriggered, setAutoTriggered] = useState(false);
+  const fallTriggerRef = useRef(createFallTrigger({ cooldownMs: FALL_TRIGGER_COOLDOWN_MS }));
 
   // READY-state input
   const [typing, setTyping] = useState(false);
@@ -193,11 +211,12 @@ export default function GhostMedic() {
 
   // ── Core submit → THINKING → RESPONSE ─────────────────────────────────────
   const submit = useCallback(
-    (inputText: string, image: string | null, reportOverride?: string) => {
+    (inputText: string, image: string | null, reportOverride?: string, auto?: boolean) => {
       const cleanText = inputText.trim();
       if (!cleanText && !image && !reportOverride) return;
 
       stopSpeech();
+      setAutoTriggered(!!auto);
       setSubmittedText(cleanText || 'Wound photograph submitted');
       setImageUri(image);
       setImageExpanded(false);
@@ -215,6 +234,14 @@ export default function GhostMedic() {
           .filter(Boolean)
           .join('\n');
 
+      // Phase 2: attach the sensor snapshot taken NOW (never stale — the ref
+      // tracks the live stream; a dead bridge yields an honest "no sensor data"
+      // block, never fabricated readings). Stored so the UI can show it.
+      const sensorBlock = buildSensorContext(vitalsRef.current);
+      setSentSensorBlock(sensorBlock);
+      setSensorBlockExpanded(false);
+      const reportWithSensors = `${report}\n\n${sensorBlock}`;
+
       const controller = new AbortController();
       abortRef.current = controller;
 
@@ -222,7 +249,7 @@ export default function GhostMedic() {
       let movedToResponse = false;
 
       streamTCCCGuidance(
-        report,
+        reportWithSensors,
         {
           onToken: (token) => {
             if (controller.signal.aborted) return;
@@ -252,6 +279,31 @@ export default function GhostMedic() {
     },
     [audioOn, buildUtterances, speakSequence, stopSpeech]
   );
+
+  // ── Fall auto-query (sensor-triggered, Phase 2) ───────────────────────────
+  // Every vitals update feeds the debounced trigger. Suppressed (edge consumed,
+  // no fire) while: toggled off, a request is in flight (thinking), or the user
+  // is composing a photo review. Allowed from 'ready' and 'response' so a new
+  // fall can interrupt an old answer with fresh post-fall guidance.
+  useEffect(() => {
+    const suppressed = !fallAutoOn || appState === 'thinking' || appState === 'review';
+    const fired = fallTriggerRef.current.update(
+      vitals.source === 'live' && vitals.fallDetected,
+      Date.now(),
+      suppressed
+    );
+    if (fired) {
+      submit(
+        '⚠ SENSOR-TRIGGERED: fall detected by wrist unit',
+        null,
+        'AUTOMATIC SENSOR-TRIGGERED QUERY (not typed by the user): the wrist ' +
+          "unit's accelerometer heuristic just detected a fall. The user has not " +
+          'said anything yet. Give immediate post-fall self-assessment guidance ' +
+          '(head/neck/spine precautions, checking for injury before moving).',
+        true
+      );
+    }
+  }, [vitals, fallAutoOn, appState, submit]);
 
   // ── Voice: hold-to-speak ──────────────────────────────────────────────────
   const startRecording = useCallback(async () => {
@@ -364,6 +416,9 @@ export default function GhostMedic() {
     setResponse('');
     setTypedText('');
     setTyping(false);
+    setSentSensorBlock(null);
+    setSensorBlockExpanded(false);
+    setAutoTriggered(false);
     setAppState('ready');
   }, [stopSpeech]);
 
@@ -394,6 +449,8 @@ export default function GhostMedic() {
               typing={typing}
               typedText={typedText}
               audioOn={audioOn}
+              fallAutoOn={fallAutoOn}
+              onToggleFallAuto={() => setFallAutoOn((v) => !v)}
               onHoldStart={startRecording}
               onHoldEnd={stopRecording}
               onPhoto={takePhoto}
@@ -427,6 +484,10 @@ export default function GhostMedic() {
               imageUri={imageUri}
               imageExpanded={imageExpanded}
               onToggleImage={() => setImageExpanded((v) => !v)}
+              sensorBlock={sentSensorBlock}
+              sensorExpanded={sensorBlockExpanded}
+              onToggleSensor={() => setSensorBlockExpanded((v) => !v)}
+              autoTriggered={autoTriggered}
               spokenIndex={spokenIndex}
               audioOn={audioOn}
               onRepeat={repeat}
@@ -527,6 +588,8 @@ function ReadyView(props: {
   typing: boolean;
   typedText: string;
   audioOn: boolean;
+  fallAutoOn: boolean;
+  onToggleFallAuto: () => void;
   onHoldStart: () => void;
   onHoldEnd: () => void;
   onPhoto: () => void;
@@ -604,15 +667,26 @@ function ReadyView(props: {
         )}
       </View>
 
-      <TouchableOpacity
-        style={[s.audioToggle, { borderColor: props.audioOn ? GREEN : DIM }]}
-        onPress={props.onToggleAudio}
-        activeOpacity={0.8}
-      >
-        <Text style={[s.audioLabel, { color: props.audioOn ? GREEN : DIM }]}>
-          {props.audioOn ? 'AUDIO ON' : 'AUDIO OFF'}
-        </Text>
-      </TouchableOpacity>
+      <View style={s.toggleRow}>
+        <TouchableOpacity
+          style={[s.audioToggle, s.toggleHalf, { borderColor: props.audioOn ? GREEN : DIM }]}
+          onPress={props.onToggleAudio}
+          activeOpacity={0.8}
+        >
+          <Text style={[s.audioLabel, { color: props.audioOn ? GREEN : DIM }]}>
+            {props.audioOn ? 'AUDIO ON' : 'AUDIO OFF'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[s.audioToggle, s.toggleHalf, { borderColor: props.fallAutoOn ? AMBER : DIM }]}
+          onPress={props.onToggleFallAuto}
+          activeOpacity={0.8}
+        >
+          <Text style={[s.audioLabel, { fontSize: 13, color: props.fallAutoOn ? AMBER : DIM }]}>
+            {props.fallAutoOn ? 'FALL AUTO-QUERY ON' : 'FALL AUTO-QUERY OFF'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -705,6 +779,10 @@ function ResponseView(props: {
   imageUri: string | null;
   imageExpanded: boolean;
   onToggleImage: () => void;
+  sensorBlock: string | null;
+  sensorExpanded: boolean;
+  onToggleSensor: () => void;
+  autoTriggered: boolean;
   spokenIndex: number;
   audioOn: boolean;
   onRepeat: () => void;
@@ -736,6 +814,36 @@ function ResponseView(props: {
             </Text>
             {props.imageExpanded && (
               <Image source={{ uri: props.imageUri }} style={s.imageExpanded} />
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* Honest labeling: this response was sensor-triggered, not user-typed. */}
+        {props.autoTriggered && (
+          <View style={s.autoChip}>
+            <Text style={s.autoChipLabel}>
+              ⚠ SENSOR-TRIGGERED — fall detected by wrist unit (not typed by user)
+            </Text>
+          </View>
+        )}
+
+        {/* Honesty affordance: the EXACT sensor block sent with this request.
+            Tap to expand — viewers can verify what the model was actually given. */}
+        {props.sensorBlock && (
+          <TouchableOpacity style={s.imageTag} onPress={props.onToggleSensor} activeOpacity={0.8}>
+            <Text
+              style={[
+                s.imageTagLabel,
+                { color: props.sensorBlock.includes('No sensor data') ? DIM : GREEN },
+              ]}
+            >
+              {(props.sensorExpanded ? '▾ ' : '▸ ') +
+                (props.sensorBlock.includes('No sensor data')
+                  ? 'NO SENSOR DATA WAS AVAILABLE'
+                  : 'SENSOR CONTEXT ATTACHED (LIVE)')}
+            </Text>
+            {props.sensorExpanded && (
+              <Text style={s.sensorBlockText}>{props.sensorBlock}</Text>
             )}
           </TouchableOpacity>
         )}
@@ -1048,6 +1156,24 @@ const s = StyleSheet.create({
   },
   imageTagLabel: { fontFamily: MONO, color: DIM, fontSize: 13, letterSpacing: 1 },
   imageExpanded: { width: '100%', height: 200, borderRadius: 6, marginTop: 12 },
+  sensorBlockText: {
+    fontFamily: MONO,
+    color: DIM,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 10,
+  },
+  autoChip: {
+    borderWidth: 1,
+    borderColor: AMBER,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 18,
+    backgroundColor: '#1c1400',
+  },
+  autoChipLabel: { fontFamily: MONO, color: AMBER, fontSize: 12, letterSpacing: 1 },
+  toggleRow: { flexDirection: 'row', gap: 12 },
+  toggleHalf: { flex: 1 },
   introLine: {
     color: WHITE,
     fontSize: 18,
