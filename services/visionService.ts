@@ -26,7 +26,7 @@
 const VISION_PROVIDER = 'stub';       // 'stub' | 'ollama' | 'anthropic' | 'openai'
 const VISION_MODEL = 'llava:13b';     // Change to your available vision model
 const VISION_PROMPT =
-  'You are a trauma assessment assistant. Describe this wound image concisely for a combat medic: type of wound, approximate size, visible bleeding, signs of contamination, and any immediate concerns. Be brief and clinical.';
+  'You are a wilderness first-aid assistant. Describe this wound image concisely for a first-aid responder: type of wound, approximate size, visible bleeding, signs of contamination, and any immediate concerns. Be brief and clinical.';
 
 /**
  * analyzeWoundImage — sends a base64 image to the vision backend for analysis.

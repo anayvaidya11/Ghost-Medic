@@ -59,6 +59,11 @@ Double-click `simulator/index.html`, or drag it into any modern browser
 - **Altitude (0–4000 m)** — sets BMP280 pressure and temperature.
 - **Motion / g-force (0–4 g)** — drives the accelerometer magnitude.
   **Simulate Fall** scripts the free-fall→impact sequence.
-- **Exertion (0–100)** — drives heart rate (~60 resting to ~180) and the raw
-  IR/RED optical counts.
+- **Exertion (0–100)** — drives an internal pulse model that shapes the raw
+  IR/RED optical counts. The pulse rate itself is never displayed or emitted —
+  the device outputs raw counts, not heart rate.
+- **Temp offset (−40..+20 °C)** — shifts the emitted BMP280 temperature on top
+  of the altitude lapse rate (cold-snap / heat demos).
+- **Sensor failures** — per-sensor checkboxes emit `{"ok":false}` with numeric
+  fields omitted (per `DATA_FORMAT.md`), to exercise the consumer's failure path.
 - **Pause / Clear** — freeze the stream or wipe the log.

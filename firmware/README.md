@@ -58,7 +58,7 @@ reports `"ok":false` — one dead sensor doesn't take down the stream.
 
 | Sensor   | Role                         | I²C addr | Notes |
 |----------|------------------------------|----------|-------|
-| MAX30102 | Heart rate / SpO₂ (raw)      | `0x57`   | Fixed address. Driver reads **raw RED/IR FIFO counts only** — no HR/SpO₂ algorithm (out of scope). |
+| MAX30102 | Raw optical (PPG) front-end  | `0x57`   | Fixed address. Driver reads **raw RED/IR FIFO counts only** — no HR/SpO₂ algorithm (out of scope). |
 | BMP280   | Barometric pressure → altitude | `0x76` | SDO→GND. Reads factory calibration, applies Bosch compensation formulas. |
 | LIS3DH   | Accelerometer / fall detection | `0x18` | SDO→GND. Includes an **illustrative** free-fall→impact heuristic (see below). |
 

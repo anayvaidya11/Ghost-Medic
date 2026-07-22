@@ -482,7 +482,7 @@ editing + visual-layout job, not a writing-from-scratch job.
 
 ```
 ┌─ HERO
-│   "Ghost Medic — an offline AI trauma assistant for the backcountry."
+│   "Ghost Medic — an offline AI first-aid assistant prototype for the backcountry."
 │   One line on what it is. One line of honesty: "A working engineering proof —
 │   firmware, simulator, app, and local LLM. Not yet a physical device; every
 │   real-vs-simulated line is labeled below."

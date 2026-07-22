@@ -49,6 +49,10 @@ export async function streamTCCCGuidance(
         model: OLLAMA_MODEL,
         prompt,
         system: WILDERNESS_SYSTEM_PROMPT,
+        // HONEST: no real token streaming. The full response is fetched, then
+        // replayed word-by-word below for display pacing only (see ARCHITECTURE.md
+        // "Phase 2 — Sensor-Aware LLM"). Real streaming would need a readable
+        // fetch body, which React Native does not expose without extra deps.
         stream: false,
       }),
     });
@@ -62,7 +66,8 @@ export async function streamTCCCGuidance(
 
     if (!text) throw new Error('Empty response from model');
 
-    // Simulate token streaming for UX — bail out immediately if cancelled.
+    // SIMULATED streaming: replay the already-complete response ~18 ms/word so
+    // the UI feels live. This is display pacing, not model token streaming.
     const words = text.split(' ');
     for (const word of words) {
       if (aborted()) return;
