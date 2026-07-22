@@ -103,7 +103,7 @@ test('a missing sensor block entirely is not-ok with null readings', () => {
 
 // ── lines that must be rejected ────────────────────────────────────────────
 
-test('the boot line is rejected — it has no t_ms, so it is not a data line', () => {
+test('the boot line is rejected: it has no t_ms, so it is not a data line', () => {
   assert.equal(parseWristLine(BOOT_LINE), null);
 });
 
@@ -130,7 +130,7 @@ test('the parsed shape has no heart-rate, pulse or SpO2 field to fill in', () =>
   );
 });
 
-test('optical counts stay raw integers — no scaling, no derived value', () => {
+test('optical counts stay raw integers, with no scaling and no derived value', () => {
   const v = parseWristLine(IMPACT_LINE);
   assert.equal(v.red, 10249, 'exactly the count on the wire');
   assert.equal(v.ir, 10398, 'exactly the count on the wire');

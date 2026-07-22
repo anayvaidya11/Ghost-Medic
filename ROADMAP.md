@@ -99,6 +99,12 @@ for the wire contract.
   spine + hidden-trauma assessment absent from the no-fall response; the model
   did not invent HR/SpO2 when probed. (Seeded proof harness; transcript in the
   2026-07-22 session report.)
+- 🟢 **Tests committed 2026-07-22.** The 16/16 and 6/6 counts previously quoted
+  here came from in-session harnesses that were never committed, so a reviewer
+  who went looking found nothing. `tests/` now holds real files: 39 tests,
+  `npm test`, no framework and no new dependency (node:test plus Node's native
+  TypeScript support, Node >= 22.6). sensorContext 16, fallTrigger 12,
+  wristVitalsParser 11.
 - ⬜ Remaining: visually confirm the full loop in a running browser/app (same
   outstanding gap as Phase 1's "numbers move live" — everything up to the React
   render is verified headless). Known limit: the 3B model avoids inventing HR
@@ -129,6 +135,34 @@ for the wire contract.
 - ⬜ Owner deploys to Vercel (steps in `site/README.md`) and eyeballs the page.
 - ⬜ Hardware-run video slot stays honestly empty until Phase 3 happens.
 - **DONE WHEN:** a stranger understands the engineering and sees it work in ~90 s.
+
+### Phase 4b — rebuilt for a non-engineer audience  🟢 (2026-07-22)
+*Same evidence, different reader. Target is a founder who is technical enough to
+smell exaggeration but is not an embedded engineer.*
+- 🟢 Split the single 530-line page into four: `index.html` (pitch, status,
+  the wire format, the live simulator), `how-it-works.html`, `hardware.html`,
+  `proof.html`. Shared `style.css`, shared nav, section anchors on every page.
+- 🟢 Language rewritten throughout: translate rather than simplify, keeping the
+  specific number and the engineering reason. Two structural devices carry it:
+  the *translation pair* (technical artifact, then what it means) and the
+  *ledger mark* (works today / standing in / simulated).
+- 🟢 **House style, applies to all future site and doc prose:** no em dashes, no
+  figurative language, short direct sentences. Verbatim artifacts (test output,
+  model transcripts, code, the sensor block) are exempt and must never be edited
+  to fit the style. Recorded in `site/README.md`.
+- 🟢 3D board viewer: `kicad-cli pcb export glb` from the committed KiCad source,
+  rendered with three.js r185 vendored into `site/vendor/` so the site still
+  makes zero external requests. Falls back to the still render when WebGL is
+  missing or the model fails to load; failure path tested by removing the file.
+- 🟢 Front-copper 2D export added, because the soldermask hides the routing in 3D
+  exactly as it would on a board.
+- 🟢 Owner decision 2026-07-22: **the site says nothing about PCB fabrication
+  status, either way.** Repo docs (`hardware/README.md`, `ARCHITECTURE.md`, this
+  file) keep their accurate wording and the site links to them.
+- 🟢 Honesty audit re-run: all links and asset references resolve, all quoted
+  code and output checked against source, overclaim grep clean. It caught one
+  real defect: the model transcripts had been condensed while being presented as
+  recorded output. They are now verbatim.
 
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).
