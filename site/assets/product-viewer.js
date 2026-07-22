@@ -20,6 +20,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 const GRAPHITE = 0x23261f;   // enclosures, band, cable
 const CARBON   = 0x181a16;   // darker inserts, seam, screen bezel
 const STEEL    = 0xb9bdb6;   // clasp, connector bosses
+const STRAP    = 0x3d4038;   // belt webbing, lighter than the enclosure
 const MOSS     = 0x86a37e;   // screen text bars
 const CLAY     = 0x9c4f28;   // the alert bar on the screen
 
@@ -132,8 +133,17 @@ export function mountProductViewer({ mount, status }) {
 
   // Softer fillets and a slightly glossier finish so it reads as a moulded
   // enclosure rather than an extruded rectangle.
+  //
+  // The bend radius is the OUTER surface (162.5 + 25/2), not the body radius,
+  // so the documented 120 mm width is preserved along the face you actually
+  // see. Bending at the body radius instead stretched that face by 17% and
+  // rendered the pack 136 mm wide, which is what made it read as luggage next
+  // to the wrist unit. The inner face is still concave at the 150 mm body
+  // radius. Measured after this change: 117.7 mm rendered, 2.45x the case's
+  // 48 mm long edge.
+  const PACK_BEND_R = 175;
   const shellGeo = new RoundedBoxGeometry(120, 80, 25, 6, 8);
-  bendAroundY(shellGeo, 150, 162.5);
+  bendAroundY(shellGeo, PACK_BEND_R, 162.5);
   shellGeo.computeVertexNormals();
   const shell = sh(new THREE.Mesh(shellGeo, mat(GRAPHITE, 0.42, 0.08)));
   pack.add(shell);
@@ -141,7 +151,7 @@ export function mountProductViewer({ mount, status }) {
   // Parting seam running around the whole enclosure at mid-thickness, where
   // the two halves of a moulded case would meet.
   const seamGeo = new RoundedBoxGeometry(121, 1.1, 26, 3, 0.5);
-  bendAroundY(seamGeo, 150, 162.5);
+  bendAroundY(seamGeo, PACK_BEND_R, 162.5);
   seamGeo.computeVertexNormals();
   const seam = sh(new THREE.Mesh(seamGeo, mat(CARBON, 0.75)));
   pack.add(seam);
@@ -155,14 +165,15 @@ export function mountProductViewer({ mount, status }) {
     pack.add(onOuterFace(new THREE.BoxGeometry(13, 1.6, 0.9), CARBON, -0.16, 28 - i * 4.5, 175.6, sh, mat));
   }
 
-  // Belt strap passing behind the inner face through two loops.
-  const strapGeo = new RoundedBoxGeometry(190, 24, 3, 3, 1.4);
-  bendAroundY(strapGeo, 145, 146.5);
-  strapGeo.computeVertexNormals();
-  const strap = sh(new THREE.Mesh(strapGeo, mat(CARBON, 0.85)));
-  pack.add(strap);
-  for (const th of [-0.24, 0.24]) {
-    pack.add(onOuterFace(new THREE.BoxGeometry(13, 32, 2.5), GRAPHITE, th, 0, 143.2, sh, mat));
+  // Belt strap. It sits at radius 147.5, inside the pack's 150 mm inner face,
+  // so it genuinely passes behind the enclosure and emerges symmetrically on
+  // both sides rather than sticking out as a panel on one edge. It tapers from
+  // 22 mm at the centre to 8 mm at the ends so it reads as continuing out of
+  // frame, and it is lighter and rougher than the enclosure so it stays
+  // visually subordinate.
+  const strapMat = mat(STRAP, 0.95);
+  for (const g of strapGeometries({ innerR: 147.5, arcRad: 1.22, hCenter: 22, hEnd: 7, thick: 2.5, steps: 110 })) {
+    pack.add(sh(new THREE.Mesh(g, strapMat)));
   }
 
   // Cable connector: a recessed port sunk into the outer face with a metal
@@ -180,8 +191,8 @@ export function mountProductViewer({ mount, status }) {
   packBossGroup.position.z = -162.5;
   pack.add(packBossGroup);
 
-  pack.position.set(62, 40, -34);
-  pack.rotation.y = -0.75;              // show the curved profile, seam and vents
+  pack.position.set(56, 40, -32);
+  pack.rotation.y = -0.5;              // shows the curved profile; strap clears both sides
   scene.add(pack);
 
   // ══ THE CABLE: a solid tube with natural slack, boss to boss ═════════════
@@ -331,6 +342,52 @@ function bandGeometries({ innerR, arcDeg, width, widthEnd, thick, thickEnd, step
   };
 
   return [strip(1, 2), strip(0, 3), strip(0, 1), strip(3, 2), cap(0), cap(steps)];
+}
+
+/**
+ * Sweeps a tapering rectangular cross-section along an arc around the Y axis,
+ * for the belt strap. Returns one geometry per face so the edges stay crisp.
+ * Angle 0 is the front of the wearer; the strap is centred there and runs
+ * symmetrically to both sides. Depths are expressed relative to the pack's
+ * curvature centre so the strap shares its frame.
+ */
+function strapGeometries({ innerR, arcRad, hCenter, hEnd, thick, steps }) {
+  const half = arcRad / 2;
+  const MID = 162.5;                       // the pack's curvature centre
+
+  const ring = (i) => {
+    const t = i / steps;
+    const theta = -half + t * arcRad;
+    const edge = Math.pow(Math.abs(theta) / half, 1.5);
+    const h = hCenter + (hEnd - hCenter) * edge;
+    const sin = Math.sin(theta), cos = Math.cos(theta);
+    const at = (r, y) => [r * sin, y, r * cos - MID];
+    return [
+      at(innerR, -h / 2),
+      at(innerR + thick, -h / 2),
+      at(innerR + thick, h / 2),
+      at(innerR, h / 2),
+    ];
+  };
+
+  const strip = (ca, cb) => {
+    const pos = [], idx = [];
+    for (let i = 0; i <= steps; i++) {
+      const c = ring(i);
+      pos.push(...c[ca], ...c[cb]);
+      if (i < steps) {
+        const k = i * 2;
+        idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+  };
+
+  return [strip(1, 2), strip(0, 3), strip(0, 1), strip(3, 2)];
 }
 
 /** Bends a geometry around the Y axis: x becomes arc length at body radius R. */

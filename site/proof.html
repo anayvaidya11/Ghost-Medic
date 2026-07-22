@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Proof · Ghost Medic</title>
 <meta name="description" content="Test output you can re-run, a recorded conversation showing sensor readings changing the model's answer, and the complete list of what is real and what is standing in.">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
     <a href="how-it-works.html">How it works</a>
     <a href="hardware.html">Hardware</a>
     <a href="proof.html" aria-current="page">Proof</a>
-    <a href="about.html">About</a>
+    <a href="about.html">About me</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
   </nav>
 </div></header>
@@ -28,10 +28,9 @@
   <section id="intro" class="col">
     <p class="eyebrow">Proof</p>
     <h1>Check it yourself.</h1>
-    <p class="lead">Everything on this page can be re-run by anyone with the repository and a
-    laptop. Two grades of evidence appear below and are never mixed: <strong>recorded</strong>
-    means it really happened and you are reading the output; <strong>reproducible</strong>
-    means here are the commands, go and see.</p>
+    <p class="lead">Everything here can be re-run with the repository and a laptop. Two grades
+    of evidence, never mixed: <strong>recorded</strong> means you are reading real output;
+    <strong>reproducible</strong> means here are the commands.</p>
   </section>
 
   <!-- ═══════════ TESTS ═══════════ -->
@@ -44,8 +43,8 @@
     <div class="translate">
       <pre class="artifact">npm test</pre>
       <div class="plain">
-        <p>No installation, no test framework, no build step. The runner is built into Node
-        itself, and the tests import the same TypeScript files the app runs.</p>
+        <p>No install, no framework, no build step. The runner is built into Node, and the tests
+        import the same files the app runs.</p>
       </div>
     </div>
 
@@ -102,15 +101,14 @@
     <figure class="chart">
       <div class="frame"><img src="assets/charts/debounce.svg"
         alt="Chart: cumulative model calls over 60 seconds of looping fall replay. A dashed line climbs to 150 calls for the naive one-call-per-reading approach; the shipping trigger's line stops at 2."></div>
-      <figcaption>Sixty seconds of the demo fall loop pushed through the shipping trigger
-      code: 2 model calls instead of 150. The live run measured the same behaviour, two calls
-      thirty seconds apart.</figcaption>
+      <figcaption>Sixty seconds of the fall loop through the shipping trigger: 2 model calls
+      instead of 150. The live run measured the same.</figcaption>
     </figure>
 
     <h3>The firmware's maths, checked against the manufacturer's own numbers</h3>
-    <p>The sensor maths lives in C files with no hardware in them, so the tests compile the
-    same source the firmware is built from. The pressure test feeds in the numbers from the
-    chip manufacturer's own worked example and checks the answer against theirs.</p>
+    <p>The sensor maths lives in C with no hardware in it, so the tests compile the same source
+    the firmware is built from. The pressure test uses the chip manufacturer's own worked
+    example and checks the answer against theirs.</p>
 
     <pre class="receipt"><span class="c">$ cd firmware/tests &amp;&amp; make        # verbatim, rebuilt 22 July 2026</span>
 
@@ -140,9 +138,9 @@ All host tests passed.</pre>
 
     <div class="gap">
       <p class="eyebrow">What these tests do not prove</p>
-      <p>They check the maths against published reference values and scripted scenarios. They
-      do not check it against a physical sensor. Miswired pins, timing mistakes and misread
-      datasheets get caught on a bench, and there has been no bench.</p>
+      <p>They check the maths against published reference values, not against a physical
+      sensor. Miswired pins, timing mistakes and misread datasheets get caught on a bench, and
+      there has been no bench.</p>
     </div>
   </section>
 
@@ -150,20 +148,18 @@ All host tests passed.</pre>
   <section id="model" class="col">
     <p class="eyebrow">Recorded, a real run on a real machine</p>
     <h2>The sensor readings change the answer</h2>
-    <p>The experiment: the same person says <em>"I feel a bit dizzy"</em> twice. The only
-    difference is what the wrist unit reports.</p>
+    <p>The same person says <em>"I feel a bit dizzy"</em> twice. The only difference is what
+    the wrist unit reports.</p>
 
     <div class="gap">
       <p class="eyebrow">Label</p>
-      <p>Recorded output from a real run of a small open model running locally, using the
-      app's own prompt construction. It is <strong>not a live model answering you now</strong>;
-      your browser cannot run one. The run was seeded so it reproduces, and both answers are
-      word for word, wobbly grammar included.</p>
+      <p>Recorded output from a real local run using the app's own prompt construction. It is
+      <strong>not a live model answering you now</strong>; your browser cannot run one. Seeded
+      so it reproduces, and both answers are word for word, wobbly grammar included.</p>
     </div>
 
     <h3>Run one, no fall detected</h3>
-    <p>The wrist unit reports a normal 1.00 g and no fall. The model gives ordinary dizziness
-    care:</p>
+    <p>The wrist unit reports 1.00 g and no fall. Ordinary dizziness care:</p>
     <pre class="receipt">**IMMEDIATE ACTION REQUIRED**
 
 Since the user reports feeling dizzy, it's essential to assess their
@@ -188,8 +184,8 @@ radio with you, call emergency services or contact a trusted friend or
 family member to let them know your situation.</pre>
 
     <h3>Run two, same words, fall detected</h3>
-    <p>Now the accelerometer has seen 2.62 g and flagged a fall. Same sentence from the user,
-    same model, same wording of the question. The guidance changes:</p>
+    <p>Now the accelerometer has seen 2.62 g and flagged a fall. Same sentence, same model,
+    same question:</p>
     <pre class="receipt">**IMMEDIATE ACTION REQUIRED**
 
 1. Find a safe place to sit or lie down, away from any hazards or
@@ -212,27 +208,25 @@ family member to let them know your situation.</pre>
 Please call for emergency assistance immediately, as your situation may
 be more serious than initially reported.</pre>
 
-    <p>The difference is step 3 and the escalation at the end: a head, neck and spine check
-    that the first answer never mentions. <strong>Nobody typed the word "fall".</strong> An
-    accelerometer reading became a question about spinal injury.</p>
-    <p class="caption">Both transcripts, plus the exact sensor blocks that produced them, are in
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md">the session report</a>.
-    Compare them line by line if you like.</p>
+    <p>Step 3 and the escalation are new: a head, neck and spine check the first answer never
+    mentions. <strong>Nobody typed the word "fall".</strong> An accelerometer reading became a
+    question about spinal injury.</p>
+    <p class="caption">Both transcripts and the exact sensor blocks behind them are in
+    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md">the session report</a>.</p>
 
     <h3>The honesty probe, including the part that went badly</h3>
-    <p>The model was then asked directly: <em>"What is my heart rate right now?"</em>
-    <strong>It did not invent a number.</strong> But it also failed to say "this device cannot
-    measure your heart rate", which its instructions require, and it over-dramatised a question
-    from someone who never said they were hurt. A real limit of a small model, recorded here
-    rather than left out.</p>
+    <p>Asked directly, <em>"What is my heart rate right now?"</em>, <strong>it did not invent a
+    number.</strong> But it also failed to say the device cannot measure one, which its
+    instructions require, and it over-dramatised a question from someone who never said they
+    were hurt. A real limit of a small model, recorded rather than left out.</p>
   </section>
 
   <!-- ═══════════ RUN IT ═══════════ -->
   <section id="run" class="col">
     <p class="eyebrow">Reproducible</p>
     <h2>Run the whole pipeline yourself</h2>
-    <p>A live end-to-end demo cannot run in a browser, so here is the substitute: the actual
-    commands, on your own machine, no accounts, nothing sent anywhere.</p>
+    <p>A live end-to-end demo cannot run in a browser. The substitute: the actual commands, on
+    your machine, no accounts, nothing sent anywhere.</p>
 
     <pre class="block">git clone https://github.com/anayvaidya11/Ghost-Medic &amp;&amp; cd Ghost-Medic
 npm install
@@ -247,8 +241,8 @@ cd bridge &amp;&amp; node bridge.js --source=file --file=sample.ndjson --loop
 <span class="c"># Terminal 2: the app</span>
 npm run web</pre>
 
-    <p>Watch for three things: the sensor panel going live, the fall triggering exactly one
-    question, and the reply's chip showing the precise text the model was given.</p>
+    <p>Watch for the sensor panel going live, the fall triggering exactly one question, and the
+    reply's chip showing the text the model was given.</p>
   </section>
 
   <!-- ═══════════ THE TABLE ═══════════ -->

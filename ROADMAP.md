@@ -193,6 +193,17 @@ smell exaggeration but is not an embedded engineer.*
   rating and the runtime is marked "on paper". The site says plainly that no
   module has been selected and nothing has been measured.
 - 🟢 `site/about.html` added: who built it, two sentences, contact links.
+- 🟢 Concept scale fix: the pack was rendering 136 mm wide (2.84x the case)
+  because bendAroundY bent at the body radius, stretching the outer face 17%.
+  Bending at the outer radius (175) preserves the documented 120 mm and lands
+  the ratio at 2.45x, verified by measuring the rendered bounding boxes, not by
+  eye. Belt strap rebuilt as a tapering swept arc at r=147.5 (behind the pack's
+  150 mm inner face), symmetric ~27 mm past each side, lighter than the
+  enclosure. Wrist and pack dimensions unchanged (48x40x11, 120x80x25).
+- 🟢 Removed the concept LABEL box (folded the essential disclosure into the
+  caption), the "dot is illustrative pacing" figcaption sentence, and the
+  Hardware page's "criticism of my own layout" box (owner override). Hardware
+  and Proof prose tightened further. About page renamed "About me".
 
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).

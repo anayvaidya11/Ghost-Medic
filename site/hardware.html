@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hardware · Ghost Medic</title>
 <meta name="description" content="The Ghost Medic wrist-unit circuit board: a two-layer KiCad design with 35 components and 477 copper segments. Orbit it in 3D, see the routing, and read why each chip is there.">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
     <a href="how-it-works.html">How it works</a>
     <a href="hardware.html" aria-current="page">Hardware</a>
     <a href="proof.html">Proof</a>
-    <a href="about.html">About</a>
+    <a href="about.html">About me</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
   </nav>
 </div></header>
@@ -29,9 +29,9 @@
     <p class="eyebrow">Hardware</p>
     <h1>The wrist unit, routed down to the last trace.</h1>
     <p class="lead">A two-layer board carrying an RP2040 and three sensors: 35 components, 477
-    copper segments, 63 vias, powered and programmed over one USB-C connector. I designed this
-    board by hand in KiCad: I drew the schematic myself, placed every part, and routed every
-    trace. The files are in the repository and open in KiCad, which is free.</p>
+    copper segments, 63 vias, powered and programmed over one USB-C connector. I drew the
+    schematic, placed every part, and routed every trace by hand in KiCad. The files are in the
+    repository.</p>
   </section>
 
   <!-- ═══════════ THE 3D BOARD ═══════════ -->
@@ -51,22 +51,19 @@
       <div class="board-bar" id="board-controls" hidden>
         <button type="button" class="ghost" data-board-reset>Reset view</button>
       </div>
-      <p class="caption">Exported from
-      <code>hardware/ghostmedic-sensor-hub.kicad_pcb</code> by KiCad's own 3D exporter, with
-      the exact command recorded in
+      <p class="caption">Exported from the layout file by KiCad's own 3D exporter; the exact
+      command is in
       <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/hardware/README.md">hardware/README.md</a>.
-      Nothing here is modelled by hand. If 3D cannot run in your browser you get a still render
-      of the same board instead.</p>
+      Nothing is modelled by hand.</p>
 
       <div class="gap">
         <p class="eyebrow">Two things the render does not show</p>
         <p><strong>The optical sensor has no body in the picture.</strong> Its package has no
-        3D shape in the standard component library, so the exporter leaves that spot empty. It
-        is in the schematic, in the layout, and routed. It just has no shape to draw. Rather
-        than substitute a stand-in part, the gap is left visible.</p>
-        <p><strong>The copper is under the surface.</strong> The green coating covers the
-        routing on a board, and it covers it here too. The routing itself is the next
-        section.</p>
+        3D shape in the standard library, so the exporter leaves that spot empty. It is in the
+        schematic, in the layout, and routed. The gap is left visible rather than filled with a
+        stand-in part.</p>
+        <p><strong>The copper is under the surface,</strong> as it is on a real board. The
+        routing is the next section.</p>
       </div>
     </div>
   </section>
@@ -76,33 +73,29 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">The routing</p>
       <h2>Every connection placed by hand, one at a time</h2>
-      <p>This is the front copper: 477 individual segments I routed by hand between 35
-      components, plus 63 vias. A via is a small plated hole that lets a connection pass
-      through to the other side of the board when its path is blocked.</p>
+      <p>477 segments routed by hand between 35 components, plus 63 vias. A via is a plated
+      hole letting a connection cross to the other side of the board.</p>
     </div>
     <figure>
       <div class="frame"><img class="copper" src="assets/ghostmedic-sensor-hub-front-copper.svg"
         alt="The front copper layer of the board: a network of traces connecting the components, exported from the KiCad layout."></div>
-      <figcaption>Front copper layer, exported from the layout file. The board outline extends
-      well beyond the routing. See the note on size below.</figcaption>
+      <figcaption>Front copper layer, exported from the layout file.</figcaption>
     </figure>
 
     <div class="col" style="padding:0">
       <h3>Why two layers</h3>
-      <p>The board has copper on both faces and nothing in between. Boards can have four, six,
-      or twelve layers, and more layers make routing easier, but each one costs money and this
-      design does not need them.</p>
-      <p>The two faces do different jobs. The front carries the signals you just looked at. The
-      back is almost entirely one continuous sheet of copper, <strong>5,218 of the board's
-      5,561 square millimetres</strong>, held at zero volts. That sheet gives every part a
-      short, quiet path back to the power supply, which is the single most effective thing you
-      can do to stop a mixed-signal board from misbehaving.</p>
+      <p>Copper on both faces, nothing between. More layers make routing easier but cost
+      money, and this design does not need them.</p>
+      <p>The front carries the signals above. The back is almost entirely one sheet of copper,
+      <strong>5,218 of the board's 5,561 square millimetres</strong>, held at zero volts. That
+      gives every part a short, quiet path back to the supply, the single most effective way to
+      stop a mixed-signal board misbehaving.</p>
 
       <div class="table-scroll">
       <table>
         <thead><tr><th>Measurement</th><th>Value</th><th>What it means</th></tr></thead>
         <tbody>
-          <tr><td>Board size</td><td>77.5 × 71.75 mm</td><td>About the size of a passport. See the note below.</td></tr>
+          <tr><td>Board size</td><td>77.5 × 71.75 mm</td><td>About the size of a passport.</td></tr>
           <tr><td>Thickness</td><td>1.6 mm</td><td>The standard the whole industry is set up to make cheaply.</td></tr>
           <tr><td>Copper layers</td><td>2</td><td>Signals on the front, ground on the back.</td></tr>
           <tr><td>Components</td><td>35</td><td>34 surface-mounted, 1 through-hole.</td></tr>
@@ -114,13 +107,6 @@
       </table>
       </div>
 
-      <div class="gap">
-        <p class="eyebrow">A criticism of my own layout</p>
-        <p>At 77.5 × 71.75 mm this board is far too big to wear on a wrist. The components take
-        up a fraction of it and the rest is empty. It was routed for correctness rather than
-        size, and shrinking it to something wearable is real work that has not been done.
-        Calling it a wrist unit describes the intent, not the current dimensions.</p>
-      </div>
     </div>
   </section>
 
@@ -130,27 +116,22 @@
     <h2>Why each part is on the board</h2>
 
     <h3>The processor and the memory chip beside it</h3>
-    <p>The chip in charge is an <strong>RP2040</strong>, the same processor as in a Raspberry
-    Pi Pico, chosen because the firmware was already written for it. Using the bare chip
-    instead of a ready-made Pico module means one extra part is needed: a separate memory chip
-    to hold the program, because the bare processor has nowhere to store it. A small quartz
-    crystal next to it keeps time, and its frequency matches what the programming toolkit
-    expects by default, so nothing has to be reconfigured.</p>
+    <p>An <strong>RP2040</strong>, the same processor as in a Raspberry Pi Pico, because the
+    firmware was already written for it. The bare chip has nowhere to store its program, so a
+    separate memory chip sits beside it. The crystal's frequency matches what the programming
+    toolkit expects by default, so nothing needs reconfiguring.</p>
 
     <h3>Three sensors, two wires</h3>
-    <p>All three sensors share the same pair of wires. Each sensor has its own address and the
-    processor calls them by name one at a time, so three sensors need no more wiring than one.
-    Two resistors hold those wires at a known level when nobody is speaking. The two pins used
-    are the same two the firmware was written for, so the software and the board agree without
-    either being adjusted.</p>
+    <p>All three sensors share one pair of wires. Each has its own address and the processor
+    calls them one at a time, so three need no more wiring than one. Two resistors hold the
+    wires at a known level when nobody is speaking. The pins match the firmware's, so board and
+    software agree without either being adjusted.</p>
 
     <h3>One connector for everything</h3>
-    <p>A <strong>USB-C</strong> socket supplies power and carries the program onto the board,
-    so there is nothing else to plug in. USB delivers 5 volts and everything on the board wants
-    3.3, so a regulator steps it down. Two buttons handle programming: hold one, tap the other,
-    and the board appears on your computer as a drive you can drop a file onto. A four-pin
-    header offers a second way in, for the case where the first way stops working, which is the
-    situation you cannot fix later.</p>
+    <p>A <strong>USB-C</strong> socket carries both power and the program, so there is nothing
+    else to plug in. USB delivers 5 volts and the board wants 3.3, so a regulator steps it down.
+    Hold one button, tap the other, and the board appears as a drive you can drop a file onto. A
+    four-pin header is the second way in, for when the first stops working.</p>
 
     <div class="table-scroll">
     <table>
@@ -171,10 +152,8 @@
     </table>
     </div>
 
-    <p>The full schematic is
-    <a href="assets/ghostmedic-sensor-hub-schematic.pdf">available as a PDF</a>, and the
-    editable design files are
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">in the repository</a>.</p>
+    <p>Full schematic as a <a href="assets/ghostmedic-sensor-hub-schematic.pdf">PDF</a>;
+    editable files <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">in the repository</a>.</p>
   </section>
 
   <section id="next" class="col">

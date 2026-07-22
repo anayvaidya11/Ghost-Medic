@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ghost Medic · offline AI first-aid assistant prototype</title>
 <meta name="description" content="A prototype wearable first-aid assistant that works with no internet: a wrist sensor unit, a language model running on hardware you carry, and spoken first-aid steps.">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
     <a href="how-it-works.html">How it works</a>
     <a href="hardware.html">Hardware</a>
     <a href="proof.html">Proof</a>
-    <a href="about.html">About</a>
+    <a href="about.html">About me</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
   </nav>
 </div></header>
@@ -78,13 +78,6 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">The product, as a concept</p>
       <h2>What it would look like on you</h2>
-      <div class="gap">
-        <p class="eyebrow">Label</p>
-        <p>A concept illustration of how the system would be worn, built in code rather than
-        CAD. The only hardware actually designed is the circuit board, which I drew and routed
-        by hand in KiCad and which is on the <a href="hardware.html">Hardware page</a>. The
-        markers show where the finished parts would live.</p>
-      </div>
     </div>
 
     <div class="board-viewer" id="product-viewer">
@@ -134,8 +127,9 @@
         <li><span class="num">3</span><div><b>The cable.</b> The bridge software is real and carries every reading unchanged. It is a wired, local stand-in for the eventual wrist-to-pack BLE link.</div></li>
         <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case, sized around a Jetson Orin Nano class module. That class is rated for 7 to 15 W power modes, so a USB-C power bank would run it for a few hours on paper. <b>No module has been selected and nothing has been measured.</b> The LLM layer is real and runs fully offline; a laptop stands in for this enclosure today.</div></li>
       </ul>
-      <p class="caption">Drag to rotate, scroll to zoom. Without WebGL you get the flat diagram
-      instead, same markers.</p>
+      <p class="caption">A concept, built in code rather than CAD. The only hardware actually
+      designed is the circuit board, which I drew and routed by hand in KiCad and which is on
+      the <a href="hardware.html">Hardware page</a>. Drag to rotate, scroll to zoom.</p>
     </div>
   </section>
 
