@@ -28,10 +28,9 @@
   <section id="intro" class="col">
     <p class="eyebrow">Hardware</p>
     <h1>The wrist unit, routed down to the last trace.</h1>
-    <p class="lead">A two-layer board carrying an RP2040 and three sensors: 35 components, 477
-    copper segments, 63 vias, powered and programmed over one USB-C connector. I drew the
-    schematic, placed every part, and routed every trace by hand in KiCad. The files are in the
-    repository.</p>
+    <p class="lead">A two-layer board: an RP2040 and three sensors, 35 components, 477 copper
+    segments, 63 vias, over one USB-C connector. Schematic drawn, parts placed, every trace
+    routed by hand in KiCad; the files are in the repository.</p>
   </section>
 
   <!-- ═══════════ THE 3D BOARD ═══════════ -->
@@ -39,7 +38,6 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">The design in three dimensions</p>
       <h2>Drag to turn it over</h2>
-      <p>Drag to rotate, scroll to zoom.</p>
     </div>
 
     <div class="board-viewer" id="board-viewer">
@@ -51,19 +49,17 @@
       <div class="board-bar" id="board-controls" hidden>
         <button type="button" class="ghost" data-board-reset>Reset view</button>
       </div>
-      <p class="caption">Exported from the layout file by KiCad's own 3D exporter; the exact
-      command is in
-      <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/hardware/README.md">hardware/README.md</a>.
-      Nothing is modelled by hand.</p>
+      <p class="caption">Exported from the layout file by KiCad's own 3D exporter (command in
+      <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/hardware/README.md">hardware/README.md</a>);
+      nothing modelled by hand. Drag to rotate, scroll to zoom.</p>
 
       <div class="gap">
         <p class="eyebrow">Two things the render does not show</p>
-        <p><strong>The optical sensor has no body in the picture.</strong> Its package has no
-        3D shape in the standard library, so the exporter leaves that spot empty. It is in the
-        schematic, in the layout, and routed. The gap is left visible rather than filled with a
-        stand-in part.</p>
-        <p><strong>The copper is under the surface,</strong> as it is on a real board. The
-        routing is the next section.</p>
+        <p><strong>The optical sensor has no body in the render.</strong> Its package has no 3D
+        model in the standard library, so the exporter leaves the spot empty. It is in the
+        schematic, the layout, and routed; the gap is left visible rather than faked.</p>
+        <p><strong>The copper is under the surface,</strong> as on a real board. The routing is
+        next.</p>
       </div>
     </div>
   </section>
@@ -73,8 +69,8 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">The routing</p>
       <h2>Every connection placed by hand, one at a time</h2>
-      <p>477 segments routed by hand between 35 components, plus 63 vias. A via is a plated
-      hole letting a connection cross to the other side of the board.</p>
+      <p>477 segments routed by hand between 35 components, plus 63 vias (a via is a plated hole
+      crossing to the other side).</p>
     </div>
     <figure>
       <div class="frame"><img class="copper" src="assets/ghostmedic-sensor-hub-front-copper.svg"
@@ -84,12 +80,11 @@
 
     <div class="col" style="padding:0">
       <h3>Why two layers</h3>
-      <p>Copper on both faces, nothing between. More layers make routing easier but cost
-      money, and this design does not need them.</p>
-      <p>The front carries the signals above. The back is almost entirely one sheet of copper,
-      <strong>5,218 of the board's 5,561 square millimetres</strong>, held at zero volts. That
-      gives every part a short, quiet path back to the supply, the single most effective way to
-      stop a mixed-signal board misbehaving.</p>
+      <p>Copper on both faces, nothing between. More layers ease routing but cost money, and this
+      design does not need them.</p>
+      <p>The front carries the signals; the back is almost entirely one copper sheet,
+      <strong>5,218 of the board's 5,561 mm²</strong>, held at zero volts, giving every part a
+      short, quiet return path.</p>
 
       <div class="table-scroll">
       <table>
@@ -116,22 +111,19 @@
     <h2>Why each part is on the board</h2>
 
     <h3>The processor and the memory chip beside it</h3>
-    <p>An <strong>RP2040</strong>, the same processor as in a Raspberry Pi Pico, because the
-    firmware was already written for it. The bare chip has nowhere to store its program, so a
-    separate memory chip sits beside it. The crystal's frequency matches what the programming
-    toolkit expects by default, so nothing needs reconfiguring.</p>
+    <p>An <strong>RP2040</strong>, as in a Raspberry Pi Pico, because the firmware was written
+    for it. It can't store its own program, so a memory chip sits beside it; the crystal matches
+    the toolkit's default frequency.</p>
 
     <h3>Three sensors, two wires</h3>
-    <p>All three sensors share one pair of wires. Each has its own address and the processor
-    calls them one at a time, so three need no more wiring than one. Two resistors hold the
-    wires at a known level when nobody is speaking. The pins match the firmware's, so board and
-    software agree without either being adjusted.</p>
+    <p>All three sensors share one pair of wires, each with its own address, called one at a
+    time. Two resistors hold the wires at a known level when idle. The pins match the
+    firmware's.</p>
 
     <h3>One connector for everything</h3>
-    <p>A <strong>USB-C</strong> socket carries both power and the program, so there is nothing
-    else to plug in. USB delivers 5 volts and the board wants 3.3, so a regulator steps it down.
-    Hold one button, tap the other, and the board appears as a drive you can drop a file onto. A
-    four-pin header is the second way in, for when the first stops working.</p>
+    <p>A <strong>USB-C</strong> socket carries power and the program; a regulator steps 5 V down
+    to 3.3. Hold one button, tap the other, and the board mounts as a drive to drop a file onto.
+    A four-pin header is the backup way in.</p>
 
     <div class="table-scroll">
     <table>
@@ -159,7 +151,7 @@
   <section id="next" class="col">
     <hr class="rule">
     <p><a href="proof.html"><strong>Next: the receipts →</strong></a> test output, the recorded
-    conversation with the model, and the full list of what is real and what is standing in.</p>
+    model conversation, and the full real-vs-standing-in list.</p>
   </section>
 
 </main>
@@ -172,10 +164,9 @@
     <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">Board</a>
   </div>
-  <p>Ghost Medic is an engineering prototype built by one self-taught person. It is not a
-  medical device, it has not been clinically evaluated, and nothing it says should be treated
-  as medical advice. There is no heart rate or blood-oxygen reading anywhere in this project,
-  by design.</p>
+  <p>Ghost Medic is an engineering prototype, not a medical device: not clinically evaluated,
+  not medical advice. Simulated data and placeholders are labelled as such. No heart rate or
+  blood-oxygen reading anywhere, by design.</p>
 </div></footer>
 
 <script type="importmap">

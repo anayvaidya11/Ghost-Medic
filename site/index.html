@@ -29,9 +29,8 @@
   <section id="pitch" class="col">
     <p class="eyebrow">Prototype</p>
     <h1>A first-aid assistant that works with no signal.</h1>
-    <p class="lead">A wrist unit tracks your movement and the air around you. A language model
-    on hardware in your own pack reads those numbers with what you tell it, then speaks
-    numbered first-aid steps. No network involved.</p>
+    <p class="lead">A wrist unit reads your motion and the air around you. A language model on
+    hardware you carry turns that, and what you say, into spoken first-aid steps. No network.</p>
   </section>
 
   <!-- ═══════════ STATUS, UP FRONT ═══════════ -->
@@ -41,24 +40,23 @@
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>The software chain runs end to end, offline, on one laptop: sensor readings
-          arrive and the model's answer changes because of them.</p>
-          <p>Verified 22 July 2026 against a local model. <a href="proof.html">The receipts are on the Proof page.</a></p>
+          <p>The software chain runs end to end, offline, on one laptop: sensor readings change
+          the model's answer. Verified 22 Jul 2026 against a local model,
+          <a href="proof.html">receipts on Proof</a>.</p>
         </div>
       </li>
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>The firmware compiles for the real chip and its maths passes tests against the
-          manufacturer's own reference numbers: 6 + 3 checks, plus 39 on the software that
-          talks to the model.</p>
+          <p>Firmware compiles for the real chip; its maths passes the manufacturer's own
+          reference numbers (6 + 3 checks), plus 39 on the model-facing software.</p>
         </div>
       </li>
       <li>
         <span class="mark mark-part">Stands in</span>
         <div>
-          <p>A laptop does the job of the pack computer, a cable the job of the wireless
-          link. Both are labelled everywhere they appear.</p>
+          <p>A laptop stands in for the pack computer, a cable for the wireless link.
+          Labelled wherever they appear.</p>
         </div>
       </li>
       <li>
@@ -69,8 +67,7 @@
         </div>
       </li>
     </ul>
-    <p class="caption">Every claim here points at a file in the public repository. If you find
-    one that does not, that is a bug worth telling me about.</p>
+    <p class="caption">Every claim points at a file in the repository.</p>
   </section>
 
   <!-- ═══════════ PRODUCT CONCEPT ═══════════ -->
@@ -122,23 +119,22 @@
 
     <div class="col" style="padding:0">
       <ul class="legend">
-        <li><span class="num">1</span><div><b>Wrist case.</b> The sensor board and its firmware live here. Both exist: I designed and routed the board by hand in KiCad, and the firmware compiles with its maths tested.</div></li>
-        <li><span class="num">2</span><div><b>Display.</b> Concept only. The built board has no screen. Today the app shows the readings and speaks the steps.</div></li>
-        <li><span class="num">3</span><div><b>The cable.</b> The bridge software is real and carries every reading unchanged. It is a wired, local stand-in for the eventual wrist-to-pack BLE link.</div></li>
-        <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case, sized around a Jetson Orin Nano class module. That class is rated for 7 to 15 W power modes, so a USB-C power bank would run it for a few hours on paper. <b>No module has been selected and nothing has been measured.</b> The LLM layer is real and runs fully offline; a laptop stands in for this enclosure today.</div></li>
+        <li><span class="num">1</span><div><b>Wrist case.</b> Holds the sensor board and firmware, both real: the board hand-routed in KiCad, the firmware compiled with its maths tested.</div></li>
+        <li><span class="num">2</span><div><b>Display.</b> Concept only: the built board has no screen. Today the app shows the readings and speaks the steps.</div></li>
+        <li><span class="num">3</span><div><b>The cable.</b> Real bridge software, carrying every reading unchanged: a wired stand-in for the eventual wrist-to-pack BLE link.</div></li>
+        <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case, sized around a Jetson Orin Nano class module (7 to 15 W on paper). <b>No module has been selected and nothing has been measured.</b> The offline LLM layer is real; a laptop stands in today.</div></li>
       </ul>
-      <p class="caption">A concept, built in code rather than CAD. The only hardware actually
-      designed is the circuit board, which I drew and routed by hand in KiCad and which is on
-      the <a href="hardware.html">Hardware page</a>. Drag to rotate, scroll to zoom.</p>
+      <p class="caption">A concept, built in code rather than CAD. The only hardware designed is
+      the circuit board, hand-routed in KiCad, on the <a href="hardware.html">Hardware page</a>.
+      Drag to rotate, scroll to zoom.</p>
     </div>
   </section>
 
   <!-- ═══════════ THE THESIS: ONE LINE OF TEXT ═══════════ -->
   <section id="wire" class="col">
     <h2>The whole system is held together by one line of text</h2>
-    <p>Ten times a second the wrist unit prints one line describing everything it can sense.
-    It is the only agreement between the parts, so any part can be swapped without touching
-    the others. Here is one, from the moment of a fall:</p>
+    <p>Ten times a second the wrist unit prints one line describing everything it senses. It is
+    the only contract between the parts. Here is one, from a fall:</p>
 
     <div class="translate">
       <pre class="artifact">{"t_ms":300,
@@ -148,17 +144,14 @@
  "fall_detected":true}</pre>
       <div class="plain">
         <p class="eyebrow" style="color:var(--forest)">In plain English</p>
-        <p>Three tenths of a second after switching on: the optical sensor is working and
-        returning these two light readings. The pressure sensor is working, it is 21 °C, and
-        you are 2.1 metres above where you started. The accelerometer is working and just felt
-        2.62 g, which is more than two and a half times normal gravity. Putting those last
-        numbers together: <strong>that looked like a fall.</strong></p>
+        <p>Optical sensor working, two light readings. Pressure working: 21 °C, 2.1 m above the
+        start. Accelerometer just felt 2.62 g, over 2.5x gravity. <strong>That looked like a
+        fall.</strong></p>
       </div>
     </div>
 
-    <p>Each sensor reports its own <code>"ok"</code> first, so a failed sensor says so rather
-    than quietly reporting zero. And the light readings stay raw: turning them into a heart
-    rate takes signal processing this project does not do, so no heart rate appears anywhere.</p>
+    <p>Each sensor reports its own <code>"ok"</code> first, so a failure says so instead of
+    quietly reading zero. The light stays raw: no heart rate is derived anywhere, by design.</p>
   </section>
 
   <!-- ═══════════ THE LIVE THING ═══════════ -->
@@ -166,14 +159,13 @@
     <div class="col" style="padding:0">
       <p class="eyebrow">Live in this page</p>
       <h2>Drive the wrist unit yourself</h2>
-      <p>Running in your browser right now, not a video. Move the sliders, press
-      <strong>Simulate fall</strong>, switch a sensor off and watch the line report the failure
-      instead of inventing a number. Same formulas and constants as the firmware, same line
-      format.</p>
+      <p>Running in your browser now, not a video. Move the sliders, simulate a fall, switch a
+      sensor off and watch it report the failure instead of a number. Same formulas as the
+      firmware.</p>
       <div class="gap">
         <p class="eyebrow">Label</p>
-        <p>A simulator. No sensor is attached to your computer. It demonstrates the data
-        format and the maths, not hardware.</p>
+        <p>A simulator. No sensor is attached. It demonstrates the data format and the maths,
+        not hardware.</p>
       </div>
     </div>
     <iframe class="embed" src="simulator/index.html" title="Ghost Medic wrist-unit simulator, interactive" loading="lazy"></iframe>
@@ -185,15 +177,15 @@
     <ul class="next">
       <li><a href="how-it-works.html">
         <span class="t">How it works</span>
-        <span class="d">The four parts, what runs where today, and what each one is standing in for.</span>
+        <span class="d">The four parts, and what each stands in for.</span>
       </a></li>
       <li><a href="hardware.html">
         <span class="t">Hardware</span>
-        <span class="d">The circuit board in 3D, the routing, and why each chip is on it.</span>
+        <span class="d">The board in 3D, the routing, why each chip.</span>
       </a></li>
       <li><a href="proof.html">
         <span class="t">Proof</span>
-        <span class="d">Test output, the recorded conversation with the model, and the full list of what is real and what is standing in.</span>
+        <span class="d">Tests, the model transcript, the full ledger.</span>
       </a></li>
     </ul>
   </section>
@@ -222,11 +214,9 @@
     <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a>
     <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/hardware">Board</a>
   </div>
-  <p>Ghost Medic is an engineering prototype built by one self-taught person. It is not a
-  medical device, it has not been clinically evaluated, and nothing it says should be treated
-  as medical advice. Simulated data is labelled simulated. Placeholders are labelled
-  placeholders. There is no heart rate or blood-oxygen reading anywhere in this project, by
-  design.</p>
+  <p>Ghost Medic is an engineering prototype, not a medical device: not clinically evaluated,
+  not medical advice. Simulated data and placeholders are labelled as such. No heart rate or
+  blood-oxygen reading anywhere, by design.</p>
 </div></footer>
 
 </body>

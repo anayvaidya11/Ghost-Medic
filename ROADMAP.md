@@ -204,6 +204,21 @@ smell exaggeration but is not an embedded engineer.*
   caption), the "dot is illustrative pacing" figcaption sentence, and the
   Hardware page's "criticism of my own layout" box (owner override). Hardware
   and Proof prose tightened further. About page renamed "About me".
+- 🟢 Concept bend fix + more detail, and a hard site prose cut (2026-07-22).
+  `bendAroundY` now uses each vertex's own radius (`theta = x / r`) instead of a
+  single fixed radius. The fixed-radius version (this file's earlier note) held
+  the outer face right but squeezed the inner face into a wedge: 92 mm against
+  107 mm. The per-vertex bend renders 117 mm across, inner and outer within a
+  millimetre, measured headless against the real `RoundedBoxGeometry`, not by
+  eye. Cable deepened into a catenary (54% slack vs the straight span, clears
+  the floor). Detail added: wrist side buttons (the board's real SW1/SW2, not a
+  crown, which would imply an encoder the board lacks), an underside optical
+  aperture (the MAX30102 window), strap lugs; pack recessed vent grille, a
+  concept status LED, softer seam chamfer. **No browser render this session** —
+  no Chromium is installed here, so the geometry is verified by measurement, not
+  pixels. Site prose cut across all five pages (~3446 → ~2749 words, body prose
+  excl. tables/chrome ~2637 → ~2027); every honesty disclosure and evidence link
+  kept, overclaim grep and link check re-run clean.
 
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).
