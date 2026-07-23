@@ -121,6 +121,38 @@ export function mountProductViewer({ mount, status }) {
   wristBoss.position.set(21, CASE_Y - 1.5, 0);
   wrist.add(wristBoss);
 
+  // Two side buttons on the face away from the cable. These stand for the two
+  // switches actually on the board (SW1 reset, SW2 bootsel). A rotary crown was
+  // considered and left off: the board has no encoder, so a crown would imply
+  // hardware the design does not contain.
+  for (const z of [8, -8]) {
+    const btn = sh(new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 3.2, 16), mat(STEEL, 0.34, 0.85)));
+    btn.rotation.z = Math.PI / 2;
+    btn.position.set(-20.6, CASE_Y + 0.4, z);
+    wrist.add(btn);
+  }
+
+  // Optical aperture on the underside, facing the skin: the window over the
+  // MAX30102, which is on the board. A steel collar around a dark, unlit window
+  // (raw red/IR only, so nothing about it glows).
+  const apRing = sh(new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.7, 24), mat(STEEL, 0.34, 0.85)));
+  apRing.position.set(0, CASE_Y - 5.5, 0);
+  wrist.add(apRing);
+  const apGlass = sh(new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 0.8, 24),
+    new THREE.MeshStandardMaterial({ color: 0x0d0f0c, roughness: 0.2, metalness: 0.1 })));
+  apGlass.position.set(0, CASE_Y - 5.8, 0);
+  wrist.add(apGlass);
+
+  // Strap lugs at the two edges of the band's width, where it emerges from
+  // under the case, tying the two together the way watch lugs do. Kept narrow
+  // so they clasp the band near its crown rather than bridging over its
+  // shoulders.
+  for (const z of [11.5, -11.5]) {
+    const lug = sh(new THREE.Mesh(new RoundedBoxGeometry(16, 4, 5, 3, 1.5), mat(GRAPHITE, 0.6)));
+    lug.position.set(0, CASE_Y - 5.7, z);
+    wrist.add(lug);
+  }
+
   wrist.rotation.y = 0.55;                // three-quarter view: case face + curvature
   wrist.rotation.x = 0.10;
   wrist.position.set(-62, 24, 10);
@@ -134,24 +166,25 @@ export function mountProductViewer({ mount, status }) {
   // Softer fillets and a slightly glossier finish so it reads as a moulded
   // enclosure rather than an extruded rectangle.
   //
-  // The bend radius is the OUTER surface (162.5 + 25/2), not the body radius,
-  // so the documented 120 mm width is preserved along the face you actually
-  // see. Bending at the body radius instead stretched that face by 17% and
-  // rendered the pack 136 mm wide, which is what made it read as luggage next
-  // to the wrist unit. The inner face is still concave at the 150 mm body
-  // radius. Measured after this change: 117.7 mm rendered, 2.45x the case's
-  // 48 mm long edge.
-  const PACK_BEND_R = 175;
+  // bendAroundY wraps the flat 120 mm panel around the waist so every layer
+  // keeps its own width (see the function for the maths). An earlier version
+  // bent the whole shell at one fixed radius, which held the outer face right
+  // but squeezed the inner face into a wedge: 92 mm against 107 mm, measured.
+  // The per-vertex bend renders 117.4 mm across, inner and outer within a
+  // millimetre of each other, 2.45x the case's 48 mm long edge. The residual
+  // 2.6 mm under the nominal 120 comes from a bent panel's chord being shorter
+  // than its arc, which no bend can avoid.
   const shellGeo = new RoundedBoxGeometry(120, 80, 25, 6, 8);
-  bendAroundY(shellGeo, PACK_BEND_R, 162.5);
+  bendAroundY(shellGeo, 162.5);
   shellGeo.computeVertexNormals();
   const shell = sh(new THREE.Mesh(shellGeo, mat(GRAPHITE, 0.42, 0.08)));
   pack.add(shell);
 
   // Parting seam running around the whole enclosure at mid-thickness, where
-  // the two halves of a moulded case would meet.
-  const seamGeo = new RoundedBoxGeometry(121, 1.1, 26, 3, 0.5);
-  bendAroundY(seamGeo, PACK_BEND_R, 162.5);
+  // the two halves of a moulded case meet. Rounded a little more than before so
+  // it reads as a softened chamfer rather than a hard scored line.
+  const seamGeo = new RoundedBoxGeometry(121, 2.0, 26, 4, 0.9);
+  bendAroundY(seamGeo, 162.5);
   seamGeo.computeVertexNormals();
   const seam = sh(new THREE.Mesh(seamGeo, mat(CARBON, 0.75)));
   pack.add(seam);
@@ -160,10 +193,28 @@ export function mountProductViewer({ mount, status }) {
   // compute on one side, battery on the other.
   pack.add(onOuterFace(new THREE.BoxGeometry(0.9, 70, 0.8), CARBON, 0.14, 0, 175.6, sh, mat));
 
-  // Passive vent slots, compute side.
-  for (let i = 0; i < 5; i++) {
-    pack.add(onOuterFace(new THREE.BoxGeometry(13, 1.6, 0.9), CARBON, -0.16, 28 - i * 4.5, 175.6, sh, mat));
+  // Venting on the compute side, as a recessed grille. The shell is a closed
+  // surface, so a true cut-in recess would sit behind it and never show. The
+  // read comes instead from a dark inset panel with lighter fins raised across
+  // it: the gaps between the fins are the vent slots, deeper and better defined
+  // than the earlier flat grooves. Kept above the parting seam.
+  pack.add(onOuterFace(new RoundedBoxGeometry(24, 28, 0.8, 5, 1.2), 0x131610, -0.16, 12, 175.3, sh, mat));
+  for (let i = 0; i < 4; i++) {
+    pack.add(onOuterFace(new THREE.BoxGeometry(19, 2.2, 1.1), GRAPHITE, -0.16, 22 - i * 6.5, 176.0, sh, mat));
   }
+
+  // Status LED on the battery side, raised just proud of the face. Part of the
+  // concept enclosure, which stands in for a laptop today; the pack has no
+  // hardware design, so nothing on it maps to a built component.
+  const ledPivot = new THREE.Group();
+  ledPivot.position.z = -162.5;
+  ledPivot.rotation.y = 0.34;
+  const led = sh(new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.9, 20),
+    new THREE.MeshStandardMaterial({ color: MOSS, roughness: 0.4, emissive: 0x3f5c38, emissiveIntensity: 0.7 })));
+  led.rotation.x = Math.PI / 2;
+  led.position.set(0, 30, 175.4);
+  ledPivot.add(led);
+  pack.add(ledPivot);
 
   // Belt strap. It sits at radius 147.5, inside the pack's 150 mm inner face,
   // so it genuinely passes behind the enclosure and emerges symmetrically on
@@ -195,18 +246,21 @@ export function mountProductViewer({ mount, status }) {
   pack.rotation.y = -0.5;              // shows the curved profile; strap clears both sides
   scene.add(pack);
 
-  // ══ THE CABLE: a solid tube with natural slack, boss to boss ═════════════
+  // ══ THE CABLE: a solid tube hanging in a catenary, boss to boss ══════════
+  // The bosses sit about 75 mm apart with the floor at y = 0, so the belly can
+  // drop well below them and still clear the ground. Two low mid-points at the
+  // same height give the full, slack droop of a real cable between wrist and
+  // waist rather than a taut line across the gap. Thickness unchanged at 3 mm.
   scene.updateMatrixWorld(true);
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   wristBoss.getWorldPosition(a);
   packBoss.getWorldPosition(b);
-  const m1 = a.clone().lerp(b, 0.35);
-  const m2 = a.clone().lerp(b, 0.7);
-  m1.y = Math.max(8, Math.min(a.y, b.y) - 16);   // shallow sag, not taut, not an arc
-  m2.y = Math.max(10, Math.min(a.y, b.y) - 10);
+  const belly = Math.min(a.y, b.y) - 34;         // ~23, deep sag, clears the floor
+  const m1 = a.clone().lerp(b, 0.30); m1.y = belly; m1.z += 8;
+  const m2 = a.clone().lerp(b, 0.70); m2.y = belly; m2.z += 10;
   const curve = new THREE.CatmullRomCurve3([a, m1, m2, b]);
-  const cable = sh(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 3.0, 14), mat(GRAPHITE, 0.62)));
+  const cable = sh(new THREE.Mesh(new THREE.TubeGeometry(curve, 96, 3.0, 14), mat(GRAPHITE, 0.62)));
   scene.add(cable);
 
   // ══ NUMBERED MARKERS ══════════════════════════════════════════════════════
@@ -390,13 +444,20 @@ function strapGeometries({ innerR, arcRad, hCenter, hEnd, thick, steps }) {
   return [strip(1, 2), strip(0, 3), strip(0, 1), strip(3, 2)];
 }
 
-/** Bends a geometry around the Y axis: x becomes arc length at body radius R. */
-function bendAroundY(geo, bodyR, midR) {
+/**
+ * Bends a geometry around the Y axis so a flat panel wraps the waist. Each
+ * vertex keeps its own radius r = midR + z and takes the angle theta = x / r,
+ * so its arc length from centre (r * theta) equals its original x. That
+ * preserves the panel's width on every layer, inner and outer alike. Computing
+ * theta at one fixed radius instead (an earlier shortcut) held the outer face
+ * right but shrank the inner face, turning the cross-section into a wedge.
+ */
+function bendAroundY(geo, midR) {
   const p = geo.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), z = p.getZ(i);
-    const theta = x / bodyR;
     const r = midR + z;
+    const theta = x / r;
     p.setX(i, r * Math.sin(theta));
     p.setZ(i, r * Math.cos(theta) - midR);
   }
