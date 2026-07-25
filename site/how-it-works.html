@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How it works · Ghost Medic</title>
-<meta name="description" content="The four parts of Ghost Medic in plain language: what the wrist unit senses, how the readings travel, what the offline language model does with them, and what each part is standing in for.">
+<meta name="description" content="Ghost Medic in plain language: what the wrist unit senses, how the readings travel, what reaches the screen, and what each part is standing in for.">
 <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
@@ -86,11 +86,12 @@
     </figure>
   </section>
 
-  <!-- ═══════════ 01 ═══════════ -->
+  <!-- ═══════════ THE WRIST UNIT ═══════════ -->
   <section id="wrist" class="col">
-    <p class="eyebrow">01 · The wrist unit</p>
+    <p class="eyebrow">The wrist unit</p>
     <h2>Three sensors, and one thing it refuses to report</h2>
-    <p>Three sensors, each answering a different question, driven by bare-metal C.</p>
+    <p>Three sensors, each answering a different question. The code that drives them is written
+    in C and runs straight on the chip, with no operating system underneath it.</p>
 
     <div class="table-scroll">
     <table>
@@ -121,104 +122,57 @@
     <figure class="chart">
       <div class="frame"><img src="assets/charts/altitude-curve.svg"
         alt="Chart: computed altitude against air pressure, a smooth curve from about 5000 metres at 55 kilopascals down to 0 at sea-level pressure, with the two host-test check points marked."></div>
-      <figcaption>The curve computed by the shipping C; the two marked points are what the
-      host tests check.</figcaption>
+      <figcaption>The curve worked out by the same C the wrist unit runs. The two marked points
+      are the ones the tests check.</figcaption>
     </figure>
 
     <h3>What a fall looks like to a machine</h3>
-    <p>Free fall reads near zero, landing spikes. Either alone is ordinary, so the firmware
-    requires both, in that order, within 400 ms.</p>
+    <p>Falling reads near zero, landing spikes. Either one on its own happens all day, so the
+    wrist unit only calls it a fall when both happen, in that order, within 400 ms.</p>
 
     <figure class="chart">
       <div class="frame"><img src="assets/charts/fall-signature.svg"
         alt="Chart: acceleration over four seconds. A steady line near 1 g dips below the 0.35 g free-fall threshold, then spikes past the 2.5 g impact threshold inside a shaded 400 millisecond window, where the fall is flagged."></div>
-      <figcaption>A synthetic motion trace fed through the shipping C state machine; the flag
-      fires exactly where the real code fires it.</figcaption>
+      <figcaption>A made-up motion recording, put through the same C the wrist unit runs. The
+      flag goes up exactly where the real code puts it.</figcaption>
     </figure>
 
     <div class="gap">
       <p class="eyebrow">Label</p>
-      <p>A demonstration, not a medical-grade detector. The thresholds are untuned textbook
-      values, and the code says so.</p>
+      <p>A demonstration, not a medical-grade detector. The levels it triggers at are textbook
+      numbers nobody has tuned, and the code says so.</p>
     </div>
 
     <h3>No heart rate</h3>
-    <p>The optical sensor measures light off skin. That contains a pulse, but extracting it
-    needs signal processing this project does not do, so the readings stay raw. Enforced in
-    four places:</p>
+    <p>The light sensor measures light bouncing off skin. A pulse is buried in that, but pulling
+    it out takes work this project does not do, so the readings are passed on exactly as they
+    arrive. Four things hold that line:</p>
     <ul>
-      <li>the firmware reports counts only;</li>
-      <li>the app has no heart-rate field;</li>
-      <li>the text sent to the model forbids inferring one;</li>
-      <li>a test fails if one ever appears.</li>
+      <li>the wrist unit only ever reports how much light came back;</li>
+      <li>the app has nowhere to put a heart rate;</li>
+      <li>the text sent to the model forbids working one out;</li>
+      <li>a test fails if one ever shows up.</li>
     </ul>
-    <p>An invented vital sign is worse than none.</p>
+    <p>A made-up vital sign is worse than none.</p>
   </section>
 
-  <!-- ═══════════ 02 ═══════════ -->
+  <!-- ═══════════ THE LINK ═══════════ -->
   <section id="link" class="col">
-    <p class="eyebrow">02 · The link</p>
+    <p class="eyebrow">The link</p>
     <h2>A cable doing a radio's job</h2>
-    <p>A short-range radio would do this; until it exists, a small program passes each line over
-    a wire unchanged, so nothing downstream can tell a board from the simulator or a recording.
-    It drops only the power-on greeting, which has no timestamp and so is not a reading.</p>
+    <p>A short-range radio would carry this. Until one exists, a small program passes each line
+    along a wire without changing it, so nothing further along can tell a real board from a
+    replayed recording. It throws away one thing only: the greeting the wrist unit prints when it
+    powers on, which carries no time and so is not a reading.</p>
   </section>
 
-  <!-- ═══════════ 03 ═══════════ -->
-  <section id="brain" class="col">
-    <p class="eyebrow">03 · The pack computer</p>
-    <h2>The model is told what the sensors saw, and what not to conclude</h2>
-    <p>A small open model runs locally; the engineering is what it is told and forbidden. Every
-    question carries the readings in words, each with its limits:</p>
-
-    <div class="translate">
-      <pre class="artifact">DERIVED READINGS:
-- Altitude: 2.1 m (pressure-derived vs a fixed 101325 Pa sea-level
-  reference; reliable for RELATIVE change only — NOT GPS or true elevation)
-- Temperature: 21.0 °C (AMBIENT air at the device — NOT body temperature)
-- Fall detected: YES (accelerometer free-fall→impact heuristic,
-  not medical-grade)
-
-RAW SIGNALS (non-diagnostic):
-- Optical counts: red 10249, ir 10398. These are raw photodiode counts
-  from the optical sensor. No pulse-extraction algorithm runs on this
-  device: heart rate and blood-oxygen saturation (SpO2) are NOT
-  available and must not be inferred from these numbers.</pre>
-      <div class="plain">
-        <p>The last paragraph does the most: the light readings are not vital signs, and a
-        failed sensor reads <strong>"unavailable"</strong>, never zero.</p>
-      </div>
-    </div>
-    <p class="caption">Real output of <code>services/sensorContext.ts</code>, wrapped, markers
-    removed.</p>
-
-    <p>One rule sits above the rest: if the readings disagree with the person, the person wins.</p>
-
-    <h3>When the wristband speaks first</h3>
-    <p>On a fall, the assistant asks on its own. One fall arrives as many identical readings, so
-    the trigger fires only on the change to yes, then waits thirty seconds. One fall, one
-    question.</p>
-
-    <div class="translate">
-      <pre class="artifact">const risingEdge = fallDetected &amp;&amp; !prevFall;
-prevFall = fallDetected;
-
-if (!risingEdge) return false;
-if (suppressed) return false; // consumed, not queued
-if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
-      <div class="plain">
-        <p>The real trigger code. The Proof chart shows what it saves: 2 model calls instead of
-        150 over a minute of replay.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════ 04 ═══════════ -->
+  <!-- ═══════════ THE SCREEN ═══════════ -->
   <section id="interface" class="col">
-    <p class="eyebrow">04 · The interface</p>
+    <p class="eyebrow">The screen</p>
     <h2>Six steps, and one line that matters more than the rest</h2>
-    <p>At most six one-sentence steps, ending with an evacuation line shown separately. Derived
-    and raw values stay apart; a failed reading shows a dash.</p>
+    <p>Six steps at most, one sentence each, and a separate line telling you whether to get out.
+    Readings the software worked out are kept apart from readings that came straight off a
+    sensor, and anything that failed shows a dash.</p>
 
     <div class="phone" id="app-demo">
       <div class="pd-head"><span>GHOST MEDIC</span><span class="pd-live">● LIVE</span></div>
@@ -234,8 +188,8 @@ if (nowMs - lastFiredMs &lt; opts.cooldownMs) return false;</pre>
 
     <div class="gap">
       <p class="eyebrow">Placeholders</p>
-      <p>Voice and wound photos are captured, but nothing transcribes or analyses them yet. The
-      word-by-word reveal is display pacing; the complete answer arrives at once.</p>
+      <p>Voice and wound photos are captured, but nothing reads or listens to them yet. The
+      word-by-word reveal is just pacing: the whole answer arrives at once.</p>
     </div>
   </section>
 

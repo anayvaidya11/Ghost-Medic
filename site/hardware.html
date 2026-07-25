@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hardware · Ghost Medic</title>
-<meta name="description" content="The Ghost Medic wrist-unit circuit board: a two-layer KiCad design with 35 components and 477 copper segments. Orbit it in 3D, see the routing, and read why each chip is there.">
+<meta name="description" content="The Ghost Medic wrist-unit circuit board: 35 parts and 477 lengths of track, drawn by hand in KiCad. Turn it in 3D, see the wiring, and read what every part does.">
 <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
@@ -28,9 +28,10 @@
   <section id="intro" class="col">
     <p class="eyebrow">Hardware</p>
     <h1>The wrist unit, routed down to the last trace.</h1>
-    <p class="lead">A two-layer board: an RP2040 and three sensors, 35 components, 477 copper
-    segments, 63 vias, over one USB-C connector. Schematic drawn, parts placed, every trace
-    routed by hand in KiCad; the files are in the repository.</p>
+    <p class="lead">A board with copper on both faces: one processor, three sensors, 35 parts in
+    total, 477 lengths of track, and a single USB-C socket for power and programming. The
+    circuit was drawn, the parts placed and every track laid down by hand in KiCad. The files
+    are in the repository.</p>
   </section>
 
   <!-- ═══════════ THE 3D BOARD ═══════════ -->
@@ -49,17 +50,17 @@
       <div class="board-bar" id="board-controls" hidden>
         <button type="button" class="ghost" data-board-reset>Reset view</button>
       </div>
-      <p class="caption">Exported from the layout file by KiCad's own 3D exporter (command in
-      <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/hardware/README.md">hardware/README.md</a>);
-      nothing modelled by hand. Drag to rotate, scroll to zoom.</p>
+      <p class="caption">Produced from the layout file by KiCad itself, using the command in
+      <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/hardware/README.md">hardware/README.md</a>.
+      Nothing here was modelled by hand. Drag to turn it, scroll to zoom.</p>
 
       <div class="gap">
-        <p class="eyebrow">Two things the render does not show</p>
-        <p><strong>The optical sensor has no body in the render.</strong> Its package has no 3D
-        model in the standard library, so the exporter leaves the spot empty. It is in the
-        schematic, the layout, and routed; the gap is left visible rather than faked.</p>
-        <p><strong>The copper is under the surface,</strong> as on a real board. The routing is
-        next.</p>
+        <p class="eyebrow">Two things this picture does not show</p>
+        <p><strong>The light sensor is missing from it.</strong> Nobody has drawn a 3D shape for
+        that part, so the exporter leaves its spot empty. It is in the circuit, in the layout and
+        fully wired up. The hole is left visible rather than filled in with something invented.</p>
+        <p><strong>The copper is hidden under the surface,</strong> exactly as on a real board.
+        It is next.</p>
       </div>
     </div>
   </section>
@@ -67,10 +68,10 @@
   <!-- ═══════════ THE ROUTING ═══════════ -->
   <section id="routing" class="col-w">
     <div class="col" style="padding:0">
-      <p class="eyebrow">The routing</p>
+      <p class="eyebrow">The wiring</p>
       <h2>Every connection placed by hand, one at a time</h2>
-      <p>477 segments routed by hand between 35 components, plus 63 vias (a via is a plated hole
-      crossing to the other side).</p>
+      <p>477 lengths of track laid between 35 parts, plus 63 vias. A via is a small plated hole
+      that carries a connection through to the other face of the board.</p>
     </div>
     <figure>
       <div class="frame"><img class="copper" src="assets/ghostmedic-sensor-hub-front-copper.svg"
@@ -80,11 +81,11 @@
 
     <div class="col" style="padding:0">
       <h3>Why two layers</h3>
-      <p>Copper on both faces, nothing between. More layers ease routing but cost money, and this
-      design does not need them.</p>
-      <p>The front carries the signals; the back is almost entirely one copper sheet,
-      <strong>5,218 of the board's 5,561 mm²</strong>, held at zero volts, giving every part a
-      short, quiet return path.</p>
+      <p>Copper on the front and the back, nothing in between. More layers would make the wiring
+      easier but cost more, and this design does not need them.</p>
+      <p>The front carries the connections. The back is almost one unbroken sheet of copper,
+      <strong>5,218 of the board's 5,561 mm²</strong>, held at zero volts, so current from every
+      part has a short, direct way back.</p>
 
       <div class="table-scroll">
       <table>
@@ -93,10 +94,10 @@
           <tr><td>Board size</td><td>77.5 × 71.75 mm</td><td>About the size of a passport.</td></tr>
           <tr><td>Thickness</td><td>1.6 mm</td><td>The standard the whole industry is set up to make cheaply.</td></tr>
           <tr><td>Copper layers</td><td>2</td><td>Signals on the front, ground on the back.</td></tr>
-          <tr><td>Components</td><td>35</td><td>34 surface-mounted, 1 through-hole.</td></tr>
-          <tr><td>Copper segments</td><td>477</td><td>Individual straight runs of track.</td></tr>
-          <tr><td>Vias</td><td>63</td><td>Plated holes carrying a connection to the other side.</td></tr>
-          <tr><td>Narrowest track</td><td>0.2 mm</td><td>Comfortably above what any cheap fabricator can make. Deliberately unambitious.</td></tr>
+          <tr><td>Parts</td><td>35</td><td>34 sit on the surface, 1 has legs through the board.</td></tr>
+          <tr><td>Lengths of track</td><td>477</td><td>Individual straight runs of copper.</td></tr>
+          <tr><td>Vias</td><td>63</td><td>Plated holes carrying a connection to the other face.</td></tr>
+          <tr><td>Narrowest track</td><td>0.2 mm</td><td>Comfortably wider than any cheap manufacturer needs. Deliberately unambitious.</td></tr>
           <tr><td>Smallest hole</td><td>0.3 mm</td><td>Same reasoning.</td></tr>
         </tbody>
       </table>
@@ -105,40 +106,25 @@
     </div>
   </section>
 
-  <!-- ═══════════ THE DECISIONS ═══════════ -->
+  <!-- ═══════════ THE PARTS ═══════════ -->
   <section id="decisions" class="col">
-    <p class="eyebrow">The decisions</p>
-    <h2>Why each part is on the board</h2>
-
-    <h3>The processor and the memory chip beside it</h3>
-    <p>An <strong>RP2040</strong>, as in a Raspberry Pi Pico, because the firmware was written
-    for it. It can't store its own program, so a memory chip sits beside it; the crystal matches
-    the toolkit's default frequency.</p>
-
-    <h3>Three sensors, two wires</h3>
-    <p>All three sensors share one pair of wires, each with its own address, called one at a
-    time. Two resistors hold the wires at a known level when idle. The pins match the
-    firmware's.</p>
-
-    <h3>One connector for everything</h3>
-    <p>A <strong>USB-C</strong> socket carries power and the program; a regulator steps 5 V down
-    to 3.3. Hold one button, tap the other, and the board mounts as a drive to drop a file onto.
-    A four-pin header is the backup way in.</p>
+    <p class="eyebrow">The parts</p>
+    <h2>Everything on the board, and what it does</h2>
 
     <div class="table-scroll">
     <table>
       <thead><tr><th>Ref</th><th>Part</th><th>Job</th></tr></thead>
       <tbody>
-        <tr><td>U3</td><td>RP2040</td><td>The processor. Runs the firmware.</td></tr>
-        <tr><td>U1</td><td>W25Q128JVS</td><td>Memory. Stores the program.</td></tr>
-        <tr><td>U2</td><td>AMS1117-3.3</td><td>Steps 5 volts down to 3.3.</td></tr>
-        <tr><td>U6</td><td>BMP280</td><td>Air pressure and temperature, giving altitude.</td></tr>
-        <tr><td>U5</td><td>LIS3DH</td><td>Acceleration, giving motion and falls.</td></tr>
-        <tr><td>U4</td><td>MAX30102</td><td><strong>Raw optical readings only.</strong> Not heart rate, not blood oxygen.</td></tr>
-        <tr><td>J1</td><td>USB-C</td><td>Power and programming.</td></tr>
-        <tr><td>Y1</td><td>12 MHz crystal</td><td>The processor's clock.</td></tr>
-        <tr><td>R6, R7</td><td>4.7 kΩ</td><td>Hold the two sensor wires at a known level.</td></tr>
-        <tr><td>SW1, SW2</td><td>Buttons</td><td>Reset, and enter programming mode.</td></tr>
+        <tr><td>U3</td><td>RP2040</td><td>The processor, the same one in a Raspberry Pi Pico. Runs the code.</td></tr>
+        <tr><td>U1</td><td>W25Q128JVS</td><td>Memory. The processor cannot hold its own program, so this does.</td></tr>
+        <tr><td>U2</td><td>AMS1117-3.3</td><td>Brings the 5 volts arriving over USB down to the 3.3 everything else wants.</td></tr>
+        <tr><td>U6</td><td>BMP280</td><td>Air pressure and temperature, which give altitude.</td></tr>
+        <tr><td>U5</td><td>LIS3DH</td><td>Movement, which gives motion and falls.</td></tr>
+        <tr><td>U4</td><td>MAX30102</td><td><strong>Light readings only, exactly as they arrive.</strong> Not heart rate, not blood oxygen.</td></tr>
+        <tr><td>J1</td><td>USB-C</td><td>One socket for both power and loading new code.</td></tr>
+        <tr><td>Y1</td><td>12 MHz crystal</td><td>The processor's clock, at the speed its toolkit expects.</td></tr>
+        <tr><td>R6, R7</td><td>4.7 kΩ</td><td>All three sensors share one pair of wires. These two hold that pair at a known level when nothing is talking.</td></tr>
+        <tr><td>SW1, SW2</td><td>Buttons</td><td>Hold one and tap the other, and the board appears as a drive to drop a file onto.</td></tr>
         <tr><td>D1</td><td>LED</td><td>Shows the board is alive.</td></tr>
       </tbody>
     </table>

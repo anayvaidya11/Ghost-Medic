@@ -20,15 +20,15 @@ the style, because their whole value is being unedited.
 
 | Path | What it is |
 |---|---|
-| `index.html` | **Overview**, the pitch, the honest status ledger, the wire format explained, the live simulator |
+| `index.html` | **Overview**, the pitch, the honest status ledger, the concept viewer, the wire format explained |
 | `how-it-works.html` | **How it works**, the four stages in plain language, with an animated 2D pipeline diagram |
 | `hardware.html` | **Hardware**, the 3D board viewer, the copper routing, why each part is there |
 | `proof.html` | **Proof**, test output, the recorded model transcript, the real-vs-simulated table |
 | `about.html` | **About**, who built it, with links |
 | `style.css` | The whole design system. Two devices carry the site: the *translation pair* (`.translate`) and the *ledger mark* (`.mark`) |
-| `simulator/index.html` | **Byte-identical copy** of `../simulator/index.html`, embedded via iframe on the overview page |
 | `assets/board-viewer.js` | three.js board viewer, merges draw calls, falls back to the static render on any failure |
-| `assets/product-viewer.js` | three.js concept illustration of how the system would be worn. Placeholder shapes built in code, labelled as concept, falls back to the inline 2D SVG |
+| `assets/product-viewer.js` | three.js concept illustration of how the system would be worn. Placeholder shapes built in code, labelled as concept, falls back to the inline 2D SVG. Two views: on the body, and the units alone |
+| `assets/wearer-figure.js` | The cropped body form the concept is worn on. Also built in code: a lofted torso and a swept arm, not a scan and not CAD |
 | `assets/app-demo.js` | Scripted replay of the app's screen. The response text is the verbatim recorded run; no model runs in the page |
 | `assets/charts/*.svg` | Chart plates generated from the shipping code. See `../tools/charts/README.md` |
 | `assets/*.glb / *.svg / *.png / *.pdf` | Generated from `../hardware/` source, see below |
@@ -61,16 +61,6 @@ C and TypeScript. Commands in [`../tools/charts/README.md`](../tools/charts/READ
 Pages link `style.css?v=N`. Bump `N` whenever `style.css` changes, so cached
 copies don't serve a stale design.
 
-## Keeping the simulator in sync
-
-`simulator/index.html` here is a **byte-identical copy**. The canonical source is
-`../simulator/index.html`. If you change that, re-copy it:
-
-```sh
-cp ../simulator/index.html simulator/index.html
-cmp ../simulator/index.html simulator/index.html && echo identical
-```
-
 ## Preview locally
 
 ```sh
@@ -80,9 +70,13 @@ python3 -m http.server 8090
 ```
 
 Use the local server, not a double-click. Opening `index.html` from `file://`
-blocks JavaScript modules and iframes, so the 3D board falls back to its still
-render and the embedded simulator won't load, both by design, but it isn't a
-faithful preview.
+blocks JavaScript modules, so both 3D viewers fall back to their still image and
+2D diagram. That is the fallback working as designed, but it is not a faithful
+preview.
+
+To iterate on the concept viewer on its own, serve the repository root instead
+and open `tools/render/preview.html`. It mounts the same module with the camera
+the site ships, and prints the measurements under the canvas.
 
 ## Deploy to Vercel, exact steps (no experience assumed)
 

@@ -283,6 +283,11 @@ button.ghost {
   padding: .5rem .75rem; cursor: pointer;
 }
 button.ghost:hover { color: var(--forest); border-color: var(--forest); }
+/* The pressed one is the view you are looking at, so it has to read as chosen
+   rather than merely hovered. */
+button.ghost[aria-pressed="true"] {
+  color: var(--paper); background: var(--forest); border-color: var(--forest);
+}
 
 /* front-copper plate, the export is black artwork on transparent, so it sits
    on the paper as a technical plate with no recolouring needed */

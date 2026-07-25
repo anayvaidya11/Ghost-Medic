@@ -48,8 +48,9 @@
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>Firmware compiles for the real chip; its maths passes the manufacturer's own
-          reference numbers (6 + 3 checks), plus 39 on the model-facing software.</p>
+          <p>The code for the wrist unit compiles for the real chip, and its maths matches the
+          numbers the sensor's own maker publishes. Nine checks there, and 39 more on the
+          software that decides what the model gets told.</p>
         </div>
       </li>
       <li>
@@ -116,17 +117,22 @@
       </svg>
     </div>
     <p class="board-status" id="product-status" role="status"></p>
+    <div class="board-bar" id="product-views" hidden>
+      <button type="button" class="ghost" data-view="wearer">On the body</button>
+      <button type="button" class="ghost" data-view="units">The units alone</button>
+    </div>
 
     <div class="col" style="padding:0">
       <ul class="legend">
-        <li><span class="num">1</span><div><b>Wrist case.</b> Holds the sensor board and firmware, both real: the board hand-routed in KiCad, the firmware compiled with its maths tested.</div></li>
-        <li><span class="num">2</span><div><b>Display.</b> Concept only: the built board has no screen. Today the app shows the readings and speaks the steps.</div></li>
-        <li><span class="num">3</span><div><b>The cable.</b> Real bridge software, carrying every reading unchanged: a wired stand-in for the eventual wrist-to-pack BLE link.</div></li>
-        <li><span class="num">4</span><div><b>Belt pack.</b> Compute and battery in one curved case, sized around a Jetson Orin Nano class module (7 to 15 W on paper). <b>No module has been selected and nothing has been measured.</b> The offline LLM layer is real; a laptop stands in today.</div></li>
+        <li><span class="num">1</span><div><b>Wrist case.</b> Holds the sensor board and its code. Both exist: every connection on the board drawn by hand, the code compiled and its maths tested.</div></li>
+        <li><span class="num">2</span><div><b>Display.</b> Concept only: the board that was designed has no screen. Today a phone or laptop shows the readings and speaks the steps.</div></li>
+        <li><span class="num">3</span><div><b>The cable.</b> The software carrying the readings is real and passes every one through unchanged. The cable itself stands in for the wireless link that would replace it.</div></li>
+        <li><span class="num">4</span><div><b>Belt pack.</b> The computer and the battery in one curved case, sized around the sort of small computer module this would need. Its makers rate that class at 7 to 15 watts. <b>No module has been chosen and nothing has been measured.</b> The software that runs without internet is real; a laptop stands in for the pack today.</div></li>
       </ul>
-      <p class="caption">A concept, built in code rather than CAD. The only hardware designed is
-      the circuit board, hand-routed in KiCad, on the <a href="hardware.html">Hardware page</a>.
-      Drag to rotate, scroll to zoom.</p>
+      <p class="caption">A concept, built in code rather than CAD. The body is a placeholder
+      shape too, not a scan of anyone. The only hardware that exists as a design is the circuit
+      board, drawn by hand in KiCad, on the <a href="hardware.html">Hardware page</a>. Drag to
+      turn it, scroll to zoom.</p>
     </div>
   </section>
 
@@ -144,31 +150,15 @@
  "fall_detected":true}</pre>
       <div class="plain">
         <p class="eyebrow" style="color:var(--forest)">In plain English</p>
-        <p>Optical sensor working, two light readings. Pressure working: 21 °C, 2.1 m above the
-        start. Accelerometer just felt 2.62 g, over 2.5x gravity. <strong>That looked like a
-        fall.</strong></p>
+        <p>Light sensor working, two readings from it. Pressure sensor working: 21 °C, and 2.1 m
+        higher than where it started. The motion sensor just felt 2.62 g, over two and a half
+        times the pull of gravity. <strong>That looked like a fall.</strong></p>
       </div>
     </div>
 
-    <p>Each sensor reports its own <code>"ok"</code> first, so a failure says so instead of
-    quietly reading zero. The light stays raw: no heart rate is derived anywhere, by design.</p>
-  </section>
-
-  <!-- ═══════════ THE LIVE THING ═══════════ -->
-  <section id="simulator" class="col-w">
-    <div class="col" style="padding:0">
-      <p class="eyebrow">Live in this page</p>
-      <h2>Drive the wrist unit yourself</h2>
-      <p>Running in your browser now, not a video. Move the sliders, simulate a fall, switch a
-      sensor off and watch it report the failure instead of a number. Same formulas as the
-      firmware.</p>
-      <div class="gap">
-        <p class="eyebrow">Label</p>
-        <p>A simulator. No sensor is attached. It demonstrates the data format and the maths,
-        not hardware.</p>
-      </div>
-    </div>
-    <iframe class="embed" src="simulator/index.html" title="Ghost Medic wrist-unit simulator, interactive" loading="lazy"></iframe>
+    <p>Each sensor reports its own <code>"ok"</code> first, so a broken one says so instead of
+    quietly reading zero. The light readings stay exactly as they came off the sensor: no heart
+    rate is worked out anywhere, on purpose.</p>
   </section>
 
   <!-- ═══════════ WHERE TO GO ═══════════ -->
@@ -181,7 +171,7 @@
       </a></li>
       <li><a href="hardware.html">
         <span class="t">Hardware</span>
-        <span class="d">The board in 3D, the routing, why each chip.</span>
+        <span class="d">The board in 3D, its wiring, and every part on it.</span>
       </a></li>
       <li><a href="proof.html">
         <span class="t">Proof</span>
@@ -200,10 +190,29 @@
 </script>
 <script type="module">
   import { mountProductViewer } from './assets/product-viewer.js';
-  mountProductViewer({
-    mount:  document.getElementById('product-viewer'),
-    status: document.getElementById('product-status'),
+
+  const mount  = document.getElementById('product-viewer');
+  const status = document.getElementById('product-status');
+  const bar    = document.getElementById('product-views');
+  let view = null;
+
+  // Each switch rebuilds the scene, so the old one has to be torn down first.
+  const show = (name) => {
+    view?.dispose();
+    view = mountProductViewer({ mount, status, wearer: name === 'wearer' });
+    // No WebGL means no viewer to switch, and the 2D diagram stands alone.
+    bar.hidden = !view;
+    for (const b of bar.querySelectorAll('button[data-view]')) {
+      b.setAttribute('aria-pressed', String(b.dataset.view === name));
+    }
+  };
+
+  bar.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-view]');
+    if (b) show(b.dataset.view);
   });
+
+  show('wearer');
 </script>
 
 <footer class="site-foot"><div class="col-w">
