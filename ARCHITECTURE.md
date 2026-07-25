@@ -65,8 +65,10 @@ wrist unit later by changing one flag.
 
 ## The three data sources (same format, increasing realism)
 
-1. **`simulator/index.html`** — a browser page with sliders. Human-facing *visual
-   demo* for the website. Not in the app's data path.
+1. **`simulator/index.html`** — a browser page with sliders. A standalone *visual
+   demo* you open yourself. Not in the app's data path, and **no longer embedded
+   in the site** (removed from the overview page 25 Jul 2026, along with the
+   byte-identical copy that used to live at `site/simulator/`).
 2. **The bridge's `sim`/`file` modes** — replays/generates NDJSON at 10 Hz for the
    hardware-free app demo. The honest goal: generate it from the firmware's *own*
    pure C math (`firmware/bmp280_compensation.c`, `firmware/fall_detection.c`) so

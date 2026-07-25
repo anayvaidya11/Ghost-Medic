@@ -220,6 +220,55 @@ smell exaggeration but is not an embedded engineer.*
   excl. tables/chrome ~2637 → ~2027); every honesty disclosure and evidence link
   kept, overclaim grep and link check re-run clean.
 
+### Phase 4d — the concept on a body, and a hard prose cut  🟢 (2026-07-25)
+- 🟢 **A way to actually see the render.** Every earlier concept session shipped
+  geometry verified only by measuring bounding boxes, because no browser was
+  installed. `tools/render/` fixes that: `preview.html` mounts the viewer on its
+  own with the camera the site ships, and `shot.mjs` screenshots it over the
+  Chrome DevTools Protocol. **No new dependency** — Node's built-in `WebSocket`
+  drives a Chromium already on the machine, and nothing is added to
+  `package.json`. This paid for itself immediately (see the two defects below).
+- 🟢 **`site/assets/wearer-figure.js`**: a cropped body form the concept is worn
+  on. A torso lofted through superellipse cross-sections, an arm swept in one
+  piece from shoulder to fingertip, and a belt that wraps the real surface. Built
+  in code like the two units, and labelled on the page, in the module, and in the
+  Proof table as a placeholder — not a scan, not CAD, nobody's proportions.
+  Cropped deliberately: a whole standing figure puts the 48 mm case at about 3%
+  of frame height and hides every detail on it.
+- 🟢 **Placement is measured, not nudged.** The pack's inner face is a 150 mm arc
+  and a waist is elliptical, so there is no angle where it sits flush. The code
+  scans the front-left quadrant for the closest local radius of curvature and
+  seats it there: **149.8 mm against 150.0**. The preview prints that, plus arm-to-
+  torso gap (47.9 mm), shoulder burial (82.5 mm, which is what hides the cut end),
+  cable-to-torso (24.0 mm), cable slack (18%) and every marker's pixel position.
+- 🟢 **Two defects only a render could have caught.** The band mounted itself
+  using the straight elbow-to-wrist chord rather than the curve's tangent, so it
+  sat skewed across the base of the hand. And the cable ran from the connector
+  straight at the belt, which on a raised arm means through the hand; it now
+  leads back down the forearm first and clears by **9.3 mm**. *An initial
+  diagnosis blamed centripetal Catmull-Rom spacing. That was wrong — three.js maps
+  `t` uniformly across segments — and the comment in the file says so rather than
+  keeping a tidy-sounding story.*
+- 🟢 `product-viewer.js` refactored: wrist unit and belt pack extracted into their
+  own builders, plus a `wearer` flag. The units-only view is **pixel-identical**
+  to before, verified by screenshot against one taken before the refactor. Added
+  `dispose()`, because the page now rebuilds the scene on every view switch and
+  would otherwise leak a WebGL context each time.
+- 🟢 Overview page carries both views behind a toggle, on-the-body first, which is
+  what its heading ("What it would look like on you") was always promising.
+- 🟢 **Cuts (owner-directed):** the embedded simulator and its section left the
+  overview page, and `site/simulator/` (a byte-identical copy) is deleted along
+  with the sync ritual in `site/README.md`. `ARCHITECTURE.md` §"three data
+  sources" updated to say the simulator is standalone now. Hardware lost "Why each
+  part is on the board" — the useful content moved into the parts table in plainer
+  words. How it works lost the whole "03 · The pack computer" section; the
+  numbered eyebrows went with it, since 01/02/04 reads as a mistake.
+- 🟢 **Plain-language sweep** across all five pages: no "bare-metal", "downstream",
+  "BLE", "LLM layer", "routing", "host tests", "prompt construction", "synthetic
+  trace". Verbatim artifacts (test output, transcripts, code, the sensor block)
+  untouched, per the house style. Link check clean over 50 local references,
+  overclaim grep clean, `npm test` 39/39, `npx tsc --noEmit` clean.
+
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).
 - 🧊 Real BLE wrist→pack link (the wired bridge is the honest stand-in).
@@ -241,5 +290,6 @@ smell exaggeration but is not an embedded engineer.*
   of 2026-07-22**: `npx tsc --noEmit` passes clean; the file is 46 lines and fine.
 - Consider lifting `legacy/src/scenarios/*.json` (wilderness vignettes) out for use
   as LLM demo/eval inputs.
-- If `simulator/index.html` changes, re-copy it to `site/simulator/index.html`
-  (the site embeds a byte-identical copy; see `site/README.md`).
+- ~~If `simulator/index.html` changes, re-copy it to `site/simulator/index.html`~~
+  — **gone as of 2026-07-25.** The site no longer embeds the simulator, and the
+  copy under `site/` was deleted, so there is nothing left to keep in sync.
