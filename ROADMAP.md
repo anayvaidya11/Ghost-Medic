@@ -268,6 +268,29 @@ smell exaggeration but is not an embedded engineer.*
   trace". Verbatim artifacts (test output, transcripts, code, the sensor block)
   untouched, per the house style. Link check clean over 50 local references,
   overclaim grep clean, `npm test` 39/39, `npx tsc --noEmit` clean.
+- 🟢 **Proof page rebuilt around four pieces of evidence** (owner-directed): each
+  is one trimmed code block followed by a plain "what this proves". The 39-line
+  test wall is now 5 lines plus the pass count, the firmware output is the two
+  Bosch comparison lines, and the two full model transcripts are one excerpt: the
+  step that only exists in the fall run. Every cut is marked in grey inside the
+  block and every full version is one link or one command away.
+  **Watch this one.** A previous audit caught transcripts being condensed while
+  presented as recorded output, so the excerpt is explicitly labelled and the
+  session report is linked from beside it. Re-ran both suites to quote them
+  honestly, and fixed a pre-existing defect while there: the firmware block had
+  been re-spaced to fit the column, so the site was showing output that never
+  came out of the terminal. `.receipt` scrolls horizontally, so it now carries
+  the real spacing.
+- 🟢 **Reading level is measured, not asserted.** `tools/prose/readability.mjs`
+  scores each page (Flesch-Kincaid, target grade 10, skips `<pre>` and the shared
+  nav/footer). All five pages pass: index 4.7, hardware 4.6, how-it-works 4.3,
+  proof 4.7, about 9.4, whose only long sentence is a degree name. The first
+  version of the script was wrong in an instructive way — with no sentence break
+  at block tags it read the whole ledger table as one grade-72 sentence.
+- ⬜ **Known gap:** `assets/charts/debounce.svg` still labels a line "the shipping
+  trigger". Chart text is baked in as glyph paths, so fixing three words means
+  installing matplotlib and regenerating all three plates, risking visual drift
+  on the other two. The figcaption underneath translates it instead.
 
 ## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).
