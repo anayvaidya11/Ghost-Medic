@@ -40,13 +40,13 @@ anchored to real doctrine. See `protocols-source/README.md`.
 ### 1. Generate the synthetic dataset
 ```bash
 # Free / fully offline (uses your local Ollama server):
-GHOST_MEDIC_PROVIDER=ollama \
+ARCHIATER_PROVIDER=ollama \
   OLLAMA_BASE_URL=http://localhost:11434 \
   OLLAMA_MODEL=llama3.2:3b \
   npx tsx training/generateDataset.ts --count 500 --out training/dataset.jsonl
 
 # Higher quality (uses the Anthropic API):
-GHOST_MEDIC_PROVIDER=anthropic \
+ARCHIATER_PROVIDER=anthropic \
   ANTHROPIC_API_KEY=sk-ant-... \
   ANTHROPIC_MODEL=claude-3-5-haiku-20241022 \
   npx tsx training/generateDataset.ts --count 500 --out training/dataset.jsonl

@@ -2,11 +2,11 @@
  * generateDataset.ts
  *
  * Synthesize a dataset of wilderness-medicine training pairs for fine-tuning
- * Ghost Medic. Each entry is:
+ * Archiater. Each entry is:
  *
- *   { input: <patient vignette>, output: <formatted Ghost Medic response> }
+ *   { input: <patient vignette>, output: <formatted Archiater response> }
  *
- * Providers (set GHOST_MEDIC_PROVIDER):
+ * Providers (set ARCHIATER_PROVIDER):
  *   - "ollama"    → free / fully offline, uses your local Ollama server.
  *   - "anthropic" → higher quality, uses the Anthropic API.
  *
@@ -21,8 +21,8 @@ import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// ── The Ghost Medic system prompt (kept in sync with services/llmService.ts) ──
-const GHOST_MEDIC_SYSTEM_PROMPT = `You are GHOST MEDIC — an offline AI clinical decision support tool for wilderness search-and-rescue responders, wilderness EMTs, and backcountry users. You follow Wilderness Medical Society guidelines and the Patient Assessment System (PAS). Always prioritize: scene safety, primary assessment ABCDE, secondary assessment SAMPLE, then treatment, then evacuation decision. Be concise. The responder is in the field, often cold, tired, and far from help. Drug recommendations should reflect what's realistically in a wilderness kit (epinephrine auto-injector, diphenhydramine, ibuprofen, acetaminophen, aspirin, glucose). Always end with: EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE] and one sentence on what to tell dispatch.
+// ── The Archiater system prompt (kept in sync with services/llmService.ts) ──
+const ARCHIATER_SYSTEM_PROMPT = `You are ARCHIATER — an offline AI clinical decision support tool for wilderness search-and-rescue responders, wilderness EMTs, and backcountry users. You follow Wilderness Medical Society guidelines and the Patient Assessment System (PAS). Always prioritize: scene safety, primary assessment ABCDE, secondary assessment SAMPLE, then treatment, then evacuation decision. Be concise. The responder is in the field, often cold, tired, and far from help. Drug recommendations should reflect what's realistically in a wilderness kit (epinephrine auto-injector, diphenhydramine, ibuprofen, acetaminophen, aspirin, glucose). Always end with: EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE] and one sentence on what to tell dispatch.
 
 FORMAT your response exactly like this:
 ASSESSMENT: [1-2 sentence summary]
@@ -116,7 +116,7 @@ function loadGrounding(): string {
 type Provider = 'ollama' | 'anthropic';
 
 async function callModel(system: string, prompt: string): Promise<string> {
-  const provider = (process.env.GHOST_MEDIC_PROVIDER ?? 'ollama') as Provider;
+  const provider = (process.env.ARCHIATER_PROVIDER ?? 'ollama') as Provider;
 
   if (provider === 'anthropic') {
     const apiKey = process.env.ANTHROPIC_API_KEY ?? '';
@@ -195,9 +195,9 @@ async function generateOne(
     );
     if (!vignette) return null;
 
-    // Step 2: produce the properly formatted Ghost Medic response (output).
+    // Step 2: produce the properly formatted Archiater response (output).
     const output = await callModel(
-      GHOST_MEDIC_SYSTEM_PROMPT,
+      ARCHIATER_SYSTEM_PROMPT,
       responsePrompt(grounding, vignette)
     );
     if (!output) return null;
@@ -214,7 +214,7 @@ async function main(): Promise<void> {
   const { count, out } = parseArgs();
   const grounding = loadGrounding();
   console.log(
-    `Generating ${count} entries via ${process.env.GHOST_MEDIC_PROVIDER ?? 'ollama'}` +
+    `Generating ${count} entries via ${process.env.ARCHIATER_PROVIDER ?? 'ollama'}` +
       (grounding ? ` (grounded: ${grounding.length} chars)` : ' (no grounding docs)')
   );
 

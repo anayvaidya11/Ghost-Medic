@@ -1,5 +1,5 @@
 /**
- * GHOST MEDIC — single-file state machine UI.
+ * ARCHIATER — single-file state machine UI.
  *
  * Three states, no navigation:
  *   READY    → primary input (hold-to-speak / photo / type) + audio toggle
@@ -86,7 +86,7 @@ function parseResponse(text: string): Parsed {
   return { intro, steps, evacuation };
 }
 
-export default function GhostMedic() {
+export default function Archiater() {
   const [appState, setAppState] = useState<AppState>('ready');
   const [audioOn, setAudioOn] = useState(true);
 
@@ -602,7 +602,7 @@ function ReadyView(props: {
   return (
     <View style={s.readyRoot}>
       <View style={s.readyHeader}>
-        <Text style={s.brand}>GHOST MEDIC</Text>
+        <Text style={s.brand}>ARCHIATER</Text>
         <Text style={s.tagline}>offline decision support</Text>
         <Text style={s.postureBanner}>
           DECISION SUPPORT FOR A TRAINED RESPONDER · NOT A MEDICAL DEVICE
@@ -763,7 +763,7 @@ function ThinkingView(props: {
       )}
       <View style={s.thinkingCenter}>
         <Animated.View style={[s.pulseDot, { transform: [{ scale: props.pulse }] }]} />
-        <Text style={s.thinkingTitle}>GHOST MEDIC IS THINKING</Text>
+        <Text style={s.thinkingTitle}>ARCHIATER IS THINKING</Text>
         <Text style={s.thinkingSub} numberOfLines={2}>
           {truncate(props.submittedText, 80)}
         </Text>
@@ -799,7 +799,7 @@ function ResponseView(props: {
   return (
     <View style={s.respRoot}>
       <View style={s.topBar}>
-        <Text style={s.topBrand}>GHOST MEDIC</Text>
+        <Text style={s.topBrand}>ARCHIATER</Text>
         <TouchableOpacity onPress={props.onNew} activeOpacity={0.7} style={s.topBtn}>
           <Text style={s.topBtnLabel}>NEW SITUATION</Text>
         </TouchableOpacity>
