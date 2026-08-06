@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hardware · Archiater</title>
 <meta name="description" content="The Archiater wrist-unit circuit board: 35 parts and 477 lengths of track, drawn by hand in KiCad. Turn it in 3D, see the wiring, and read what every part does.">
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232C4630'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1E9'%3EA%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -41,10 +41,9 @@
   <section id="intro" class="col">
     <p class="eyebrow">Hardware</p>
     <h1>The wrist unit, routed down to the last trace.</h1>
-    <p class="lead">A board with copper on both faces: one processor, three sensors, 35 parts in
-    total, 477 lengths of track, and a single USB-C socket for power and programming. The
-    circuit was drawn, the parts placed and every track laid down by hand in KiCad. The files
-    are in the repository.</p>
+    <p class="lead">One processor, three sensors, 35 parts, 477 tracks, one USB-C socket.
+    Every part placed and every track laid by hand in KiCad. The files are in the
+    repository.</p>
   </section>
 
   <!-- ═══════════ THE 3D BOARD ═══════════ -->
@@ -63,9 +62,9 @@
       <div class="board-bar" id="board-controls" hidden>
         <button type="button" class="ghost" data-board-reset>Reset view</button>
       </div>
-      <p class="caption">Produced from the layout file by KiCad itself, using the command in
+      <p class="caption">Exported from the layout by KiCad itself, command in
       <a href="https://github.com/anayvaidya11/Archiater/blob/main/hardware/README.md">hardware/README.md</a>.
-      Nothing here was modelled by hand. Drag to turn it, scroll to zoom.</p>
+      Drag to turn, scroll to zoom.</p>
 
       <div class="gap">
         <p class="eyebrow">Two things this picture does not show</p>
@@ -94,8 +93,8 @@
 
     <div class="col" style="padding:0">
       <h3>Why two layers</h3>
-      <p>Copper on the front and the back, nothing in between. More layers would make the wiring
-      easier but cost more, and this design does not need them.</p>
+      <p>Front and back copper, nothing in between. More layers cost more, and this design
+      does not need them.</p>
       <p>The front carries the connections. The back is almost one unbroken sheet of copper,
       <strong>5,218 of the board's 5,561 mm²</strong>, held at zero volts, so current from every
       part has a short, direct way back.</p>

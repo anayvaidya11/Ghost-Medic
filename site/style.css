@@ -379,6 +379,12 @@ button.ghost[aria-pressed="true"] {
 
 .hero-scene { line-height: 0; overflow: hidden; }
 .hero-scene svg { display: block; width: 100%; height: auto; min-height: 150px; object-fit: cover; }
+/* The living version: a canvas the oasis paints itself onto. Hidden until
+   the script confirms it is running, so no-JavaScript visitors keep the SVG
+   still instead of a blank band. */
+.oasis-canvas { display: none; }
+.hero-scene.is-live .oasis-canvas { display: block; width: 100%; height: clamp(340px, 44vw, 620px); }
+.hero-scene.is-live svg { display: none; }
 /* The headline rises over the scene's faded lower edge. */
 .hero-scene + section { margin-top: -3.4rem; position: relative; }
 

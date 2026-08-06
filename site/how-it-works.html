@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How it works · Archiater</title>
 <meta name="description" content="Archiater in plain language: what the wrist unit senses, how the readings travel, what reaches the screen, and what each part is standing in for.">
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232C4630'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1E9'%3EA%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -103,8 +103,8 @@
   <section id="wrist" class="col">
     <p class="eyebrow">The wrist unit</p>
     <h2>Three sensors, and one thing it refuses to report</h2>
-    <p>Three sensors, each answering a different question. The code that drives them is written
-    in C and runs straight on the chip, with no operating system underneath it.</p>
+    <p>Three sensors, each answering a different question, driven by C that runs straight on
+    the chip.</p>
 
     <div class="table-scroll">
     <table>
@@ -126,10 +126,9 @@
         (1.0f - powf(pressure_pa / BMP280_SEA_LEVEL_PA, 0.1903f));
 }</pre>
       <div class="plain">
-        <p><strong>The catch, which is in the code too:</strong> the sea-level number it
-        compares against never changes. Real air pressure does, with the weather. So this is
-        good for telling you that you climbed 300 m. It cannot tell you how high you are. It
-        is not GPS.</p>
+        <p><strong>The catch, which is in the code too:</strong> the sea-level reference never
+        changes, but real air pressure does. Good for telling you that you climbed 300 m.
+        Not for how high you are. Not GPS.</p>
       </div>
     </div>
 
@@ -158,9 +157,8 @@
     </div>
 
     <h3>No heart rate</h3>
-    <p>The light sensor measures light bouncing off skin. A pulse is buried in that, but pulling
-    it out takes work this project does not do, so the readings are passed on exactly as they
-    arrive. Four things hold that line:</p>
+    <p>A pulse is buried in the light readings. Extracting it is work this project does not
+    do, and four things hold that line:</p>
     <ul>
       <li>the wrist unit only ever reports how much light came back;</li>
       <li>the app has nowhere to put a heart rate;</li>
@@ -174,19 +172,17 @@
   <section id="link" class="col">
     <p class="eyebrow">The link</p>
     <h2>A cable doing a radio's job</h2>
-    <p>A short-range radio would carry this. Until one exists, a small program passes each line
-    along a wire without changing it. Nothing further along can tell a real board from a
-    replayed recording. The program throws away one thing only: the greeting the wrist unit
-    prints when it powers on. That line carries no time, so it is not a reading.</p>
+    <p>A short-range radio would carry this. Until one exists, a small program passes each
+    line along a wire unchanged; nothing further along can tell a real board from a replayed
+    recording. It drops one thing only: the power-on greeting, which carries no reading.</p>
   </section>
 
   <!-- ═══════════ THE SCREEN ═══════════ -->
   <section id="interface" class="col">
     <p class="eyebrow">The screen</p>
     <h2>Six steps, and one line that matters more than the rest</h2>
-    <p>Six steps at most, one sentence each, and a separate line telling you whether to get out.
-    Readings the software worked out are kept apart from readings that came straight off a
-    sensor, and anything that failed shows a dash.</p>
+    <p>Six steps at most, one sentence each, and a separate line telling you whether to get
+    out. Worked-out readings stay apart from raw ones; anything that failed shows a dash.</p>
 
     <div class="phone" id="app-demo">
       <div class="pd-head"><span>ARCHIATER</span><span class="pd-live">● LIVE</span></div>

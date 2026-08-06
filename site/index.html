@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Archiater · offline AI first-aid assistant prototype</title>
 <meta name="description" content="A prototype first-aid assistant that works with no internet: a language model on the device you carry, an optional wrist sensor unit, and spoken first-aid steps.">
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232C4630'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1E9'%3EA%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -26,8 +26,10 @@
 
 <main id="main">
 
-  <!-- ═══════════ OASIS SCENE (decorative) ═══════════ -->
+  <!-- ═══════════ OASIS SCENE (decorative; the canvas paints the living
+       version, the SVG beneath is the no-JavaScript still) ═══════════ -->
   <div class="hero-scene" aria-hidden="true">
+    <canvas class="oasis-canvas"></canvas>
     <svg viewBox="0 0 1440 430" preserveAspectRatio="xMidYMax slice" role="presentation" focusable="false">
       <circle cx="1150" cy="86" r="58" fill="#F2E9D2" opacity=".7"/>
       <circle cx="1150" cy="86" r="96" fill="#F2E9D2" opacity=".25"/>
@@ -72,8 +74,8 @@
   <section id="pitch" class="col">
     <p class="eyebrow">Prototype</p>
     <h1>A first-aid assistant that works with no signal.</h1>
-    <p class="lead">A wrist unit reads your motion and the air around you. A language model on
-    hardware you carry turns that, and what you say, into spoken first-aid steps. No network.</p>
+    <p class="lead">A language model on the phone you already carry turns sensor readings, and
+    what you say, into spoken first-aid steps. No network.</p>
   </section>
 
   <div class="horizon" aria-hidden="true">
@@ -95,17 +97,15 @@
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>The software chain runs end to end, offline, on one laptop: sensor readings change
-          the model's answer. Verified 22 Jul 2026 against a local model,
-          <a href="proof.html">receipts on Proof</a>.</p>
+          <p>Offline, end to end, on one laptop: sensor readings change the model's answer.
+          Verified 22 Jul 2026, <a href="proof.html">receipts on Proof</a>.</p>
         </div>
       </li>
       <li>
         <span class="mark mark-yes">Working</span>
         <div>
-          <p>The code for the wrist unit compiles for the real chip, and its maths matches the
-          numbers the sensor's own maker publishes. Nine checks there, and 39 more on the
-          software that decides what the model gets told.</p>
+          <p>The wrist unit's code compiles for the real chip, and its maths matches the
+          numbers the sensor's maker publishes. 48 committed checks in all.</p>
         </div>
       </li>
       <li>
@@ -171,29 +171,26 @@
     <p class="board-status" id="product-status" role="status"></p>
     <div class="board-bar" id="product-views" hidden>
       <button type="button" class="ghost" data-view="wearer">On the body</button>
-      <button type="button" class="ghost" data-view="units">The devices alone</button>
-      <span class="board-bar" id="product-presets" style="margin:0"></span>
+      <button type="button" class="ghost" data-view="units">Devices</button>
     </div>
 
     <div class="col" style="padding:0">
       <ul class="legend">
-        <li><span class="num">1</span><div><b>Wrist sensor accessory.</b> Holds the sensor board and its code. Both exist: every connection on the board drawn by hand, the code compiled and its maths tested. No screen, on purpose: the board has none.</div></li>
-        <li><span class="num">2</span><div><b>The cable.</b> The software carrying the readings is real and passes every one through unchanged. The cable itself stands in for the wireless link that would replace it.</div></li>
-        <li><span class="num">3</span><div><b>The device you already carry.</b> The assistant runs on it: numbered steps, spoken aloud, no internet. The software is real and runs today, with a laptop playing this device. The phone body shown is a mockup.</div></li>
+        <li><span class="num">1</span><div><b>Wrist sensor accessory.</b> The board and its code exist: hand-routed, compiled, maths tested. No screen, because the board has none.</div></li>
+        <li><span class="num">2</span><div><b>The cable.</b> Stands in for the wireless link. The software carrying the readings is real.</div></li>
+        <li><span class="num">3</span><div><b>The device you already carry.</b> The assistant runs on it: numbered steps, spoken, no internet. The software runs today; the phone body is a mockup.</div></li>
       </ul>
-      <p class="caption">A concept, built in code rather than CAD. The figure is a studio
-      mannequin from an open-source base mesh (MakeHuman, CC0): not a scan of anyone, and
-      nobody's real proportions. The only hardware that exists as a design is the circuit
-      board, drawn by hand in KiCad, on the <a href="hardware.html">Hardware page</a>. Drag to
-      turn it, scroll to zoom.</p>
+      <p class="caption">A concept in code, not CAD. The mannequin is an open-source base mesh
+      (MakeHuman, CC0), not a scan of anyone. The one piece of designed hardware is the board
+      on the <a href="hardware.html">Hardware page</a>. Drag to turn, scroll to zoom.</p>
     </div>
   </section>
 
   <!-- ═══════════ THE THESIS: ONE LINE OF TEXT ═══════════ -->
   <section id="wire" class="col">
     <h2>The whole system is held together by one line of text</h2>
-    <p>Ten times a second the wrist unit prints one line describing everything it senses. It is
-    the only contract between the parts. Here is one, from a fall:</p>
+    <p>Ten times a second the wrist unit prints one line: the only contract between the
+    parts. Here is one, from a fall:</p>
 
     <div class="translate">
       <pre class="artifact">{"t_ms":300,
@@ -243,19 +240,28 @@
 </script>
 <script type="module">
   import { mountProductViewer } from './assets/product-viewer.js';
+  import { mountOasis } from './assets/oasis.js';
+
+  // The living hero. The class swap gives the canvas its layout before the
+  // scene reads its size; without JavaScript the SVG still stands alone.
+  {
+    const scene = document.querySelector('.hero-scene');
+    const oasis = scene?.querySelector('.oasis-canvas');
+    if (scene && oasis) {
+      scene.classList.add('is-live');
+      mountOasis(oasis);
+    }
+  }
 
   const mount  = document.getElementById('product-viewer');
   const status = document.getElementById('product-status');
   const bar    = document.getElementById('product-views');
-  const chips  = document.getElementById('product-presets');
-  const LABELS = { figure: 'Whole figure', wrist: 'Wrist unit', phone: 'The device', all: 'All parts', pack: 'Belt pack' };
   let view = null;
 
   // Each switch rebuilds the scene, so the old one has to be torn down first.
   // The figure loads asynchronously; dispose during the load is safe.
   const show = async (name) => {
     view?.dispose();
-    chips.textContent = '';
     view = mountProductViewer({ mount, status, wearer: name === 'wearer' });
     // No WebGL means no viewer to switch, and the 2D diagram stands alone.
     bar.hidden = !view;
@@ -265,18 +271,7 @@
     if (!view) return;
     await view.ready;
     // The figure can fail to load; the viewer then backs out to the diagram.
-    if (!mount.classList.contains('is-3d')) { bar.hidden = true; return; }
-    for (const p of view.presets) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'ghost';
-      btn.textContent = LABELS[p] ?? p;
-      btn.addEventListener('click', () => {
-        view.setPreset(p);
-        for (const c of chips.children) c.setAttribute('aria-pressed', String(c === btn));
-      });
-      chips.appendChild(btn);
-    }
+    if (!mount.classList.contains('is-3d')) bar.hidden = true;
   };
 
   bar.addEventListener('click', (e) => {

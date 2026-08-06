@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Proof · Archiater</title>
 <meta name="description" content="Four pieces of evidence you can check: the tests, the maths against the sensor maker's own numbers, the answer changing when a fall is detected, and the full list of what is real and what is standing in.">
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232C4630'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1E9'%3EA%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -41,10 +41,10 @@
   <section id="intro" class="col">
     <p class="eyebrow">Proof</p>
     <h1>Check it yourself.</h1>
-    <p class="lead">Four pieces of evidence. Each one is a command you can run or
-    output from a run that happened. After each, a short note on what it proves.</p>
-    <p>The blocks below are trimmed. Where lines were cut, it says so in grey, and
-    the full version is one link or one command away.</p>
+    <p class="lead">Four pieces of evidence. Each is a command you can run, or output from a
+    run that happened.</p>
+    <p>The blocks are trimmed; cuts are marked in grey, and the full version is one link or
+    one command away.</p>
   </section>
 
   <!-- ═══════════ 1. THE TESTS ═══════════ -->
@@ -66,13 +66,11 @@
 ℹ <span class="ok">pass 39</span>
 ℹ fail 0</pre>
 
-    <p><strong>What this proves.</strong> A broken sensor is the easiest way for a
-    device like this to lie. It reads 0, and 0 looks like a real number. The first
-    two lines show the code can tell those apart in both directions: a dead sensor
-    says "unavailable", and a genuine reading of zero survives. The third line is
-    the heart-rate rule, enforced by a test rather than by good intentions. The
-    fourth stops one stumble turning into forty questions. The fifth means a
-    dropped connection shows as no data, not as old data.</p>
+    <p><strong>What this proves.</strong> A broken sensor reads 0, and 0 looks like a real
+    number. The first two lines prove the code tells a dead sensor from a true zero. The
+    third is the heart-rate rule, enforced by a test rather than good intentions. The fourth
+    stops one stumble becoming forty questions. The fifth makes a dropped connection show as
+    no data, not old data.</p>
 
     <p class="caption">Run it yourself: <code>npm test</code>. Needs Node 22.6 or
     newer and nothing else. All 39 are in
@@ -107,12 +105,10 @@
 
 All host tests passed.</pre>
 
-    <p><strong>What this proves.</strong> Bosch makes the pressure sensor, and
-    publishes a worked example: feed in these raw numbers, you should get these
-    answers. This test compiles the same C the wrist unit runs, feeds it Bosch's
-    numbers, and compares. We get 25.0825 °C where they say 25.08, and 100653.27
-    Pa where they say 100653. So the maths is right, and it is the shipping maths,
-    not a copy written for the test.</p>
+    <p><strong>What this proves.</strong> Bosch publishes a worked example for its own
+    sensor: these raw numbers in, these answers out. This test feeds them to the same C the
+    wrist unit runs: 25.0825 °C where Bosch says 25.08, 100653.27 Pa where Bosch says
+    100653. The shipping maths, not a copy written for the test.</p>
 
     <div class="gap">
       <p class="eyebrow">What it does not prove</p>
@@ -137,11 +133,10 @@ All host tests passed.</pre>
    <span class="ok">If you have any visible wounds or signs of trauma, get help as soon</span>
    <span class="ok">as possible.</span></pre>
 
-    <p><strong>What this proves.</strong> Run one had no fall, and its answer is
-    ordinary dizziness care with nothing about the spine in it. Run two is the same
-    sentence to the same model, and this step appears. <strong>Nobody typed the
-    word "fall."</strong> A number from a motion sensor turned into a question
-    about spinal injury. That is the whole point of the project working.</p>
+    <p><strong>What this proves.</strong> Run one, no fall: ordinary dizziness care. Run two,
+    same sentence, and this step appears. <strong>Nobody typed the word "fall."</strong> A
+    number from a motion sensor became a question about spinal injury. That is the whole
+    point working.</p>
 
     <div class="gap">
       <p class="eyebrow">Label</p>
