@@ -351,6 +351,10 @@ not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
   took body prose down again (index 491 to 395 words, how-it-works 602 to
   533, hardware 554 to 513, proof 885 to 802) with every honesty device
   kept. All gates re-run green.
+- 🟢 Forest pass, owner-directed (2026-08-06): lush broadleaf trees frame the
+  headline (pre-rendered leaf-blob sprites, swaying at the trunk), understory
+  shrubs sink into the fade at the corners, and the rain is a constant soft
+  drizzle that swells in waves instead of a rare shower.
 - ⬜ **Next-session site worklist (text session):** investor-terse rewrite;
   hero spec strip using the four honest numbers — **0** external network
   requests · **10 Hz** one-line contract · **48** committed checks (39 app +

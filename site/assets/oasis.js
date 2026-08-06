@@ -1,10 +1,15 @@
 /**
  * OASIS: the living hero scene on the overview page.
  *
- * A painted desert oasis, drawn every frame on a 2D canvas: layered dunes,
- * detailed palms whose fronds sway, a pool with a wavering reflection, sand
- * drifting off the crests, and every now and then a passing shower that
- * rings the water where the drops land. Decoration only; aria-hidden.
+ * A painted oasis in rain, drawn every frame on a 2D canvas: layered dunes,
+ * palms whose fronds sway, lush broadleaf trees framing the headline, a pool
+ * with a wavering reflection, sand drifting off the crests, and a soft rain
+ * that swells in waves and rings the water where the drops land. Decoration
+ * only; aria-hidden.
+ *
+ * The trees are pre-rendered once to offscreen canvases (hundreds of leaf
+ * blobs each) and swayed as whole sprites, so the per-frame cost stays at a
+ * handful of draws.
  *
  * Zero requests: everything is drawn in code, colours are read from the
  * stylesheet's scenery tokens so the palette stays one system.
@@ -77,17 +82,25 @@ export function mountOasis(canvas) {
     GRAINS.push({ x: rnd(), y: rnd(), v: 0.25 + rnd() * 0.6, band: Math.floor(rnd() * 3), ph: rnd() * 6.28 });
   }
 
-  // Rain lives in cycles: a long clear spell, then a soft shower drifts
-  // through. Drops that land inside the pool leave rings.
-  const DROPS = [];
+  // The lush frame: broadleaf trees flanking the headline zone, and a pair
+  // of bushes by the pool. Each is a recipe for a pre-rendered sprite.
+  const TREES = [
+    { x: 0.075, base: 1.02, h: 0.78, lean: 0.06, lobes: 5, spread: 1.25, ph: 0.4 },
+    { x: 0.935, base: 1.03, h: 0.7, lean: -0.08, lobes: 5, spread: 1.15, ph: 2.6 },
+    { x: 0.185, base: 1.16, h: 0.34, lean: 0.10, lobes: 5, spread: 1.9, ph: 4.1 },
+    { x: 0.86, base: 1.17, h: 0.30, lean: -0.05, lobes: 5, spread: 2.0, ph: 1.3 },
+    { x: 0.645, base: 0.88, h: 0.15, lean: 0.04, lobes: 4, spread: 1.6, ph: 3.3 },
+    { x: 0.30, base: 0.885, h: 0.13, lean: -0.07, lobes: 4, spread: 1.7, ph: 5.0 },
+  ];
+  let treeSprites = [];
+
+  // Rain is always near: a soft drizzle that swells in long waves. Drops that
+  // land inside the pool leave rings.
   const RINGS = [];
   const rainAt = (t) => {
-    const cycle = 34;                                  // seconds per weather cycle
-    const u = (t / cycle) % 1;
-    const inShower = u > 0.62 && u < 0.9;              // ~9.5 s of rain
-    if (!inShower) return 0;
-    const v = (u - 0.62) / 0.28;
-    return Math.sin(Math.PI * v) ** 1.5;               // ease in and out
+    const wave = 0.5 + 0.5 * Math.sin((t / 26) * Math.PI * 2 + 4.2);
+    const gust = 0.5 + 0.5 * Math.sin((t / 7.3) * Math.PI * 2);
+    return 0.28 + 0.62 * (wave ** 1.6) + 0.10 * gust * wave;
   };
 
   // ── painters ─────────────────────────────────────────────────────────────
@@ -219,6 +232,107 @@ export function mountOasis(canvas) {
     ctx.restore();
   }
 
+  /** Pre-renders one lush broadleaf tree to an offscreen canvas: a bark
+   *  trunk, a few branches, then hundreds of leaf blobs built up dark to
+   *  light so the canopy reads full rather than flat. Drawn per frame as a
+   *  single sprite, swaying about its base. */
+  function makeTree(spec) {
+    const h = Math.max(60, spec.h * H);
+    const w = h * spec.spread;
+    const c = document.createElement('canvas');
+    c.width = Math.ceil(w * dpr);
+    c.height = Math.ceil(h * dpr);
+    const g = c.getContext('2d');
+    g.scale(dpr, dpr);
+
+    let s = Math.floor(1000 + spec.ph * 977) || 7;
+    const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+
+    const bark = mix('#3a3128', C.water, 0.3);
+    const dark = mix(C.frond, C.water, 0.55);
+    const mid = C.frond;
+    const light = mix(C.frond, C.pool, 0.35);
+
+    const bx = w / 2, by = h;
+    const crown = { x: bx + spec.lean * h * 0.5, y: h * 0.34 };
+
+    // trunk and a few limbs reaching into the crown
+    g.strokeStyle = bark;
+    g.lineCap = 'round';
+    g.lineWidth = Math.max(4, h * 0.05);
+    g.beginPath();
+    g.moveTo(bx, by);
+    g.quadraticCurveTo(bx + spec.lean * h * 0.2, h * 0.72, crown.x, crown.y + h * 0.14);
+    g.stroke();
+    g.lineWidth = Math.max(2, h * 0.022);
+    for (let i = 0; i < 3; i++) {
+      const a = -Math.PI / 2 + (r() - 0.5) * 1.6;
+      g.beginPath();
+      g.moveTo(crown.x, crown.y + h * 0.16);
+      g.quadraticCurveTo(
+        crown.x + Math.cos(a) * h * 0.1, crown.y + h * 0.05,
+        crown.x + Math.cos(a) * h * 0.22, crown.y + Math.sin(a) * h * 0.18);
+      g.stroke();
+    }
+
+    // canopy lobes, then leaf blobs from shadow to light
+    const lobes = [{ x: crown.x, y: crown.y, rr: h * 0.24 }];
+    for (let i = 1; i < spec.lobes; i++) {
+      lobes.push({
+        x: crown.x + (r() - 0.5) * w * 0.62,
+        y: crown.y + (r() - 0.42) * h * 0.30,
+        rr: h * (0.13 + r() * 0.10),
+      });
+    }
+    for (const lb of lobes) {                       // silhouette base
+      g.fillStyle = dark;
+      g.globalAlpha = 0.9;
+      g.beginPath();
+      g.ellipse(lb.x, lb.y, lb.rr * 1.06, lb.rr * 0.88, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+    for (const [shade, count, bias] of [[dark, 26, 0.30], [mid, 34, 0.0], [light, 22, -0.32]]) {
+      g.fillStyle = shade;
+      for (const lb of lobes) {
+        for (let i = 0; i < count; i++) {
+          const a = r() * Math.PI * 2;
+          const d = (r() + r()) * 0.5 * lb.rr;
+          const px = lb.x + Math.cos(a) * d * 1.08;
+          const py = lb.y + Math.sin(a) * d * 0.85 + bias * lb.rr;
+          const rad = lb.rr * (0.10 + r() * 0.14);
+          g.globalAlpha = 0.75 + r() * 0.25;
+          g.beginPath();
+          g.ellipse(px, py, rad, rad * (0.75 + r() * 0.3), r() * 1.2, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+    }
+    g.globalAlpha = 1;
+    return { c, w, h, spec };
+  }
+
+  let spritesBuilt = false;
+  const buildSprites = () => {
+    treeSprites = TREES.map(makeTree);
+    spritesBuilt = true;
+  };
+
+  function drawTrees(t, layer) {
+    if (!spritesBuilt) buildSprites();
+    for (const sp of treeSprites) {
+      const isBack = sp.spec.base < 1;
+      if ((layer === 'back') !== isBack) continue;
+      const sway = reduceMotion ? 0
+        : Math.sin(t * 0.55 + sp.spec.ph) * 0.012 + Math.sin(t * 1.3 + sp.spec.ph * 1.7) * 0.004;
+      ctx.save();
+      ctx.translate(sp.spec.x * W, sp.spec.base * H);
+      ctx.rotate(sway);
+      ctx.drawImage(sp.c, -sp.w / 2, -sp.h, sp.w, sp.h);
+      ctx.restore();
+    }
+  }
+
   function pool(t, rain) {
     const px = POOL.x * W, py = POOL.y * H, rx = POOL.rx * W, ry = POOL.ry * H;
 
@@ -310,7 +424,7 @@ export function mountOasis(canvas) {
     if (!strength || reduceMotion) return;
     ctx.strokeStyle = C.water2;
     ctx.lineWidth = 1;
-    const n = Math.floor(70 * strength);
+    const n = Math.floor(30 + 115 * strength);
     for (let i = 0; i < n; i++) {
       // stable per-index randoms, advanced by time
       const h1 = Math.sin(i * 127.1) * 43758.5453;
@@ -320,7 +434,7 @@ export function mountOasis(canvas) {
       const fall = ((t * (0.6 + rv * 0.5)) % 1);
       const x = (rx + fall * 0.06) % 1 * W;
       const y = fall * H;
-      ctx.globalAlpha = 0.14 * strength;
+      ctx.globalAlpha = 0.09 + 0.08 * strength;
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(x - 4, y + 13);
@@ -350,9 +464,11 @@ export function mountOasis(canvas) {
     sky(t, strength);
     dunes(t);
     sand(t);
+    drawTrees(t, 'back');
     for (const p of PALMS) palm(p, t);
     pool(t, strength);
     reeds(t);
+    drawTrees(t, 'front');
     rain(t, strength);
     fade();
   }
@@ -361,7 +477,11 @@ export function mountOasis(canvas) {
   let visible = true;
   const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.01 });
   io.observe(canvas);
-  const ro = new ResizeObserver(() => { resize(); if (reduceMotion) frame(0.35); });
+  const ro = new ResizeObserver(() => {
+    resize();
+    buildSprites();                    // sprite pixels track the new size
+    if (reduceMotion) frame(0.35);
+  });
   ro.observe(canvas);
 
   if (reduceMotion) {
