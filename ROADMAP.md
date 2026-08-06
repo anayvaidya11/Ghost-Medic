@@ -314,13 +314,24 @@ not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
 - 🟢 App posture: system prompt addresses a trained responder ("the responder
   on scene decides"); `EVACUATION:` line format preserved for the parser;
   persistent "decision support, not a medical device" banner in the UI.
-- ⬜ Rename Ghost Medic → **Archiater** / **Wyzantium Industries** across the
-  repo (KiCad files, include guards, CMake target, slugs, site, GitHub repo).
-  The committed `ghost_medic_firmware.uf2` keeps its name: it is the artifact
-  of the verified July build and renaming it would fake a build.
-- ⬜ On-body concept rebuilt to the new story: mannequin from a CC0 base mesh,
-  wrist accessory + end-user device (phone), belt pack removed, wrist concept
-  display removed (the phone is the display).
+- 🟢 Rename Ghost Medic → **Archiater** / **Wyzantium Industries** across the
+  repo (2026-08-05, six commit groups: prose docs, site, code identifiers,
+  slugs+lockfiles, firmware guards+CMake target, KiCad sources+regenerated
+  exports). The committed `ghost_medic_firmware.uf2` keeps its name: it is the
+  artifact of the verified July build and renaming it would fake a build.
+  Owner-gated leftovers: push + GitHub repo rename + Vercel project rename +
+  working-directory rename.
+- 🟢 On-body concept rebuilt to the new story (2026-08-05): a full standing
+  mannequin from the MakeHuman CC0 base mesh (pipeline + license record in
+  `tools/figure/`, 268 KB quantized GLB, no decoder needed), wrist accessory
+  (concept display deleted: the board has no screen), chest-carried phone
+  showing a mock of the real app layout, belt pack out of the shipped scene
+  but still buildable in the render harness (`?devices=wrist+pack`). Mounts
+  are measured off the loaded mesh, not eyeballed: the wrist is found by a
+  minimum-girth slice scan, the band bore is sized to it, and the preview
+  prints stature/flip/wrist-margin/cable-gap numbers. Four defects were
+  caught by those numbers, not by eye: a backwards facing probe, a wrist scan
+  that landed in the palm, and a cable through the torso and the arm.
 - ⬜ Site visual redesign (oasis theme); text rewrite deferred to its own
   session.
 - ⬜ **Next-session site worklist (text session):** investor-terse rewrite;

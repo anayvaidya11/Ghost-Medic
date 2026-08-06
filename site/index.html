@@ -82,56 +82,54 @@
     <div class="board-viewer" id="product-viewer">
       <!-- 2D concept diagram: the fallback when WebGL is unavailable -->
       <svg class="concept-2d" viewBox="0 0 880 340" role="img"
-           aria-label="Concept diagram: an open wrist band carrying a case with a screen, joined by a cable to a curved belt pack. Numbered markers match the legend below.">
+           aria-label="Concept diagram: an open wrist band carrying a screenless sensor case, joined by a cable to a phone running the assistant. Numbered markers match the legend below.">
         <g fill="none" stroke="#5D655B" stroke-width="2">
-          <!-- wrist unit: open band arc, gap at the bottom -->
+          <!-- wrist unit: open band arc, screenless case on its crown -->
           <path d="M 145 288 A 80 80 0 1 1 235 284" stroke-width="14" stroke-linecap="round"/>
-          <!-- case tangent at the top of the arc, screen inset with a bezel -->
           <rect x="130" y="102" width="110" height="34" rx="10" fill="#F4F1E9" stroke="#2C4630"/>
-          <rect x="140" y="109" width="90" height="20" rx="5" stroke="#2C4630"/>
-          <line x1="148" y1="116" x2="204" y2="116" stroke="#2C4630"/>
-          <rect x="148" y="121" width="46" height="4" rx="2" stroke="#9C4F28"/>
-          <!-- belt pack: curved enclosure, belt strap through it -->
-          <path d="M 560 250 Q 660 232 760 250 L 756 130 Q 660 114 564 130 Z" fill="#F4F1E9"/>
-          <line x1="520" y1="176" x2="562" y2="172"/>
-          <line x1="758" y1="172" x2="800" y2="176"/>
-          <line x1="646" y1="126" x2="646" y2="243"/>
-          <line x1="686" y1="140" x2="712" y2="138"/>
-          <line x1="686" y1="148" x2="712" y2="146"/>
-          <line x1="686" y1="156" x2="712" y2="154"/>
+          <circle cx="163" cy="119" r="7" stroke="#2C4630"/>
+          <circle cx="215" cy="119" r="2.5" fill="#2C4630" stroke="none"/>
+          <!-- the end-user device: a phone running the assistant -->
+          <rect x="600" y="72" width="128" height="232" rx="14" fill="#F4F1E9" stroke="#2C4630"/>
+          <rect x="610" y="84" width="108" height="208" rx="7" stroke="#2C4630"/>
+          <line x1="620" y1="104" x2="676" y2="104" stroke="#2C4630"/>
+          <rect x="620" y="120" width="76" height="5" rx="2" stroke="#5D655B"/>
+          <rect x="620" y="136" width="88" height="5" rx="2" stroke="#5D655B"/>
+          <rect x="620" y="152" width="64" height="5" rx="2" stroke="#5D655B"/>
+          <rect x="620" y="252" width="88" height="14" rx="3" stroke="#9C4F28"/>
           <!-- the cable: solid, with slack -->
-          <path d="M 242 122 C 360 96, 430 190, 562 196" stroke="#2C4630" stroke-width="3"/>
+          <path d="M 242 122 C 380 96, 460 210, 600 220" stroke="#2C4630" stroke-width="3"/>
           <circle cx="242" cy="122" r="4" fill="#5D655B"/>
-          <circle cx="562" cy="196" r="4" fill="#5D655B"/>
+          <circle cx="600" cy="220" r="4" fill="#5D655B"/>
         </g>
         <g font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#5D655B">
-          <text x="185" y="330" text-anchor="middle">wrist unit</text>
-          <text x="660" y="290" text-anchor="middle">belt pack: compute + battery</text>
-          <text x="410" y="230" text-anchor="middle">wired link</text>
+          <text x="185" y="330" text-anchor="middle">wrist sensor accessory</text>
+          <text x="664" y="330" text-anchor="middle">the device you carry</text>
+          <text x="420" y="240" text-anchor="middle">wired link</text>
         </g>
         <g font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="700">
           <g><circle cx="96" cy="92" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="96" y="97" text-anchor="middle" fill="#2C4630">1</text></g>
-          <g><circle cx="185" cy="66" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="185" y="71" text-anchor="middle" fill="#2C4630">2</text></g>
-          <g><circle cx="410" cy="120" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="410" y="125" text-anchor="middle" fill="#2C4630">3</text></g>
-          <g><circle cx="800" cy="112" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="800" y="117" text-anchor="middle" fill="#2C4630">4</text></g>
+          <g><circle cx="420" cy="130" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="420" y="135" text-anchor="middle" fill="#2C4630">2</text></g>
+          <g><circle cx="790" cy="92" r="14" fill="#F4F1E9" stroke="#2C4630" stroke-width="2.5"/><text x="790" y="97" text-anchor="middle" fill="#2C4630">3</text></g>
         </g>
       </svg>
     </div>
     <p class="board-status" id="product-status" role="status"></p>
     <div class="board-bar" id="product-views" hidden>
       <button type="button" class="ghost" data-view="wearer">On the body</button>
-      <button type="button" class="ghost" data-view="units">The units alone</button>
+      <button type="button" class="ghost" data-view="units">The devices alone</button>
+      <span class="board-bar" id="product-presets" style="margin:0"></span>
     </div>
 
     <div class="col" style="padding:0">
       <ul class="legend">
-        <li><span class="num">1</span><div><b>Wrist case.</b> Holds the sensor board and its code. Both exist: every connection on the board drawn by hand, the code compiled and its maths tested.</div></li>
-        <li><span class="num">2</span><div><b>Display.</b> Concept only: the board that was designed has no screen. Today a phone or laptop shows the readings and speaks the steps.</div></li>
-        <li><span class="num">3</span><div><b>The cable.</b> The software carrying the readings is real and passes every one through unchanged. The cable itself stands in for the wireless link that would replace it.</div></li>
-        <li><span class="num">4</span><div><b>Belt pack.</b> The computer and the battery in one curved case, sized around the sort of small computer module this would need. Its makers rate that class at 7 to 15 watts. <b>No module has been chosen and nothing has been measured.</b> The software that runs without internet is real; a laptop stands in for the pack today.</div></li>
+        <li><span class="num">1</span><div><b>Wrist sensor accessory.</b> Holds the sensor board and its code. Both exist: every connection on the board drawn by hand, the code compiled and its maths tested. No screen, on purpose: the board has none.</div></li>
+        <li><span class="num">2</span><div><b>The cable.</b> The software carrying the readings is real and passes every one through unchanged. The cable itself stands in for the wireless link that would replace it.</div></li>
+        <li><span class="num">3</span><div><b>The device you already carry.</b> The assistant runs on it: numbered steps, spoken aloud, no internet. The software is real and runs today, with a laptop playing this device. The phone body shown is a mockup.</div></li>
       </ul>
-      <p class="caption">A concept, built in code rather than CAD. The body is a placeholder
-      shape too, not a scan of anyone. The only hardware that exists as a design is the circuit
+      <p class="caption">A concept, built in code rather than CAD. The figure is a studio
+      mannequin from an open-source base mesh (MakeHuman, CC0): not a scan of anyone, and
+      nobody's real proportions. The only hardware that exists as a design is the circuit
       board, drawn by hand in KiCad, on the <a href="hardware.html">Hardware page</a>. Drag to
       turn it, scroll to zoom.</p>
     </div>
@@ -195,16 +193,35 @@
   const mount  = document.getElementById('product-viewer');
   const status = document.getElementById('product-status');
   const bar    = document.getElementById('product-views');
+  const chips  = document.getElementById('product-presets');
+  const LABELS = { figure: 'Whole figure', wrist: 'Wrist unit', phone: 'The device', all: 'All parts', pack: 'Belt pack' };
   let view = null;
 
   // Each switch rebuilds the scene, so the old one has to be torn down first.
-  const show = (name) => {
+  // The figure loads asynchronously; dispose during the load is safe.
+  const show = async (name) => {
     view?.dispose();
+    chips.textContent = '';
     view = mountProductViewer({ mount, status, wearer: name === 'wearer' });
     // No WebGL means no viewer to switch, and the 2D diagram stands alone.
     bar.hidden = !view;
     for (const b of bar.querySelectorAll('button[data-view]')) {
       b.setAttribute('aria-pressed', String(b.dataset.view === name));
+    }
+    if (!view) return;
+    await view.ready;
+    // The figure can fail to load; the viewer then backs out to the diagram.
+    if (!mount.classList.contains('is-3d')) { bar.hidden = true; return; }
+    for (const p of view.presets) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ghost';
+      btn.textContent = LABELS[p] ?? p;
+      btn.addEventListener('click', () => {
+        view.setPreset(p);
+        for (const c of chips.children) c.setAttribute('aria-pressed', String(c === btn));
+      });
+      chips.appendChild(btn);
     }
   };
 
