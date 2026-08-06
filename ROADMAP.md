@@ -332,8 +332,13 @@ not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
   prints stature/flip/wrist-margin/cable-gap numbers. Four defects were
   caught by those numbers, not by eye: a backwards facing probe, a wrist scan
   that landed in the palm, and a cable through the torso and the arm.
-- ⬜ Site visual redesign (oasis theme); text rewrite deferred to its own
-  session.
+- 🟢 Site visual redesign, the oasis (2026-08-06): scenery-only tokens (dune,
+  pool, water, frond) with the rule written into the stylesheet that scenery
+  never makes a claim; inline-SVG hero, dividers and footer waterline; paper
+  grain from a committed build-time generator (`tools/render/grain.mjs`);
+  depth shadows; the `--ink-3` contrast fix (2.9:1 to 5.2:1). Zero text
+  nodes changed, proven by a byte-identical readability report. Text rewrite
+  still deferred to its own session.
 - ⬜ **Next-session site worklist (text session):** investor-terse rewrite;
   hero spec strip using the four honest numbers — **0** external network
   requests · **10 Hz** one-line contract · **48** committed checks (39 app +
