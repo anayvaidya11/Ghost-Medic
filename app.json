@@ -1,19 +1,19 @@
 {
   "expo": {
     "name": "ARCHIATER",
-    "slug": "ghost-medic",
+    "slug": "archiater",
     "version": "1.0.0",
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
-    "scheme": "ghostmedic",
+    "scheme": "archiater",
     "splash": {
       "backgroundColor": "#0A0E0F"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.ghostmedic.app",
+      "bundleIdentifier": "com.wyzantium.archiater",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Voice input for symptom description",
         "NSCameraUsageDescription": "Wound documentation",
@@ -22,7 +22,7 @@
       }
     },
     "android": {
-      "package": "com.ghostmedic.app",
+      "package": "com.wyzantium.archiater",
       "adaptiveIcon": {
         "backgroundColor": "#0A0E0F"
       }

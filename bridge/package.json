@@ -1,5 +1,5 @@
 {
-  "name": "ghost-medic-bridge",
+  "name": "archiater-bridge",
   "version": "0.1.0",
   "private": true,
   "description": "Dumb NDJSON->WebSocket pipe: forwards wrist-unit telemetry lines to the app. Local/USB-serial stand-in for the eventual wrist->pack BLE link.",
