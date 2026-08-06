@@ -1,7 +1,7 @@
-# Ghost Medic — Sensor Hub Firmware (RP2040 / Raspberry Pi Pico)
+# Archiater — Sensor Hub Firmware (RP2040 / Raspberry Pi Pico)
 
 Bare-metal C firmware for a Raspberry Pi Pico that reads three I²C sensors and
-streams their data as JSON lines over USB serial. Part of the **Ghost Medic**
+streams their data as JSON lines over USB serial. Part of the **Archiater**
 project — an offline-first wilderness survival assistant. This firmware is the
 "sensor hub" data source: it produces the biodata/environment stream that a
 downstream host (and ultimately a local LLM) consumes.
@@ -15,7 +15,16 @@ not been verified:
 |-------|--------|
 | Compiles against the real Raspberry Pi Pico SDK (C, `hardware/i2c.h`) | ✅ **Verified** — builds clean |
 | Builds with **zero warnings** under `-Wall -Wextra` at `-O3` | ✅ **Verified** |
-| Produces a flashable `ghost_medic_firmware.uf2` | ✅ **Verified** (valid UF2 output) |
+| Produces a flashable UF2 (`ghost_medic_firmware.uf2`, committed) | ✅ **Verified** (valid UF2 output) |
+
+> **Why the committed file keeps its old name.** The tracked
+> `ghost_medic_firmware.uf2` is the artifact of the verified build made under
+> the project's former name, Ghost Medic. The rename touched no C source that
+> reaches the chip, but no Pico SDK toolchain is available on this machine, so
+> rebuilding is not possible and renaming the file in place would manufacture
+> evidence of a build that never happened. The renamed target will produce
+> `archiater_firmware.uf2` at the next real build, and this file will be
+> replaced then.
 | Drivers written directly against the MAX30102 / BMP280 / LIS3DH datasheets | ✅ True |
 | **Flashed and run on physical hardware** | ❌ **NOT done** |
 | **Verified against real sensors** (correct readings, timing, FIFO behavior) | ❌ **NOT done** |
@@ -63,7 +72,7 @@ reports `"ok":false` — one dead sensor doesn't take down the stream.
 | LIS3DH   | Accelerometer / fall detection | `0x18` | SDO→GND. Includes an **illustrative** free-fall→impact heuristic (see below). |
 
 Pin assignment (SDA = GPIO4, SCL = GPIO5) intentionally matches the custom
-Ghost Medic PCB so breadboard and board firmware are identical.
+Archiater PCB so breadboard and board firmware are identical.
 
 ### Note on fall detection
 
@@ -116,7 +125,8 @@ cmake -DPICO_SDK_PATH=/path/to/pico-sdk ..
 make
 ```
 
-This produces `ghost_medic_firmware.uf2`. To flash: hold **BOOTSEL** while
+This produces `archiater_firmware.uf2` (the target was renamed 2026-08-05).
+To flash: hold **BOOTSEL** while
 plugging in the Pico, then drag the `.uf2` onto the `RPI-RP2` drive that
 appears.
 
@@ -134,7 +144,7 @@ Result: clean compile and link of all four source files, zero warnings under
 
 `stdio` is routed over **USB CDC serial** (not the UART pins). On a host, the
 Pico appears as a serial device (`/dev/ttyACM0`, `/dev/tty.usbmodem…`, or a
-`COM` port). Each line is a complete JSON object. In the Ghost Medic system a
+`COM` port). Each line is a complete JSON object. In the Archiater system a
 small serial→WebSocket bridge forwards these lines to the React Native app —
 the wired stand-in for the eventual wrist→pack BLE link (the Pico has no radio).
 

@@ -3,7 +3,7 @@
  * optical sensor.
  *
  * Datasheet: Maxim Integrated MAX30102, 19-7740 Rev 1.
- * Used in Ghost Medic to capture raw RED/IR photoplethysmography samples.
+ * Used in Archiater to capture raw RED/IR photoplethysmography samples.
  *
  * Bus: I2C. Fixed address 0x57 (the MAX30102 has no address-select pin).
  *
@@ -16,8 +16,8 @@
  * UNTESTED ON HARDWARE — written from datasheet. See README.
  */
 
-#ifndef GHOST_MEDIC_MAX30102_H
-#define GHOST_MEDIC_MAX30102_H
+#ifndef ARCHIATER_MAX30102_H
+#define ARCHIATER_MAX30102_H
 
 #include "hardware/i2c.h"
 #include <stdbool.h>
@@ -57,4 +57,4 @@ bool max30102_init(i2c_inst_t *i2c);
  */
 bool max30102_read(i2c_inst_t *i2c, max30102_sample_t *out);
 
-#endif /* GHOST_MEDIC_MAX30102_H */
+#endif /* ARCHIATER_MAX30102_H */

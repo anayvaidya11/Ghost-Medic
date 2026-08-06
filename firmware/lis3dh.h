@@ -2,7 +2,7 @@
  * lis3dh.h — driver for the ST LIS3DH 3-axis accelerometer.
  *
  * Datasheet: STMicroelectronics LIS3DH, DocID 17530 Rev 2 (and later revs).
- * Used in Ghost Medic for motion / fall detection.
+ * Used in Archiater for motion / fall detection.
  *
  * Bus: I2C. Address 0x18 when the SDO/SA0 pin is tied to GND (0x19 if tied
  * to VDD). Our schematic ties SDO to GND -> 0x18.
@@ -10,8 +10,8 @@
  * UNTESTED ON HARDWARE — written from datasheet. See README.
  */
 
-#ifndef GHOST_MEDIC_LIS3DH_H
-#define GHOST_MEDIC_LIS3DH_H
+#ifndef ARCHIATER_LIS3DH_H
+#define ARCHIATER_LIS3DH_H
 
 #include "hardware/i2c.h"
 #include <stdbool.h>
@@ -76,4 +76,4 @@ bool lis3dh_update_fall_detection(lis3dh_fall_state_t *state,
                                   const lis3dh_reading_t *reading,
                                   uint32_t now_ms);
 
-#endif /* GHOST_MEDIC_LIS3DH_H */
+#endif /* ARCHIATER_LIS3DH_H */

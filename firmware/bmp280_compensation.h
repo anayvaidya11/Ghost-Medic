@@ -14,8 +14,8 @@
  * passing test is evidence about the code that actually ships.
  */
 
-#ifndef GHOST_MEDIC_BMP280_COMPENSATION_H
-#define GHOST_MEDIC_BMP280_COMPENSATION_H
+#ifndef ARCHIATER_BMP280_COMPENSATION_H
+#define ARCHIATER_BMP280_COMPENSATION_H
 
 #include <stdint.h>
 
@@ -62,4 +62,4 @@ float bmp280_compensate_pressure(const bmp280_calib_t *cal,
  */
 float bmp280_pressure_to_altitude(float pressure_pa);
 
-#endif /* GHOST_MEDIC_BMP280_COMPENSATION_H */
+#endif /* ARCHIATER_BMP280_COMPENSATION_H */

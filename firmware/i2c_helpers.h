@@ -19,8 +19,8 @@
  * Pico SDK docs. It has NOT been run on physical hardware. See README.
  */
 
-#ifndef GHOST_MEDIC_I2C_HELPERS_H
-#define GHOST_MEDIC_I2C_HELPERS_H
+#ifndef ARCHIATER_I2C_HELPERS_H
+#define ARCHIATER_I2C_HELPERS_H
 
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
@@ -57,4 +57,4 @@ static inline int i2c_read_reg(i2c_inst_t *i2c, uint8_t addr,
     return i2c_read_regs(i2c, addr, reg, dst, 1);
 }
 
-#endif /* GHOST_MEDIC_I2C_HELPERS_H */
+#endif /* ARCHIATER_I2C_HELPERS_H */

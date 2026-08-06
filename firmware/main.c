@@ -1,5 +1,5 @@
 /*
- * main.c — Ghost Medic sensor-hub firmware (breadboard prototype).
+ * main.c — Archiater sensor-hub firmware (breadboard prototype).
  *
  * Brings up the I2C bus and all three sensors, then loops every 100 ms:
  * reads each sensor, runs the fall-detection heuristic, and prints one JSON

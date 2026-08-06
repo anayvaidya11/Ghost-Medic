@@ -15,8 +15,8 @@
  * NOT a validated medical fall-detection algorithm.
  */
 
-#ifndef GHOST_MEDIC_FALL_DETECTION_H
-#define GHOST_MEDIC_FALL_DETECTION_H
+#ifndef ARCHIATER_FALL_DETECTION_H
+#define ARCHIATER_FALL_DETECTION_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -54,4 +54,4 @@ typedef struct {
  */
 bool fall_update(fall_state_t *state, float magnitude_g, uint32_t now_ms);
 
-#endif /* GHOST_MEDIC_FALL_DETECTION_H */
+#endif /* ARCHIATER_FALL_DETECTION_H */

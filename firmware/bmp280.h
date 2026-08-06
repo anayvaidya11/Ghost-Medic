@@ -3,7 +3,7 @@
  * sensor.
  *
  * Datasheet: Bosch BMP280 Digital Pressure Sensor, BST-BMP280-DS001.
- * Used in Ghost Medic to estimate altitude from barometric pressure.
+ * Used in Archiater to estimate altitude from barometric pressure.
  *
  * Bus: I2C. Address 0x76 when SDO is tied to GND (0x77 if tied to VDD).
  * Our schematic ties SDO to GND -> 0x76.
@@ -16,8 +16,8 @@
  * UNTESTED ON HARDWARE — written from datasheet. See README.
  */
 
-#ifndef GHOST_MEDIC_BMP280_H
-#define GHOST_MEDIC_BMP280_H
+#ifndef ARCHIATER_BMP280_H
+#define ARCHIATER_BMP280_H
 
 #include "hardware/i2c.h"
 #include <stdbool.h>
@@ -59,4 +59,4 @@ bool bmp280_init(i2c_inst_t *i2c, bmp280_calib_t *calib_out);
 bool bmp280_read(i2c_inst_t *i2c, const bmp280_calib_t *calib,
                  bmp280_reading_t *out);
 
-#endif /* GHOST_MEDIC_BMP280_H */
+#endif /* ARCHIATER_BMP280_H */

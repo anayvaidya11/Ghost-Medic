@@ -1,4 +1,4 @@
-# CMakeLists.txt — Ghost Medic sensor-hub firmware (Raspberry Pi Pico / RP2040)
+# CMakeLists.txt — Archiater sensor-hub firmware (Raspberry Pi Pico / RP2040)
 #
 # Standard Pico SDK build. Assumes the Pico SDK is available and PICO_SDK_PATH
 # is set (or the pico_sdk_import.cmake shim below can locate it).
@@ -7,7 +7,7 @@
 #   mkdir build && cd build
 #   cmake ..            # (or: cmake -DPICO_SDK_PATH=/path/to/pico-sdk ..)
 #   make
-# Produces ghost_medic_firmware.uf2 — drag onto the Pico's RPI-RP2 drive
+# Produces archiater_firmware.uf2 — drag onto the Pico's RPI-RP2 drive
 # while holding BOOTSEL.
 
 cmake_minimum_required(VERSION 3.13)
@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.13)
 # CMakeLists or rely on the VS Code Pico extension / PICO_SDK_PATH.
 include(pico_sdk_import.cmake)
 
-project(ghost_medic_firmware C CXX ASM)
+project(archiater_firmware C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Initialise the SDK (sets up toolchain, board headers, etc.).
 pico_sdk_init()
 
-add_executable(ghost_medic_firmware
+add_executable(archiater_firmware
     main.c
     max30102.c
     bmp280.c
@@ -36,7 +36,7 @@ add_executable(ghost_medic_firmware
 # Link the SDK libraries we use:
 #   pico_stdlib     — core runtime, GPIO, timers, stdio
 #   hardware_i2c    — the I2C peripheral API (hardware/i2c.h)
-target_link_libraries(ghost_medic_firmware
+target_link_libraries(archiater_firmware
     pico_stdlib
     hardware_i2c
 )
@@ -44,12 +44,12 @@ target_link_libraries(ghost_medic_firmware
 # Build our own sources under strict warnings at -O3. Scoped to THIS target
 # with PRIVATE so we don't impose flags on the Pico SDK's libraries (doing that
 # globally clobbers the SDK's -mcpu/-mthumb arch flags). Verified warning-free.
-target_compile_options(ghost_medic_firmware PRIVATE -Wall -Wextra -O3)
+target_compile_options(archiater_firmware PRIVATE -Wall -Wextra -O3)
 
 # Route stdio (printf) over USB CDC serial, not the UART pins.
 # 1 = enable, 0 = disable.
-pico_enable_stdio_usb(ghost_medic_firmware 1)
-pico_enable_stdio_uart(ghost_medic_firmware 0)
+pico_enable_stdio_usb(archiater_firmware 1)
+pico_enable_stdio_uart(archiater_firmware 0)
 
 # Generate .uf2, .hex, .bin, .map alongside the .elf.
-pico_add_extra_outputs(ghost_medic_firmware)
+pico_add_extra_outputs(archiater_firmware)
