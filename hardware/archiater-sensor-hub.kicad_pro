@@ -507,7 +507,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "ghostmedic-sensor-hub.kicad_pro",
+    "filename": "archiater-sensor-hub.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -662,8 +662,8 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "ghostmedic-sensor-hub.kicad_sch",
-        "name": "ghostmedic-sensor-hub",
+        "filename": "archiater-sensor-hub.kicad_sch",
+        "name": "archiater-sensor-hub",
         "uuid": "e011affc-6c6e-4a14-a507-6f4d5d93e429"
       }
     ],
@@ -673,7 +673,7 @@
   "sheets": [
     [
       "e011affc-6c6e-4a14-a507-6f4d5d93e429",
-      "ghostmedic-sensor-hub"
+      "archiater-sensor-hub"
     ]
   ],
   "text_variables": {},

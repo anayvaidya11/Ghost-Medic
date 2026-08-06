@@ -6157,7 +6157,7 @@
 			(uuid "24b8b3ea-3744-43d2-aab6-4a56da6b4063")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R7")
 					(unit 1)
@@ -6239,7 +6239,7 @@
 			(uuid "b08172a2-21e1-410f-bbd8-9eb7b1a8fedf")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C14")
 					(unit 1)
@@ -6317,7 +6317,7 @@
 			(uuid "15936530-4afc-4101-ad6c-5d74e2d180cf")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR033")
 					(unit 1)
@@ -6395,7 +6395,7 @@
 			(uuid "8742f2c1-f849-499e-9eba-c366de642207")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR07")
 					(unit 1)
@@ -6474,7 +6474,7 @@
 			(uuid "4ddc9183-c670-48fd-974e-4063f79158a2")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "27R1")
 					(unit 1)
@@ -6552,7 +6552,7 @@
 			(uuid "83b33290-2cac-43c4-a7af-aa113a4116e6")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR03")
 					(unit 1)
@@ -6634,7 +6634,7 @@
 			(uuid "7bfd642c-6673-4ec0-ad54-64480750f4fb")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "SW2")
 					(unit 1)
@@ -6712,7 +6712,7 @@
 			(uuid "a35aa839-a603-44aa-a70f-6d5146c5ba14")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR021")
 					(unit 1)
@@ -6795,7 +6795,7 @@
 			(uuid "c4561846-1a2e-4a7f-a8d3-04df71c2ac9c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "U2")
 					(unit 1)
@@ -6874,7 +6874,7 @@
 			(uuid "d01d0404-3d70-4c3c-a0fc-04dbd05c3f0b")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR017")
 					(unit 1)
@@ -6953,7 +6953,7 @@
 			(uuid "ae5cd746-ddbb-48c4-bbd8-80055f0eaa62")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#FLG02")
 					(unit 1)
@@ -7031,7 +7031,7 @@
 			(uuid "43b61f95-b6b5-4620-ae20-61e8a036e569")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR027")
 					(unit 1)
@@ -7114,7 +7114,7 @@
 			(uuid "7f37276c-020b-402c-a298-eeb9ba5a2580")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "J2")
 					(unit 1)
@@ -7193,7 +7193,7 @@
 			(uuid "fe33e6b8-64ab-4794-8ba7-634dc029fd01")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR050")
 					(unit 1)
@@ -7272,7 +7272,7 @@
 			(uuid "253fd72c-a3d0-4d0b-8b86-a87e415a2dbb")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR026")
 					(unit 1)
@@ -7363,7 +7363,7 @@
 			(uuid "0115d053-5a19-47a1-b1a8-fee161b71c9c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "D1")
 					(unit 1)
@@ -7441,7 +7441,7 @@
 			(uuid "9ded9c22-00ce-4f61-aede-895542afba08")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR049")
 					(unit 1)
@@ -7520,7 +7520,7 @@
 			(uuid "6e527240-acb9-4c92-970c-48b5dc6b5ad8")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR019")
 					(unit 1)
@@ -7599,7 +7599,7 @@
 			(uuid "76a6e291-a2bf-4915-b400-79b4861b38be")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR036")
 					(unit 1)
@@ -7868,7 +7868,7 @@
 			(uuid "1d977539-7cc1-4871-82d1-e4af3b5266c7")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "U3")
 					(unit 1)
@@ -7946,7 +7946,7 @@
 			(uuid "432784f0-41cb-4586-9a8a-4b6ecc5443c4")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR016")
 					(unit 1)
@@ -8024,7 +8024,7 @@
 			(uuid "4f19f856-491f-411e-a946-06c4bf3e3c7f")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR012")
 					(unit 1)
@@ -8102,7 +8102,7 @@
 			(uuid "eeaa721a-eb90-4fb8-b9e6-4bae2c9b3af5")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR035")
 					(unit 1)
@@ -8180,7 +8180,7 @@
 			(uuid "c68b84ca-4df0-41ba-a9a8-322547836a3c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR05")
 					(unit 1)
@@ -8304,7 +8304,7 @@
 			(uuid "f39fb69e-1910-4f85-8cbc-9d298ec35933")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "U5")
 					(unit 1)
@@ -8386,7 +8386,7 @@
 			(uuid "ecd33d0d-21ed-49fa-8126-e08c818e5498")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C8")
 					(unit 1)
@@ -8464,7 +8464,7 @@
 			(uuid "197b6dba-bca7-4085-b90b-c9aa3a112d10")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR013")
 					(unit 1)
@@ -8543,7 +8543,7 @@
 			(uuid "25957924-e1e2-40e0-8660-1bdc619146a7")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR010")
 					(unit 1)
@@ -8621,7 +8621,7 @@
 			(uuid "a1d5bfd6-4ba9-4b8d-97ff-ef2768b0654b")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR046")
 					(unit 1)
@@ -8699,7 +8699,7 @@
 			(uuid "7cbe10ca-09d1-408d-9389-b5bae2591eee")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR025")
 					(unit 1)
@@ -8779,7 +8779,7 @@
 			(uuid "75b61e8e-f7bf-4a5f-a3c9-2475f7b01751")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R3")
 					(unit 1)
@@ -8857,7 +8857,7 @@
 			(uuid "58878a24-8cc0-4a34-950c-a6b78e70d671")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR037")
 					(unit 1)
@@ -8936,7 +8936,7 @@
 			(uuid "21095844-f910-48f4-8418-70a5ad6a500c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR09")
 					(unit 1)
@@ -9014,7 +9014,7 @@
 			(uuid "d5a0e807-afd1-4db2-990d-e1f952283fef")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR018")
 					(unit 1)
@@ -9096,7 +9096,7 @@
 			(uuid "c3f92352-9ef1-4b3f-a825-fb1939348aa2")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C6")
 					(unit 1)
@@ -9174,7 +9174,7 @@
 			(uuid "adc192bc-e185-4860-96b3-39f911b3df59")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR06")
 					(unit 1)
@@ -9254,7 +9254,7 @@
 			(uuid "9a1d320f-cfd4-4cbe-b1ca-769d1b609965")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "L1")
 					(unit 1)
@@ -9332,7 +9332,7 @@
 			(uuid "96d4950e-3fe9-4755-8389-a60c03566aee")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR02")
 					(unit 1)
@@ -9456,7 +9456,7 @@
 			(uuid "c8e8b515-4038-42aa-8392-40e344fccb7c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "J1")
 					(unit 1)
@@ -9538,7 +9538,7 @@
 			(uuid "f60e400d-8a69-4321-96c5-0f7565776964")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C13")
 					(unit 1)
@@ -9615,7 +9615,7 @@
 			(uuid "0f734d3c-e304-40c9-9552-dd0f0d7cfa12")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#FLG04")
 					(unit 1)
@@ -9697,7 +9697,7 @@
 			(uuid "fa8aafdb-fb52-457c-9178-17fe5b39a9ed")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R6")
 					(unit 1)
@@ -9776,7 +9776,7 @@
 			(uuid "ab23ef2d-e485-4fb0-8bd5-9d74ed9feef0")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#FLG03")
 					(unit 1)
@@ -9855,7 +9855,7 @@
 			(uuid "49bb2b61-7d5a-4b4b-8479-13403eb9ee70")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR034")
 					(unit 1)
@@ -9935,7 +9935,7 @@
 			(uuid "725ae531-bbbf-4418-9c8f-cf0eb19d1d7c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "SW1")
 					(unit 1)
@@ -10014,7 +10014,7 @@
 			(uuid "6bfd5be7-55b6-49f5-9915-2a9d18cb1389")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR015")
 					(unit 1)
@@ -10095,7 +10095,7 @@
 			(uuid "009278bd-c25c-44dd-9627-23b735b5390d")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C5")
 					(unit 1)
@@ -10195,7 +10195,7 @@
 			(uuid "a4dbb364-3eb8-41c8-bc8f-e5f1f6f4027c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "U6")
 					(unit 1)
@@ -10275,7 +10275,7 @@
 			(uuid "7bf1b99a-4572-46a1-a295-89dda899ebde")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "Y1")
 					(unit 1)
@@ -10354,7 +10354,7 @@
 			(uuid "86746141-8016-430e-a90f-2c5f9ef9432b")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR040")
 					(unit 1)
@@ -10432,7 +10432,7 @@
 			(uuid "8577e9b8-e97c-43ca-bcd2-d25206fd836c")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR022")
 					(unit 1)
@@ -10510,7 +10510,7 @@
 			(uuid "cb6b89f2-2995-4173-bf76-69f0581bca5f")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR030")
 					(unit 1)
@@ -10588,7 +10588,7 @@
 			(uuid "fa17108c-329d-4a58-90c1-bea0da762735")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR048")
 					(unit 1)
@@ -10666,7 +10666,7 @@
 			(uuid "0e2b911f-91c7-45b6-a40c-443eb342684d")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR028")
 					(unit 1)
@@ -10744,7 +10744,7 @@
 			(uuid "a376814c-7226-492f-9f84-8d5c09a0034d")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR041")
 					(unit 1)
@@ -10826,7 +10826,7 @@
 			(uuid "59f0552e-8e82-4ed7-9ba1-5b440e697d73")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R2")
 					(unit 1)
@@ -10908,7 +10908,7 @@
 			(uuid "6797ba39-f995-4d3c-b9d2-23682eb573ea")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C12")
 					(unit 1)
@@ -10986,7 +10986,7 @@
 			(uuid "c292cd84-a7b7-4ad2-83e4-ce4e8ec8a355")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR011")
 					(unit 1)
@@ -11085,7 +11085,7 @@
 			(uuid "6e5206e6-1af3-45b3-9a73-6bc86ddab28d")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "U1")
 					(unit 1)
@@ -11162,7 +11162,7 @@
 			(uuid "6d92647c-8156-48ca-af06-43e640d33688")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR020")
 					(unit 1)
@@ -11242,7 +11242,7 @@
 			(uuid "a6ae23a0-8f54-4d81-b572-523ba01c91bd")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C11")
 					(unit 1)
@@ -11320,7 +11320,7 @@
 			(uuid "78114b40-09d2-49e6-95ba-d61c5454ce14")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#FLG01")
 					(unit 1)
@@ -11399,7 +11399,7 @@
 			(uuid "33b2f8ac-e90f-4050-b2fe-43ee7737d777")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#FLG05")
 					(unit 1)
@@ -11478,7 +11478,7 @@
 			(uuid "5637a2d5-26e9-4065-8a5f-fe07bf3313a9")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R1")
 					(unit 1)
@@ -11556,7 +11556,7 @@
 			(uuid "6ab0670a-09b4-4d2b-addf-a3408c629b60")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR014")
 					(unit 1)
@@ -11638,7 +11638,7 @@
 			(uuid "570b0c79-c3a2-4182-91c1-db7440143480")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C9")
 					(unit 1)
@@ -11717,7 +11717,7 @@
 			(uuid "8a608266-cc94-47ce-a7ad-5a01d2897038")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR039")
 					(unit 1)
@@ -11833,7 +11833,7 @@
 			(uuid "777e1877-202e-4d98-a00a-348601f42bd4")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "U4")
 					(unit 1)
@@ -11912,7 +11912,7 @@
 			(uuid "0fabb414-5cb3-4051-b0e2-334308fd4dee")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR032")
 					(unit 1)
@@ -11990,7 +11990,7 @@
 			(uuid "e4f34640-a268-41ff-861b-fbb7405ad749")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR04")
 					(unit 1)
@@ -12068,7 +12068,7 @@
 			(uuid "60f0bde9-261e-4f17-8c0f-6a270372edbd")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR08")
 					(unit 1)
@@ -12149,7 +12149,7 @@
 			(uuid "3014d6b0-73ed-460c-b570-a3700c50280e")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C1")
 					(unit 1)
@@ -12231,7 +12231,7 @@
 			(uuid "af66f53b-ac24-4e50-b54e-a2dea557788f")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C3")
 					(unit 1)
@@ -12310,7 +12310,7 @@
 			(uuid "942d972d-bd27-4a4b-826d-e2b7a645321a")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR031")
 					(unit 1)
@@ -12390,7 +12390,7 @@
 			(uuid "e8c25761-6908-4c8d-bb4a-4ed36392f269")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C10")
 					(unit 1)
@@ -12467,7 +12467,7 @@
 			(uuid "60feca09-bb4a-4e15-82c7-47525464966e")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR023")
 					(unit 1)
@@ -12549,7 +12549,7 @@
 			(uuid "bd3fd91a-94be-45b3-bec7-c3453409578a")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C4")
 					(unit 1)
@@ -12628,7 +12628,7 @@
 			(uuid "ffd27304-7613-438f-9959-295ba084d236")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR043")
 					(unit 1)
@@ -12709,7 +12709,7 @@
 			(uuid "c229dafa-db26-43f9-92e6-cd9f79119774")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C7")
 					(unit 1)
@@ -12787,7 +12787,7 @@
 			(uuid "13e52b55-5103-4e01-af30-0987b6aa3443")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR029")
 					(unit 1)
@@ -12866,7 +12866,7 @@
 			(uuid "868d8b41-396a-44a1-8435-3736de2fbe5f")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR042")
 					(unit 1)
@@ -12944,7 +12944,7 @@
 			(uuid "4fddfe9f-1726-4602-a794-b5bffa59c884")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR01")
 					(unit 1)
@@ -13022,7 +13022,7 @@
 			(uuid "f820126e-6995-4058-b2ae-677b3e45a809")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR047")
 					(unit 1)
@@ -13104,7 +13104,7 @@
 			(uuid "c410b883-c851-42ef-abe1-5abdc574d34e")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R5")
 					(unit 1)
@@ -13182,7 +13182,7 @@
 			(uuid "4c4a37f1-93b0-4e7a-b7ec-36df09eeeb3e")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR045")
 					(unit 1)
@@ -13261,7 +13261,7 @@
 			(uuid "d3358df9-5e00-41b4-9069-9200b95f2f25")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR038")
 					(unit 1)
@@ -13339,7 +13339,7 @@
 			(uuid "6dcecc71-91aa-4ef0-b1e0-357628c55103")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR024")
 					(unit 1)
@@ -13418,7 +13418,7 @@
 			(uuid "5637a2d5-26e9-4065-8a5f-fe07bf3313aa")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "R4")
 					(unit 1)
@@ -13499,7 +13499,7 @@
 			(uuid "6349b639-813b-456d-ba08-3c60b02fc510")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "C2")
 					(unit 1)
@@ -13577,7 +13577,7 @@
 			(uuid "a7591d44-dc35-40e4-b77b-eb96f0f0c7e9")
 		)
 		(instances
-			(project "ghostmedic-sensor-hub"
+			(project "archiater-sensor-hub"
 				(path "/e011affc-6c6e-4a14-a507-6f4d5d93e429"
 					(reference "#PWR044")
 					(unit 1)

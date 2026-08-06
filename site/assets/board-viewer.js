@@ -1,7 +1,7 @@
 /**
  * BOARD VIEWER: the Archiater wrist-unit PCB, in 3D, in the browser.
  *
- * The model is ghostmedic-sensor-hub.glb, exported straight from the committed
+ * The model is archiater-sensor-hub.glb, exported straight from the committed
  * KiCad source with kicad-cli (exact command in hardware/README.md). Nothing here
  * is modelled by hand: what you orbit is the design file.
  *

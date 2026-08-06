@@ -45,10 +45,10 @@ commands live in [`../hardware/README.md`](../hardware/README.md); copy the
 outputs here afterwards:
 
 ```sh
-cp ../hardware/exports/ghostmedic-sensor-hub.glb                assets/
-cp ../hardware/exports/ghostmedic-sensor-hub-front-copper.svg   assets/
-cp ../hardware/exports/ghostmedic-sensor-hub-3d-top.png         assets/
-cp ../hardware/exports/ghostmedic-sensor-hub-schematic.pdf      assets/
+cp ../hardware/exports/archiater-sensor-hub.glb                assets/
+cp ../hardware/exports/archiater-sensor-hub-front-copper.svg   assets/
+cp ../hardware/exports/archiater-sensor-hub-3d-top.png         assets/
+cp ../hardware/exports/archiater-sensor-hub-schematic.pdf      assets/
 ```
 
 ## Regenerating the charts

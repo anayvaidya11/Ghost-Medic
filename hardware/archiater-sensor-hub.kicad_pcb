@@ -152,7 +152,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/6ff65ba8-38d7-4d68-b6b9-688d0b1c30dc")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -310,7 +310,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/bf49f137-59cd-4150-b66c-fed77854e117")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -468,7 +468,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/b2b33bac-ac37-47bb-9b47-5c55b8a66fed")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -626,7 +626,7 @@
 		(property ki_fp_filters "*QFN*7x7mm?P0.4mm?EP3.2x3.2mm*")
 		(path "/2f7e1d28-e79a-4f6b-a1ab-36233f4629fe")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -1631,7 +1631,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/c7740576-dc31-4a8d-a3ea-5a501609132b")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -1789,7 +1789,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/88aa5d62-0711-4038-8d12-748da731e762")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -1947,7 +1947,7 @@
 		(property ki_fp_filters "*SOIC*5.3x5.3mm*P1.27mm*")
 		(path "/8e4717e6-15b3-4fc4-a420-1076b8f7d2ed")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -2329,7 +2329,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/891ddcd7-9359-49b8-af9a-4937a8a7aa35")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -2487,7 +2487,7 @@
 		(property ki_fp_filters "LGA*3x3mm*P0.5mm*LayoutBorder3x5y*")
 		(path "/3e84b66d-2bc7-42ad-acfd-b6ca0cd17848")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -2862,7 +2862,7 @@
 		(property ki_fp_filters "Choke_* *Coil* Inductor_* L_*")
 		(path "/5ee5f2be-fb67-4b14-8412-8997b7aa1b5a")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -3022,7 +3022,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/51d84716-ed4d-4d8f-9632-001c57be148a")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -3180,7 +3180,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/408a0dca-fd1a-46ad-835f-d8cc32feab81")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -3338,7 +3338,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/ddec939a-75ba-4561-9144-1a30800738d8")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -3488,7 +3488,7 @@
 		(property ki_fp_filters "Bosch*LGA*2x2.5mm*P0.65mm*")
 		(path "/7d18f793-0137-41c4-b3e4-791c28e82923")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -3822,7 +3822,7 @@
 		(property ki_fp_filters "Crystal*")
 		(path "/7e482503-6edb-424e-b572-b6c496696029")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -4038,7 +4038,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/9d997fcf-70ad-4538-99b7-0db40f4e8d44")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -4187,7 +4187,7 @@
 		)
 		(path "/13f10de3-17c6-4987-89c8-2a31af33e94c")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -4772,7 +4772,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/c04500e9-858b-4e8f-af49-1963308446ba")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -4930,7 +4930,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/a5dde750-18fa-4976-8863-8d9ee57130c1")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -5101,7 +5101,7 @@
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/24f96f08-d720-4933-a895-dd69fe78c85f")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -5310,7 +5310,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/93c951ab-1e3d-4422-8c70-aeb285e6c923")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -5459,7 +5459,7 @@
 		)
 		(path "/7bf4793d-6bf3-46cd-90f4-95be932c4f29")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -6044,7 +6044,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/f54186eb-3210-4d8c-9068-e1ab31b03d5e")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -6202,7 +6202,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/0d447d44-7858-41f0-8d91-5ef32e316b6f")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -6360,7 +6360,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/7d10f893-67f5-44f3-a0a8-33032bc33ad6")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -6518,7 +6518,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/fb5c06d2-60c2-46f3-bdd6-786b882549fa")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -6676,7 +6676,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/0367446e-a70b-4a03-be3c-d8a1a0581124")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -6826,7 +6826,7 @@
 		(property ki_fp_filters "Maxim*OLGA*3.3x5.6mm*P0.8mm*")
 		(path "/a87ce1d8-aeeb-4f6c-a6dd-9708d7af5f3e")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -7186,7 +7186,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/b8a61087-51e3-4b3a-932f-2c2e46167fac")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -7338,7 +7338,7 @@
 		(property ki_fp_filters "USB*C*Receptacle*")
 		(path "/657c87fc-17c6-4ba1-8d68-36d798b11f65")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -7725,7 +7725,7 @@
 		(property ki_fp_filters "Connector*:*_1x??_*")
 		(path "/23669622-ad5c-4724-8cc0-975e04549e90")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -7977,7 +7977,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/5b2d8e71-1317-4e2b-b59e-dae6f24e6121")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -8127,7 +8127,7 @@
 		(property ki_fp_filters "SOT?223*TabPin2*")
 		(path "/1a2aa338-bf5b-40a8-8961-edc657103aa3")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -8407,7 +8407,7 @@
 		(property ki_fp_filters "C_*")
 		(path "/070b81fa-ef55-462b-b7ff-02162ba741b5")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")
@@ -8565,7 +8565,7 @@
 		(property ki_fp_filters "R_*")
 		(path "/7259cd60-0d58-4a53-b747-df2e786189bd")
 		(sheetname "/")
-		(sheetfile "ghostmedic-sensor-hub.kicad_sch")
+		(sheetfile "archiater-sensor-hub.kicad_sch")
 		(units
 			(unit
 				(name "A")

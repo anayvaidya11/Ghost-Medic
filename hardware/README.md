@@ -16,13 +16,13 @@ the "custom PCB" claim is backed by files you can open, not just a screenshot.
 
 | File | What it is |
 |---|---|
-| `ghostmedic-sensor-hub.kicad_sch` | Schematic (source of truth for the wiring) |
-| `ghostmedic-sensor-hub.kicad_pcb` | Routed board layout (35 footprints, ~477 track segments) |
-| `ghostmedic-sensor-hub.kicad_pro` | KiCad project file |
-| `exports/ghostmedic-sensor-hub-schematic.pdf` | Schematic, exported for viewing without KiCad |
-| `exports/ghostmedic-sensor-hub-3d-top.png` | 3D board render (KiCad 3D viewer, top) — the still fallback on the website |
-| `exports/ghostmedic-sensor-hub.glb` | 3D board model for the website's interactive viewer |
-| `exports/ghostmedic-sensor-hub-front-copper.svg` | Front copper layer as 2D artwork |
+| `archiater-sensor-hub.kicad_sch` | Schematic (source of truth for the wiring) |
+| `archiater-sensor-hub.kicad_pcb` | Routed board layout (35 footprints, ~477 track segments) |
+| `archiater-sensor-hub.kicad_pro` | KiCad project file |
+| `exports/archiater-sensor-hub-schematic.pdf` | Schematic, exported for viewing without KiCad |
+| `exports/archiater-sensor-hub-3d-top.png` | 3D board render (KiCad 3D viewer, top) — the still fallback on the website |
+| `exports/archiater-sensor-hub.glb` | 3D board model for the website's interactive viewer |
+| `exports/archiater-sensor-hub-front-copper.svg` | Front copper layer as 2D artwork |
 
 The `exports/` images are **generated from the source in this folder** — see
 "Regenerating the images" below. They are the design's own tool output, not photos:
@@ -63,28 +63,28 @@ by default:
 KC=/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli
 
 # 1 — schematic PDF
-$KC sch export pdf ghostmedic-sensor-hub.kicad_sch \
-  -o exports/ghostmedic-sensor-hub-schematic.pdf
+$KC sch export pdf archiater-sensor-hub.kicad_sch \
+  -o exports/archiater-sensor-hub-schematic.pdf
 
 # 2 — still 3D render (the website's fallback when WebGL is unavailable)
-$KC pcb render ghostmedic-sensor-hub.kicad_pcb \
-  -o exports/ghostmedic-sensor-hub-3d-top.png --side top --quality high
+$KC pcb render archiater-sensor-hub.kicad_pcb \
+  -o exports/archiater-sensor-hub-3d-top.png --side top --quality high
 
 # 3 — 3D model for the website's interactive viewer
-$KC pcb export glb ghostmedic-sensor-hub.kicad_pcb \
-  -o exports/ghostmedic-sensor-hub.glb --force \
+$KC pcb export glb archiater-sensor-hub.kicad_pcb \
+  -o exports/archiater-sensor-hub.glb --force \
   --include-silkscreen --include-soldermask
 
 # 4 — front copper as 2D artwork (black on transparent)
-$KC pcb export svg ghostmedic-sensor-hub.kicad_pcb \
-  -o exports/ghostmedic-sensor-hub-front-copper.svg \
+$KC pcb export svg archiater-sensor-hub.kicad_pcb \
+  -o exports/archiater-sensor-hub-front-copper.svg \
   --layers F.Cu,Edge.Cuts --mode-single --exclude-drawing-sheet \
   --fit-page-to-board --black-and-white
 ```
 
 Then copy the four outputs into `../site/assets/`.
 
-Or open `ghostmedic-sensor-hub.kicad_pro` in KiCad and use **View → 3D Viewer**.
+Or open `archiater-sensor-hub.kicad_pro` in KiCad and use **View → 3D Viewer**.
 
 ### Notes on those choices, so they aren't silently re-litigated
 
