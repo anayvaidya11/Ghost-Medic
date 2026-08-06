@@ -122,7 +122,7 @@
       lines.push(`wrist max radius       ${d.wristRMax.toFixed(1)} mm  (band inner radius 26.0; negative margin = band sunk into skin)`);
       lines.push(`band radial margin     ${(26 - d.wristRMax).toFixed(1)} mm`);
       lines.push(`pack seat radius       ${d.seatRadius.toFixed(1)} mm  (pack inner face is 150.0)`);
-      lines.push(`chest surface z        ${d.chestZ.toFixed(1)} mm`);
+      lines.push(`carry mount at         ${d.carryPos.x.toFixed(0)}, ${d.carryPos.y.toFixed(0)}, ${d.carryPos.z.toFixed(0)} mm (hip)`);
 
       // The cable must not pass through the wearer.
       let cableMin = Infinity;

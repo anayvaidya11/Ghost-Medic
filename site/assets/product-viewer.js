@@ -59,9 +59,9 @@ export function mountProductViewer({
   canvas.tabIndex = 0;
   canvas.setAttribute('aria-label', wearer
     ? 'Interactive 3D concept: a studio mannequin wearing a wrist sensor unit, with a ' +
-      'phone-class device carried on a chest strap, joined by a cable. Numbered markers ' +
-      'match the legend below. Drag to rotate, scroll to zoom. The devices are concept ' +
-      'shapes and the mannequin is an open-source base mesh, not a scan of anyone.'
+      'phone-class device carried on a low belt at the hip, joined by a cable. Numbered ' +
+      'markers match the legend below. Drag to rotate, scroll to zoom. The devices are ' +
+      'concept shapes and the mannequin is an open-source base mesh, not a scan of anyone.'
     : 'Interactive 3D concept: a wrist sensor unit and a phone-class device on a studio ' +
       'sweep, joined by a cable. Numbered markers match the legend below. Drag to rotate, ' +
       'scroll to zoom. These are concept shapes, not CAD.');
@@ -200,7 +200,12 @@ export function mountProductViewer({
     if (wearer) {
       p.figure = { box: boxOf(figure, wristUnit, phone, beltPack).expandByScalar(60), az: -0.38, el: 0.1, rotate: true };
       p.wrist = { box: boxOf(wristUnit).expandByScalar(46), az: -0.55, el: 0.14 };
-      if (phone) p.phone = { box: boxOf(phone).expandByScalar(60), az: 0.06, el: 0.06 };
+      if (phone) {
+        // Look straight down the hip mount's own normal, so the screen is
+        // face-on wherever the carry position ends up on the body.
+        const n = figure.mounts.hip.normal;
+        p.phone = { box: boxOf(phone).expandByScalar(60), az: Math.atan2(n.x, n.z), el: 0.06 };
+      }
       if (beltPack) p.pack = { box: boxOf(beltPack).expandByScalar(60), az: -0.8, el: 0.08 };
     } else {
       p.all = { box: productBox.clone().expandByScalar(50), az: 0.1, el: 0.16, rotate: true };
@@ -300,10 +305,10 @@ export function mountProductViewer({
 
       if (phone) {
         scene.add(phone.group);
-        phone.group.position.copy(figure.mounts.chest.position);
-        phone.group.quaternion.copy(figure.mounts.chest.quaternion);
-        // half the slab's depth proud of the plate
-        phone.group.position.z += 4.4;
+        const hip = figure.mounts.hip;
+        phone.group.quaternion.copy(hip.quaternion);
+        // half the slab's depth proud of the plate, along the hip normal
+        phone.group.position.copy(hip.position).addScaledVector(hip.normal, 4.4);
       }
       if (beltPack) {
         scene.add(beltPack.group);

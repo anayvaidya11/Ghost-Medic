@@ -11,8 +11,8 @@
  * eyeballed:
  *   wrist   position + orientation for the wrist unit, found by scanning the
  *           arm for its minimum-girth slice between hand and forearm
- *   chest   a mounting frame for the end-user device, found by probing the
- *           chest surface
+ *   hip     a mounting frame for the end-user device at the pocket region,
+ *           read off the measured hip surface
  *   belt    a seat for the (killed, still renderable) belt pack, found by
  *           matching local curvature to the pack's 150 mm inner face
  *   surface torsoPoint / torsoRadiusAt / limbGap, backed by a radial profile
@@ -33,9 +33,12 @@ const CLAY = 0xd8d4cc;          // warm off-white; a display form, not flesh
 const STRAP_COLOR = 0x3d4038;
 
 const STATURE_MM = 1750;        // normalised standing height
-const CHEST_FRAC = 0.68;        // chest-plate height: mid-chest, below the armpits,
-                                // so the strap passes under the hanging arms
-const BELT_FRAC  = 0.60;        // belt line, as a fraction of stature
+const CARRY_FRAC = 0.54;        // the phone rides where a pocket sits: the hip,
+                                // which is also where a hanging wrist ends up
+const CARRY_BELT_FRAC = 0.575;  // the strap that carries it: a low waist belt
+const CARRY_THETA = Math.PI / 2 + 0.95;  // well round to the side, at the pocket,
+                                         // on the instrumented-arm side
+const BELT_FRAC  = 0.60;        // (killed) pack's belt line, as a fraction of stature
 const WRIST_ROLL = 0.0;         // documented tunable: roll of the case about the forearm axis
 
 /* ── profile grid resolution ── */
@@ -370,32 +373,52 @@ export async function loadWearer({
 
   if (belt) group.add(buildBand({ y: beltY, height: 27, thick: 4.5, standoff: 3, profileAt }));
 
-  // ── Chest mount for the end-user device. ─────────────────────────────────
-  const chestY = CHEST_FRAC * stat;
-  const chestSurf = torsoPoint(Math.PI / 2, chestY);        // dead front
-  const chestStandoff = 9;
-  const chest = {
-    position: new THREE.Vector3(0, chestY, chestSurf.z + chestStandoff),
-    normal: new THREE.Vector3(0, 0, 1),
-    quaternion: new THREE.Quaternion(),                     // screen already faces +Z
+  // ── Hip carry for the end-user device: the pocket region. ────────────────
+  // A hanging wrist ends up at pocket height, which is why pockets are where
+  // they are, so this also keeps the wrist-to-device cable short.
+  const carryY = CARRY_FRAC * stat;
+  const carrySurf = torsoPoint(CARRY_THETA, carryY);
+  const carryNormal = (() => {
+    const a = torsoPoint(CARRY_THETA - 0.02, carryY);
+    const b = torsoPoint(CARRY_THETA + 0.02, carryY);
+    const t = b.sub(a);
+    const n = new THREE.Vector3(t.z, 0, -t.x).normalize();
+    // outward, away from the body axis
+    if (n.dot(new THREE.Vector3(carrySurf.x, 0, carrySurf.z)) < 0) n.negate();
+    return n;
+  })();
+  const carryStandoff = 9;
+  const carryQuat = (() => {
+    // screen (phone local +Z) faces the surface normal, long edge stays vertical
+    const zAxis = carryNormal.clone();
+    const yAxis = new THREE.Vector3(0, 1, 0);
+    const xAxis = new THREE.Vector3().crossVectors(yAxis, zAxis).normalize();
+    return new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis));
+  })();
+  const hip = {
+    position: carrySurf.clone().addScaledVector(carryNormal, carryStandoff),
+    normal: carryNormal,
+    quaternion: carryQuat,
   };
   if (chestRig) {
-    // A plate against the chest and a strap wrapping the torso at that
-    // height: a plain strap-mounted carry, so the device never floats.
+    // A low belt carries it, with a small plate against the hip so the device
+    // never floats: a plain belt-holster carry.
     const plate = new THREE.Mesh(
-      new THREE.BoxGeometry(92, 168, 5),
+      new THREE.BoxGeometry(88, 165, 5),
       new THREE.MeshStandardMaterial({ color: STRAP_COLOR, roughness: 0.92 }));
-    plate.position.set(0, chestY, chestSurf.z + 3.4);
+    plate.position.copy(carrySurf).addScaledVector(carryNormal, 3.2);
+    plate.quaternion.copy(carryQuat);
     plate.castShadow = plate.receiveShadow = true;
     group.add(plate);
-    group.add(buildBand({ y: chestY, height: 30, thick: 4, standoff: 2.5, profileAt }));
+    group.add(buildBand({ y: CARRY_BELT_FRAC * stat, height: 32, thick: 4.5, standoff: 2.5, profileAt }));
   }
 
   return {
     group,
     wrist: { position: wristPos.clone(), quaternion: wristQuat, axis: wristAxis.clone() },
     belt: beltSeat,
-    mounts: { chest, beltSeat },
+    mounts: { hip, beltSeat },
     surface: { torsoPoint, torsoRadiusAt, profileAt, limbGap },
     diagnostics: {
       statureMm: stat,
@@ -405,7 +428,7 @@ export async function loadWearer({
       wristGirthMm: 2 * Math.PI * (wristRMax * 0.9),   // ellipse-ish estimate from max radius
       wristRMax,
       bandBoreMm: 52,
-      chestZ: chestSurf.z,
+      carryPos: hip.position.clone(),
       seatRadius: beltSeat.radius,
       buildMs: Math.round(performance.now() - t0),
     },
