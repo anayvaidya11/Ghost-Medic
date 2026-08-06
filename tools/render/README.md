@@ -27,23 +27,26 @@ ships. Serve the **repository root**, not `site/`:
 python3 -m http.server 8932
 # then open:
 #   http://localhost:8932/tools/render/preview.html            on the body
-#   http://localhost:8932/tools/render/preview.html?wearer=0   the units alone
+#   http://localhost:8932/tools/render/preview.html?wearer=0   the devices alone
 ```
 
-`?view=` picks a camera without clicking: `front`, `side`, `fit`, `wrist`,
-`wrist-back`, `pack`.
+`?devices=` picks the device set (`wrist+phone`, the shipped one, or the
+harness-only `wrist+pack` / `wrist+phone+pack`). `?preset=` picks a camera
+preset without clicking: `figure`, `wrist`, `phone`, `pack`, `all`.
 
 The page never auto-rotates, so two screenshots of the same code are identical.
 
-Printed under the canvas:
+Printed under the canvas (the figure loads from a GLB, so the page waits for
+the viewer's `ready` promise before measuring):
 
 | Line | What it is guarding |
 |---|---|
-| `torso radius there` | The pack's inner face is a 150 mm arc. A torso is elliptical, so it cannot sit flush everywhere. The seat angle is chosen by scanning for the closest local radius, and this reports what was found. |
-| `arm to torso gap` | Negative means the arm and body intersect. |
-| `shoulder buried by` | How far the sweep's start cap sits inside the torso. This is what hides the cut end, so it must stay positive. |
+| `stature / scale applied / flipped` | The GLB's own units and facing are never trusted; this reports what normalisation actually did. The facing probe once flipped the figure backwards. |
+| `wrist max radius` and `band radial margin` | The band's bore is sized to the measured wrist. A negative margin means the band is sunk into the skin. The wrist scan once landed in the palm and reported 45 mm. |
+| `pack seat radius` | The (killed) pack's inner face is a 150 mm arc; the seat is wherever the measured torso curvature comes closest. |
+| `chest surface z` | Where the chest mount's plate meets the measured torso. |
 | `cable to torso gap` | Negative means the cable runs through the wearer. |
-| `cable to hand gap` | Negative means the cable runs through the hand. It did once. |
+| `cable to arm gap` | Negative means the cable runs through the limb it is routed beside. It did once. |
 | `cable slack` | A cable is longer than the gap it spans. Near 0% means it is drawn as a taut rod. |
 | `marker N at` | Pixel position on the canvas, and the distance to the nearest other marker. Placing these by eye costs a screenshot per nudge. |
 

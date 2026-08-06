@@ -6,8 +6,11 @@
 
   Serve the repo root, then open:
     python3 -m http.server 8931
-    http://localhost:8931/tools/render/preview.html          on the body
-    http://localhost:8931/tools/render/preview.html?wearer=0  units only
+    http://localhost:8931/tools/render/preview.html            on the body
+    http://localhost:8931/tools/render/preview.html?wearer=0   devices only
+  Extra params:
+    ?devices=wrist+phone | wrist+pack | wrist+phone+pack   (default: the shipped set)
+    ?preset=figure|wrist|phone|pack|all                    camera preset
 -->
 <html lang="en">
 <head>
@@ -25,8 +28,6 @@
   .board-viewer { position:relative; background:var(--paper); border:1px solid var(--line); padding:.5rem; }
   .board-canvas { display:block; width:100%; touch-action:pan-y; cursor:grab; }
   .board-canvas:active { cursor:grabbing; }
-  /* Matches the site rule that hides the 2D fallback once WebGL has mounted, so
-     a screenshot here is the same shape as the canvas the site ships. */
   .board-viewer.is-3d .concept-2d { display:none; }
   .board-status { color:var(--ink-2); font-size:.78rem; min-height:1.2em; margin:.5rem 0 0; }
   .bar { display:flex; gap:.5rem; flex-wrap:wrap; margin:0 0 .75rem; }
@@ -45,10 +46,8 @@
 
   <div class="bar">
     <a id="tab-on"  href="?wearer=1">On the body</a>
-    <a id="tab-off" href="?wearer=0">Units only</a>
-    <button id="front">Front</button>
-    <button id="three-q">Three-quarter</button>
-    <button id="side">Side</button>
+    <a id="tab-off" href="?wearer=0">Devices only</a>
+    <span id="presets"></span>
     <button id="spin">Toggle spin</button>
   </div>
 
@@ -67,138 +66,84 @@
 </script>
 <script type="module">
   import * as THREE from 'three';
-  import { mountProductViewer } from '../../site/assets/product-viewer.js';
+  import { mountProductViewer, ACTIVE_SET, DEVICE_SETS } from '../../site/assets/product-viewer.js';
 
-  const wearer = new URLSearchParams(location.search).get('wearer') !== '0';
+  const q = new URLSearchParams(location.search);
+  const wearer = q.get('wearer') !== '0';
+  const devices = DEVICE_SETS[q.get('devices')] ? q.get('devices') : ACTIVE_SET;
   document.getElementById(wearer ? 'tab-on' : 'tab-off').setAttribute('aria-current', 'true');
 
   const view = mountProductViewer({
     mount:  document.getElementById('product-viewer'),
     status: document.getElementById('product-status'),
-    wearer,
+    wearer, devices,
   });
 
-  // Screenshots have to be repeatable, so the preview never auto-rotates. The
-  // camera the viewer picked for itself is saved first: that is the one the site
-  // would ship, and the fit buttons below are only for inspecting the model.
+  await view.ready;
+
+  // Screenshots have to be repeatable, so the preview never auto-rotates.
   view.controls.autoRotate = false;
-  const shipped = { pos: view.camera.position.clone(), target: view.controls.target.clone() };
 
-  /** Frames everything solid in the scene. Sprites are skipped: the markers sit
-   *  outside the geometry and would pad the box by their own offsets. */
-  function fit(azimuthDeg = 26, elevationDeg = 12, margin = 1.12) {
+  // Preset chips mirror the viewer's own presets; ?preset= drives them from
+  // the screenshot script.
+  const chipBox = document.getElementById('presets');
+  for (const name of view.presets) {
+    const b = document.createElement('button');
+    b.textContent = name;
+    b.onclick = () => { view.setPreset(name); view.controls.autoRotate = false; measure(); };
+    chipBox.appendChild(b);
+  }
+  const wanted = q.get('preset');
+  if (wanted && view.presets.includes(wanted)) view.setPreset(wanted);
+  view.controls.autoRotate = false;
+
+  document.getElementById('spin').onclick = () => { view.controls.autoRotate = !view.controls.autoRotate; };
+
+  function measure() {
+    const lines = [];
     const box = new THREE.Box3();
-    view.scene.traverse((o) => {
-      if (o.isMesh) box.expandByObject(o);
-    });
-    const centre = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const fovV = (view.camera.fov * Math.PI) / 180;
-    const fovH = 2 * Math.atan(Math.tan(fovV / 2) * view.camera.aspect);
-    const dist = margin * Math.max(
-      (size.y / 2) / Math.tan(fovV / 2),
-      (Math.max(size.x, size.z) / 2) / Math.tan(fovH / 2));
-    const az = (azimuthDeg * Math.PI) / 180, el = (elevationDeg * Math.PI) / 180;
-    view.controls.target.copy(centre);
-    view.camera.position.set(
-      centre.x + dist * Math.cos(el) * Math.sin(az),
-      centre.y + dist * Math.sin(el),
-      centre.z + dist * Math.cos(el) * Math.cos(az));
-    view.controls.maxDistance = Math.max(view.controls.maxDistance, dist * 2);
-    view.controls.update();
-    return { box, centre, size, dist };
-  }
+    const size = new THREE.Vector3();
+    const dim = (label, obj) => {
+      if (!obj) return;
+      box.setFromObject(obj); box.getSize(size);
+      lines.push(`${label.padEnd(22)} ${size.x.toFixed(1)} x ${size.y.toFixed(1)} x ${size.z.toFixed(1)} mm`);
+    };
+    lines.push(`device set             ${devices}${devices === ACTIVE_SET ? '  (shipped)' : '  (harness only)'}`);
+    dim('wrist unit', view.wristUnit?.group);
+    dim('phone', view.phone?.group);
+    dim('belt pack', view.beltPack?.group);
 
-  // Default view is whatever the viewer itself chose, because that is the one
-  // the site would ship. The fit buttons are for inspection only.
-  const framed = fit();
-  view.camera.position.copy(shipped.pos);
-  view.controls.target.copy(shipped.target);
-  view.controls.update();
+    if (view.figure) {
+      dim('figure', view.figure.group);
+      const d = view.figure.diagnostics;
+      lines.push('');
+      lines.push(`stature                ${d.statureMm.toFixed(0)} mm  (scale applied ${d.scaleApplied.toFixed(2)}x, flipped ${d.flipped})`);
+      lines.push(`figure vertices        ${d.vertexCount}  built in ${d.buildMs} ms`);
+      lines.push(`wrist max radius       ${d.wristRMax.toFixed(1)} mm  (band inner radius 26.0; negative margin = band sunk into skin)`);
+      lines.push(`band radial margin     ${(26 - d.wristRMax).toFixed(1)} mm`);
+      lines.push(`pack seat radius       ${d.seatRadius.toFixed(1)} mm  (pack inner face is 150.0)`);
+      lines.push(`chest surface z        ${d.chestZ.toFixed(1)} mm`);
 
-  document.getElementById('front').onclick   = () => fit(0, 8);
-  document.getElementById('three-q').onclick = () => fit(26, 12);
-  document.getElementById('side').onclick    = () => fit(78, 8);
-  document.getElementById('spin').onclick    = () => { view.controls.autoRotate = !view.controls.autoRotate; };
+      // The cable must not pass through the wearer.
+      let cableMin = Infinity;
+      for (let i = 0; i <= 200; i++) {
+        const p = view.curve.getPoint(i / 200);
+        const surf = view.figure.surface.torsoPoint(Math.atan2(p.z, p.x), p.y);
+        cableMin = Math.min(cableMin, Math.hypot(p.x, p.z) - Math.hypot(surf.x, surf.z) - 3);
+      }
+      const straight = view.curve.getPoint(0).distanceTo(view.curve.getPoint(1));
+      lines.push(`cable to torso gap     ${cableMin.toFixed(1)} mm  min  (negative = through the body)`);
+      lines.push(`cable slack            ${((view.curve.getLength() / straight - 1) * 100).toFixed(0)}% longer than the straight span`);
 
-  /** Frames one object closely, for inspecting a join rather than the whole model. */
-  function focus(obj, pad = 90, azimuthDeg = 26, elevationDeg = 12) {
-    const box = new THREE.Box3().setFromObject(obj).expandByScalar(pad);
-    const centre = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const fovV = (view.camera.fov * Math.PI) / 180;
-    const fovH = 2 * Math.atan(Math.tan(fovV / 2) * view.camera.aspect);
-    const dist = Math.max((size.y / 2) / Math.tan(fovV / 2),
-                          (Math.max(size.x, size.z) / 2) / Math.tan(fovH / 2));
-    const az = (azimuthDeg * Math.PI) / 180, el = (elevationDeg * Math.PI) / 180;
-    view.controls.target.copy(centre);
-    view.camera.position.set(
-      centre.x + dist * Math.cos(el) * Math.sin(az),
-      centre.y + dist * Math.sin(el),
-      centre.z + dist * Math.cos(el) * Math.cos(az));
-    view.controls.minDistance = Math.min(view.controls.minDistance, dist * 0.5);
-    view.controls.update();
-  }
-
-  // ?view=... drives the same buttons from a screenshot script.
-  const V = new URLSearchParams(location.search).get('view');
-  if (V === 'front') fit(0, 8);
-  else if (V === 'side') fit(78, 8);
-  else if (V === 'fit') fit(26, 12);
-  else if (V === 'wrist') focus(view.wristUnit.group, 105, -28, 14);
-  else if (V === 'wrist-back') focus(view.wristUnit.group, 105, 62, 6);
-  else if (V === 'pack') focus(view.beltPack.group, 70, -28, 10);
-
-  // Measurements, printed rather than eyeballed.
-  const lines = [];
-  const box = new THREE.Box3();
-  const size = new THREE.Vector3();
-  const dim = (label, obj) => {
-    box.setFromObject(obj); box.getSize(size);
-    lines.push(`${label.padEnd(22)} ${size.x.toFixed(1)} x ${size.y.toFixed(1)} x ${size.z.toFixed(1)} mm`);
-  };
-  dim('wrist unit', view.wristUnit.group);
-  dim('belt pack', view.beltPack.group);
-  if (view.figure) {
-    dim('figure', view.figure.group);
-    const d = view.figure.diagnostics;
-    lines.push('');
-    lines.push(`pack seat angle        ${d.seatAngleDeg.toFixed(1)} deg from the wearer's left`);
-    lines.push(`torso radius there     ${d.seatRadius.toFixed(1)} mm  (pack inner face is 150.0)`);
-    lines.push(`wrist section          ${(d.wristSection.a * 2).toFixed(1)} x ${(d.wristSection.b * 2).toFixed(1)} mm  (band inner dia 52.0)`);
-    lines.push(`forearm elbow to wrist ${d.armLength.toFixed(1)} mm`);
-    const c = d.clearance;
-    lines.push(`arm to torso gap       ${c.minGap.toFixed(1)} mm  min, at t=${c.minAt.toFixed(2)}  (negative = intersecting)`);
-    lines.push(`shoulder buried by     ${(-c.shoulderOverlap).toFixed(1)} mm  (hides the cut end)`);
-
-    // The cable must not pass through the wearer either.
-    let cableMin = Infinity;
-    for (let i = 0; i <= 200; i++) {
-      const p = view.curve.getPoint(i / 200);
-      const surf = view.figure.surface.torsoPoint(Math.atan2(p.z, p.x), p.y);
-      cableMin = Math.min(cableMin, Math.hypot(p.x, p.z) - Math.hypot(surf.x, surf.z) - 3);
+      // ...and must clear the arm it runs beside (3 = cable radius).
+      let armMin = Infinity;
+      for (let i = 0; i <= 240; i++) {
+        armMin = Math.min(armMin, view.figure.surface.limbGap(view.curve.getPoint(i / 240)) - 3);
+      }
+      lines.push(`cable to arm gap       ${armMin.toFixed(1)} mm  min  (the lead runs beside the forearm on purpose)`);
     }
-    const straight = view.curve.getPoint(0).distanceTo(view.curve.getPoint(1));
-    lines.push(`cable to torso gap     ${cableMin.toFixed(1)} mm  min`);
-    lines.push(`cable slack            ${((view.curve.getLength() / straight - 1) * 100).toFixed(0)}% longer than the straight span`);
 
-    // The cable must clear the hand. Measured from the wrist landmark outward,
-    // so the forearm it deliberately runs alongside is excluded.
-    const m = view.figure.surface.marks;
-    let handMin = Infinity;
-    for (let i = 0; i <= 240; i++) {
-      handMin = Math.min(handMin,
-        view.figure.surface.limbGap(view.curve.getPoint(i / 240), m.wrist, 1) - 3);
-    }
-    lines.push(`cable to hand gap      ${handMin.toFixed(1)} mm  min  (negative = through it)`);
-    lines.push(`wrist landmark at t=   ${m.wrist.toFixed(3)}  (elbow ${m.elbow.toFixed(3)}, knuckle ${m.knuckle.toFixed(3)})`);
-  }
-  // Where each numbered marker actually lands on the canvas, and how close the
-  // nearest other marker is. Placing these by eye costs a screenshot per nudge.
-  {
-    // The camera was moved after mount, and matrixWorldInverse is only refreshed
-    // by the renderer on its next frame. Projecting before that reads the
-    // mount-time camera and reports every marker off-canvas.
+    // Marker positions on the canvas.
     view.camera.updateMatrixWorld(true);
     const w = view.canvas.clientWidth, h = view.canvas.clientHeight;
     const px = view.markers.map((s) => {
@@ -209,27 +154,18 @@
     lines.push(`canvas                 ${w} x ${h} px`);
     px.forEach((p, i) => {
       let near = Infinity, who = '-';
-      px.forEach((q, j) => {
+      px.forEach((qq, j) => {
         if (i === j) return;
-        const d = Math.hypot(p.x - q.x, p.y - q.y);
+        const d = Math.hypot(p.x - qq.x, p.y - qq.y);
         if (d < near) { near = d; who = String(j + 1); }
       });
       const off = p.x < 0 || p.y < 0 || p.x > w || p.y > h ? '  OFF-CANVAS' : '';
       lines.push(`marker ${i + 1} at            ${p.x.toFixed(0)}, ${p.y.toFixed(0)} px   nearest #${who} ${near.toFixed(0)} px${off}`);
     });
-  }
 
-  lines.push('');
-  lines.push(`scene bounds           ${framed.size.x.toFixed(0)} x ${framed.size.y.toFixed(0)} x ${framed.size.z.toFixed(0)} mm`);
-  lines.push(`scene centre           ${framed.centre.x.toFixed(0)}, ${framed.centre.y.toFixed(0)}, ${framed.centre.z.toFixed(0)}`);
-  lines.push(`camera distance        ${framed.dist.toFixed(0)} mm`);
-  {
-    // The wrist case as a share of frame height, the number that decides
-    // whether any of its detail survives being put on a body.
-    const h = 2 * Math.tan((view.camera.fov * Math.PI) / 360) * framed.dist;
-    lines.push(`case 48 mm is          ${((48 / h) * 100).toFixed(1)}% of frame height`);
+    document.getElementById('diag').textContent = lines.join('\n');
   }
-  document.getElementById('diag').textContent = lines.join('\n');
+  measure();
   window.__ready = true;
 </script>
 </body>
