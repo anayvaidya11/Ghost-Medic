@@ -104,6 +104,35 @@ The demo today runs the app in a browser and the model under local Ollama on
 one laptop. A laptop is an end-user device. The demo has been the product
 all along; the story around it was wrong.
 
+## The phone is enough, verified
+
+"A 3B-class model runs offline on a current phone" is a shipped fact, not a
+research claim. Checked 2026-08-06 against primary sources:
+
+- **Apple ships it.** Apple Intelligence includes an on-device foundation
+  model of about 3 billion parameters, running on iPhone 15 Pro and later at
+  about 30 tokens per second (Apple ML Research, "Introducing Apple's
+  On-Device and Server Foundation Models").
+- **Google ships it.** Gemini Nano runs on-device on Pixel 8 and 9 series
+  and Galaxy S24 through the Android AICore service; Google's Gemma 3 1B
+  runs at 529 MB via its AI Edge runtime (Google model cards and developer
+  blog).
+- **The open path this repo uses works too.** Meta publishes quantized
+  Llama 3.2 1B and 3B for phones; measured decode is about 22 tokens per
+  second for the 3B on an iPhone 16 Pro at roughly 2.8 GB peak RAM, against
+  8 to 16 GB in current flagships. llama.cpp, MLC LLM, and Google AI Edge
+  all run these models on Android and iOS today.
+- **The honest limits.** Sustained generation throttles to roughly 40 to 65
+  percent of burst speed as the phone heats; context windows on phone
+  builds are short (2K to 8K tokens); and small models are dependable for
+  extraction, summarization, and protocol lookup, not for open-ended
+  clinical reasoning. All three limits fit this product's posture: short,
+  retrieval-shaped decision support for a trained responder, in bursts.
+
+The demo's llama3.2:3b under Ollama is the same model class Apple and Meta
+run on phones. Nothing about the pipeline assumes more compute than a
+responder already carries.
+
 ## What was killed, and why
 
 | Killed | Reason |
@@ -154,3 +183,7 @@ restriction: Deputy Secretary of Defense memo, August 2018. FDA software
 guidances: 21st Century Cures section 3060 CDS guidance and the January 2026
 updates. Chatbot resuscitation study: Birkun and Gautam, Prehospital and
 Disaster Medicine 38(6), 2023. IVAS: Breaking Defense, April 2025.
+Phone inference: Apple ML Research, "Introducing Apple's On-Device and
+Server Foundation Models"; Google AI Edge developer blog and the
+gemma-3n-E2B model card; Meta, "Introducing quantized Llama models";
+llama.cpp Android docs; MLC LLM docs. Checked 2026-08-06.

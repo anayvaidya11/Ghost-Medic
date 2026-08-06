@@ -339,6 +339,18 @@ not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
   depth shadows; the `--ink-3` contrast fix (2.9:1 to 5.2:1). Zero text
   nodes changed, proven by a byte-identical readability report. Text rewrite
   still deferred to its own session.
+- 🟢 Round two, owner-directed (2026-08-06): the figure is male now (MakeHuman
+  macrodetail morph applied by `tools/figure/apply-target.mjs`, same CC0
+  pipeline); the phone rides a low belt at the hip pocket, where a hanging
+  wrist ends up; the site viewer is two tabs only (On the body / Devices);
+  the hero is a living canvas oasis (`site/assets/oasis.js`: layered dunes,
+  palms that sway, a pool with reflection and rain rings, drifting sand, a
+  passing shower every ~34 s; one still frame under reduced motion); the
+  phone-compute claim is now verified fact with sources in
+  `docs/POSITIONING.md` ("The phone is enough, verified"); and a fluff cut
+  took body prose down again (index 491 to 395 words, how-it-works 602 to
+  533, hardware 554 to 513, proof 885 to 802) with every honesty device
+  kept. All gates re-run green.
 - ⬜ **Next-session site worklist (text session):** investor-terse rewrite;
   hero spec strip using the four honest numbers — **0** external network
   requests · **10 Hz** one-line contract · **48** committed checks (39 app +
