@@ -1,8 +1,13 @@
 # Ghost Medic — session rules
 
-Offline, wearable AI **first-aid assistant prototype**. Read `ROADMAP.md` first
-every session; `ARCHITECTURE.md` for topology; `DATA_FORMAT.md` for the wire
-contract.
+Offline AI **decision-support prototype** for trained responders. Read
+`ROADMAP.md` first every session; `ARCHITECTURE.md` for topology;
+`DATA_FORMAT.md` for the wire contract; `docs/POSITIONING.md` for why the
+product changed shape on 2026-08-05.
+
+Names **Archiater** (product) and **Wyzantium Industries** (company) are
+decided. The mechanical rename is a separate tracked workstream. Do not
+partially rename.
 
 ## The honesty rule (non-negotiable)
 
@@ -13,8 +18,11 @@ artifact in this repo.
 
 ## Locked decisions — do not relitigate
 
-1. Product: wrist-worn sensor hub → local (no-internet) LLM → spoken, numbered
-   first-aid guidance, combined with voice + image input.
+1. Product (repositioned 2026-08-05, see `docs/POSITIONING.md`): offline
+   decision-support software for a trained responder, running on the end-user's
+   own device (laptop stands in today), with the wrist sensor hub as an
+   **optional accessory** streaming raw signals into it. Voice + image input;
+   local (no-internet) LLM; spoken, numbered candidate actions.
 2. App shows altitude / temperature / fall-status as DERIVED values; optical
    red-IR and accel as clearly-labeled RAW SIGNAL. Raw vs. derived visually
    distinguished.
@@ -22,6 +30,9 @@ artifact in this repo.
    boundary labeled — NOT medical validity.
 4. Build order: P1 bridge+app → P2 sensor-changes-advice → P3 hardware video →
    P4 website.
+5. Posture: decision support for a **trained responder**, never autonomous
+   directives to a layperson. The app and prompt must say so. No claim of FDA
+   clearance, compliance, or clinical validation, ever.
 
 ## Hard rules
 
@@ -30,8 +41,9 @@ artifact in this repo.
   red/IR counts only. The LLM prompt explicitly forbids inferring HR/SpO2.
 - **Never touch `legacy/`.** Archived TCCC engine; nothing imports it.
 - **Out of scope (committed):** HR/SpO2 computation; real BLE (wired bridge is
-  the stand-in); dedicated pack hardware (laptop = pack); real STT/vision
-  (stubs); PCB fabrication; medical-validity claims.
+  the stand-in); dedicated pack hardware — **killed 2026-08-05**, the end-user
+  device is the compute and a laptop stands in for it in the demo; real
+  STT/vision (stubs); PCB fabrication; medical-validity claims.
 - No new dependency without justification.
 - A failed sensor read renders/says "unavailable" or "—", never 0 or a
   fabricated value. Gate every field on its `ok` flag (`DATA_FORMAT.md`).

@@ -2,53 +2,60 @@
 
 *What the system is, what runs where, and exactly where the "real" line is.*
 
-Ghost Medic is an **offline AI first-aid assistant prototype for the backcountry**: a person is
-injured, alone, far from help, and has no signal. The system senses their body and
-environment, reasons about it with a **local** language model, and gives spoken,
-numbered first-aid guidance — with **no internet**.
+Ghost Medic (being renamed **Archiater**, of **Wyzantium Industries**) is an
+**offline decision-support prototype**: a trained responder — a medic, an
+expedition leader, a remote-site lead — is treating a patient far from help,
+with no signal. The system senses the patient and the environment, reasons
+about it with a **local** language model, and speaks numbered candidate
+actions for the responder to weigh — with **no internet**. The responder on
+scene decides.
 
-## The one product (decided 2026-07-20)
+## The one product (decided 2026-07-20, repositioned 2026-08-05)
 
-The product is the **LLM wilderness assistant** (`app/` + `services/`). An earlier
-deterministic TCCC/MARCH engine was archived to [`legacy/`](legacy/README.md); it
-is not part of this architecture.
+The product is **offline decision-support software running on the device the
+responder already carries**, with the wrist sensor hub as an optional
+accessory (`app/` + `services/`; rationale in
+[`docs/POSITIONING.md`](docs/POSITIONING.md)). An earlier deterministic
+TCCC/MARCH engine was archived to [`legacy/`](legacy/README.md); it is not
+part of this architecture.
 
 ## System topology — what runs where
 
-Four roles. In the **shipping vision** they are distinct devices; in the
-**current demo** some collapse onto a laptop. Being explicit about this is the
-whole point — it's how we stay honest about what's proven.
+Three roles plus the human. In the **shipping vision** the end-user device is
+the responder's own phone or EUD; in the **current demo** a laptop plays that
+device. Being explicit about this is the whole point — it's how we stay honest
+about what's proven.
 
 ```
- ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
- │  BIOSENSOR /     │   │   WEARABLE       │   │    PACK BRAIN    │   │   INTERFACE      │
- │  WRIST UNIT      │   │   (sensor hub)   │   │   (compute)      │   │   (voice+screen) │
- │                  │   │                  │   │                  │   │                  │
- │  MAX30102  raw PPG   │  RP2040 / Pico   │   │  local LLM       │   │  React Native /  │
- │  BMP280    baro  │──▶│  reads I²C @10Hz │──▶│  (Ollama today)  │──▶│  Expo app        │
- │  LIS3DH    accel │   │  emits NDJSON    │   │  + vision/voice  │   │  speaks steps    │
- │  (custom PCB)    │   │  over USB serial │   │                  │   │                  │
- └──────────────────┘   └──────────────────┘   └──────────────────┘   └──────────────────┘
-        │                        │                      │                       │
-        └── on the PCB, these two are one board (the wrist unit) ──┘            │
-                                 │                      │                       │
-                    ══════════ THE BRIDGE ══════════    │                       │
-                    NDJSON source → WebSocket server ────┴───────────────────────┘
-                    (stand-in for the eventual wrist→pack BLE link)
+ ┌────────────────────────┐            ┌─────────────────────────────────────┐
+ │  WRIST SENSOR          │            │  END-USER DEVICE                    │
+ │  ACCESSORY (optional)  │  THE LINK  │  (the phone / EUD / laptop the      │
+ │                        │──────────▶ │   responder already carries)        │──▶ trained
+ │  RP2040 + MAX30102 raw │  NDJSON    │                                     │    responder
+ │  PPG + BMP280 baro +   │  over the  │  app (Expo) + local LLM (Ollama)    │    decides
+ │  LIS3DH accel          │  bridge    │  + vision/voice stubs               │
+ │  emits NDJSON @ 10 Hz  │            │  decision support, fully offline    │
+ └────────────────────────┘            └─────────────────────────────────────┘
+
+                    ══════════ THE BRIDGE ══════════
+                    NDJSON source → WebSocket server
+                    (stand-in for the eventual short-range wireless link)
 ```
 
 ### Role by role
 
 | Role | Shipping vision | Demo today | Status |
 |---|---|---|---|
-| **Biosensor + wrist unit** | Custom PCB: RP2040 + MAX30102 + BMP280 + LIS3DH | Same firmware, run on a Pico *or* replayed by the bridge | 🟢 Firmware built & compile-verified; ⚠️ not yet run on hardware |
-| **Pack brain (compute)** | Small efficient compute (e.g. Jetson Orin Nano / Pi 5) running a local LLM | **Laptop** running Ollama | 🟡 Works; not a dedicated device yet |
-| **Interface** | Wrist/phone/tablet voice + screen | Expo app on a phone or simulator | 🟢 Works against local LLM |
-| **The bridge** | Wrist → pack **BLE** link | Node WebSocket server, `--source ∈ {serial,sim,file}` | 🟢 Works in `file` mode (verified end-to-end); `serial` stubbed pending hardware |
+| **Wrist sensor accessory** (optional) | Custom PCB: RP2040 + MAX30102 + BMP280 + LIS3DH | Same firmware, run on a Pico *or* replayed by the bridge | 🟢 Firmware built & compile-verified; ⚠️ not yet run on hardware |
+| **The link** | Wrist → device short-range wireless (BLE) | Node WebSocket server, `--source ∈ {serial,sim,file}` | 🟢 Works in `file` mode (verified end-to-end); `serial` stubbed pending hardware |
+| **End-user device** | The responder's phone / EUD, running the app and a local LLM | **Laptop** running the app in a browser and Ollama | 🟢 Works — and note the demo device *is* an end-user device, which is the point |
 
-**Do not rathole on the pack hardware now.** For every current goal, *laptop =
-pack brain*. Picking real compute silicon is a productization question; document
-it, defer it.
+The pack-compute question is not deferred, it is **closed** (2026-08-05, see
+[`docs/POSITIONING.md`](docs/POSITIONING.md)): the end-user device is the
+compute. No dedicated carried computer will be chosen or built.
+
+*The earlier four-role topology (with a dedicated "pack brain") is in git
+history and analyzed in `docs/POSITIONING.md`.*
 
 ## Data flow (the contract-first design)
 
@@ -86,9 +93,9 @@ wrist unit later by changing one flag.
 | App → local LLM → spoken numbered advice | ✅ Works (Ollama) |
 | Live sensor data actually driving the app | ✅ Verified 2026-07-22 (bridge replay → browser app; connection observed server-side) |
 | Sensor readings influencing the LLM's advice | ✅ Verified 2026-07-22 (sensor-context injection; fall auto-trigger fired once per 30 s cooldown against live local Ollama) |
-| BLE wrist→pack link | ❌ Simulated by the wired bridge (on purpose) |
+| BLE wrist→device link | ❌ Simulated by the wired bridge (on purpose) |
 | Speech-to-text, wound vision | ❌ Stubs (`services/transcriptionService.ts`, `services/visionService.ts`) |
-| Dedicated "pack" compute device | ❌ Laptop stands in |
+| Runs on a dedicated carried computer | ❌ Killed by design (2026-08-05) — the end-user device is the compute; a laptop is the end-user device in the demo |
 
 See [`ROADMAP.md`](ROADMAP.md) for the sequence that turns the 🔜/❌ rows green.
 

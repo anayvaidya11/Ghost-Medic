@@ -22,6 +22,15 @@ for the wire contract.
 
 ## Locked Decisions (confirmed by owner — do not relitigate)
 
+> **Repositioning 2026-08-05 (supersedes decision 1's framing; see
+> [`docs/POSITIONING.md`](docs/POSITIONING.md)).** The product is **Archiater**
+> (company: **Wyzantium Industries**): offline decision-support software for a
+> trained responder, running on the device they already carry (phone / EUD /
+> laptop), with the wrist sensor hub as an **optional accessory** streaming raw
+> signals into it. The belt pack is killed, not deferred. The guidance posture
+> is decision support, never directives to a layperson. Decision 1 below is
+> kept as written because the history of the change is part of the record.
+
 1. **What it is:** an offline, wearable AI **first-aid assistant prototype**. A
    wrist-worn sensor hub captures motion, altitude/environment, and raw optical
    signals, streams them to a **local (no-internet) LLM** that combines them with
@@ -292,13 +301,43 @@ smell exaggeration but is not an embedded engineer.*
   installing matplotlib and regenerating all three plates, risking visual drift
   on the other two. The figcaption underneath translates it instead.
 
-## Phase 5+ / deferred  🧊 (do NOT start these now — they're not on the critical path)
+## Phase 5 — Reposition (Archiater)  🟡 IN PROGRESS (2026-08-05)
+*The market said the form factor was wrong. The story changed; the pipeline did
+not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
+
+- 🟢 `docs/POSITIONING.md` written: the harsh analysis (BATDOK/JOMIS incumbent,
+  soldier load, FDA posture, unit economics), what survives, what was killed,
+  honest limits stated flat.
+- 🟢 Governing docs amended: `CLAUDE.md` (decision 1 rewritten, decision 5
+  posture added), this file's superseding block, `ARCHITECTURE.md` three-box
+  topology, `README.md` reframe. `DATA_FORMAT.md` needed zero changes.
+- 🟢 App posture: system prompt addresses a trained responder ("the responder
+  on scene decides"); `EVACUATION:` line format preserved for the parser;
+  persistent "decision support, not a medical device" banner in the UI.
+- ⬜ Rename Ghost Medic → **Archiater** / **Wyzantium Industries** across the
+  repo (KiCad files, include guards, CMake target, slugs, site, GitHub repo).
+  The committed `ghost_medic_firmware.uf2` keeps its name: it is the artifact
+  of the verified July build and renaming it would fake a build.
+- ⬜ On-body concept rebuilt to the new story: mannequin from a CC0 base mesh,
+  wrist accessory + end-user device (phone), belt pack removed, wrist concept
+  display removed (the phone is the display).
+- ⬜ Site visual redesign (oasis theme); text rewrite deferred to its own
+  session.
+- ⬜ **Next-session site worklist (text session):** investor-terse rewrite;
+  hero spec strip using the four honest numbers — **0** external network
+  requests · **10 Hz** one-line contract · **48** committed checks (39 app +
+  9 firmware) · **77.5 × 71.75 mm** hand-routed 2-layer board; remaining
+  claim-fixes listed in the 2026-08-05 session analysis.
+
+## Deferred  🧊 (do NOT start these now — they're not on the critical path)
 - 🧊 Run the fine-tune pipeline in `training/` (its existence is enough proof for now).
 - 🧊 Real BLE wrist→pack link (the wired bridge is the honest stand-in).
 - 🧊 Real speech-to-text (whisper.cpp) and wound vision — stubs are fine until
   Phase 2 works with text.
-- 🧊 Choosing/building the dedicated "pack" compute device (Jetson/Pi 5). For now,
-  **laptop = pack.** Document the path in one paragraph, move on.
+- ❌ ~~Choosing/building the dedicated "pack" compute device (Jetson/Pi 5)~~ —
+  **KILLED 2026-08-05**, not deferred: the end-user device is the compute
+  (`docs/POSITIONING.md`). A laptop stands in for the end-user device in the
+  demo.
 - 🧊 PCB fabrication (the design + firmware is the story).
 
 ---
