@@ -90,7 +90,7 @@ the site ships, and prints the measurements under the canvas.
    - **Framework Preset** → **Other**.
    - **Build Command** → leave **empty**. **Output Directory** → leave as **`.`**.
 5. **Deploy**. Under a minute later you get a URL like
-   `ghost-medic-xxxx.vercel.app`.
+   `archiater-xxxx.vercel.app`.
 6. Every future `git push` to `main` redeploys automatically.
 
 Custom domain later: Project → **Settings → Domains**.
