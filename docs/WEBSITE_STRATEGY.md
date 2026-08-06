@@ -1,4 +1,4 @@
-# Ghost Medic — Website Strategy
+# Archiater — Website Strategy
 
 *How to present an honest, unfinished hardware + software project online.*
 
@@ -192,7 +192,7 @@ B). Lean into it.
 
 ---
 
-## PART 2 — What Ghost Medic has, and how to present each piece honestly
+## PART 2 — What Archiater has, and how to present each piece honestly
 
 ### a) The wrist unit — PCB, firmware, tests
 
@@ -482,7 +482,7 @@ editing + visual-layout job, not a writing-from-scratch job.
 
 ```
 ┌─ HERO
-│   "Ghost Medic — an offline AI first-aid assistant prototype for the backcountry."
+│   "Archiater — an offline AI first-aid assistant prototype for the backcountry."
 │   One line on what it is. One line of honesty: "A working engineering proof —
 │   firmware, simulator, app, and local LLM. Not yet a physical device; every
 │   real-vs-simulated line is labeled below."

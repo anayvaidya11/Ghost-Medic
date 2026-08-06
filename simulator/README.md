@@ -1,12 +1,12 @@
-# Ghost Medic — Wrist Unit Simulator
+# Archiater — Wrist Unit Simulator
 
-A single-file, self-contained web page that **simulates** the Ghost Medic wrist
+A single-file, self-contained web page that **simulates** the Archiater wrist
 sensor hub. Open `index.html` by double-clicking it — no server, no build step,
 no internet, no dependencies.
 
 ## What this is (and is NOT)
 
-- ✅ It **is** a demonstration of the Ghost Medic data pipeline. You drag three
+- ✅ It **is** a demonstration of the Archiater data pipeline. You drag three
   sliders, physically-plausible sensor values are computed, and a live JSON
   stream scrolls past — the exact same JSON shape the real firmware prints.
 - ❌ It is **NOT** reading any real hardware. There are no sensors attached.

@@ -1,7 +1,7 @@
 /**
  * BRIDGE CONNECTION CONFIG
  *
- * Where the app finds the Ghost Medic sensor bridge (the NDJSON -> WebSocket
+ * Where the app finds the Archiater sensor bridge (the NDJSON -> WebSocket
  * dumb pipe in ../bridge). The app connects to the bridge's /stream endpoint
  * as a consumer and receives one telemetry line per message.
  *

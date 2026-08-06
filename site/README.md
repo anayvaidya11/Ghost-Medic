@@ -1,4 +1,4 @@
-# Ghost Medic proof website (`site/`)
+# Archiater proof website (`site/`)
 
 A **static site with no build step**: five hand-written HTML pages, one shared
 stylesheet, and one vendored library. Nothing to install, nothing to compile.

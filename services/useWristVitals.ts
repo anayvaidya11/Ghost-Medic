@@ -1,5 +1,5 @@
 /**
- * useWristVitals — live vitals from the Ghost Medic sensor bridge.
+ * useWristVitals — live vitals from the Archiater sensor bridge.
  *
  * Connects to the bridge's /stream WebSocket (see ../bridge and BRIDGE_STREAM_URL),
  * parses each NDJSON telemetry line with the pure parser, and returns the latest

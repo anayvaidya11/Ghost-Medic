@@ -1,6 +1,6 @@
-# Ghost Medic — Wrist-Unit PCB (hardware/)
+# Archiater — Wrist-Unit PCB (hardware/)
 
-KiCad **10.0.4** design for the Ghost Medic wrist-unit sensor hub — the custom
+KiCad **10.0.4** design for the Archiater wrist-unit sensor hub — the custom
 board referenced throughout the docs. This is the real design source, committed so
 the "custom PCB" claim is backed by files you can open, not just a screenshot.
 

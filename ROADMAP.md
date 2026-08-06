@@ -1,4 +1,4 @@
-# Ghost Medic — Roadmap
+# Archiater — Roadmap
 
 **Read this first, every session.** It exists so you never have to hold the whole
 project in your head again. Pick the lowest unchecked phase, do it, check it off.

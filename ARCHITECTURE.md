@@ -1,8 +1,8 @@
-# Ghost Medic — Architecture
+# Archiater — Architecture
 
 *What the system is, what runs where, and exactly where the "real" line is.*
 
-Ghost Medic (being renamed **Archiater**, of **Wyzantium Industries**) is an
+Archiater (a **Wyzantium Industries** project, formerly Ghost Medic) is an
 **offline decision-support prototype**: a trained responder — a medic, an
 expedition leader, a remote-site lead — is treating a patient far from help,
 with no signal. The system senses the patient and the environment, reasons

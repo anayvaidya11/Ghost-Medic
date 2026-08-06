@@ -1,4 +1,4 @@
-# Ghost Medic — Sensor Bridge
+# Archiater — Sensor Bridge
 
 > ## ⚠️ What this is, stated honestly
 > This bridge is a **wired, local WebSocket stand-in for the eventual

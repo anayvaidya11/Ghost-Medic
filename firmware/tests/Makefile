@@ -1,4 +1,4 @@
-# Makefile — host-side unit tests for the Ghost Medic sensor math.
+# Makefile — host-side unit tests for the Archiater sensor math.
 #
 # These build with your laptop's normal gcc (NOT the ARM cross-compiler) and
 # run on your laptop. No Pico, no hardware. They compile the PURE math modules

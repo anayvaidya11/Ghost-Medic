@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Ghost Medic — Sensor Bridge
+ * Archiater — Sensor Bridge
  *
  * A DUMB PIPE. It reads NDJSON telemetry lines from a source (producer) and
  * forwards each line UNCHANGED to every connected app/consumer over a WebSocket.
@@ -48,7 +48,7 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  console.log(`Ghost Medic sensor bridge — a dumb NDJSON -> WebSocket pipe.
+  console.log(`Archiater sensor bridge — a dumb NDJSON -> WebSocket pipe.
 
 Usage:
   node bridge.js --source=sim   [--port=8080]
@@ -190,7 +190,7 @@ function main() {
   // One HTTP server, one WS server, routed by URL path.
   const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Ghost Medic bridge. Connect via WebSocket: /stream (consume) or /sim-input (produce).\n');
+    res.end('Archiater bridge. Connect via WebSocket: /stream (consume) or /sim-input (produce).\n');
   });
 
   const wss = new WebSocketServer({ server });

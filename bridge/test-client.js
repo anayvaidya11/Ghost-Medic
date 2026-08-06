@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Ghost Medic — bridge test consumer.
+ * Archiater — bridge test consumer.
  *
  * Connects to the bridge's /stream endpoint and prints every line it receives,
  * with a running count. Stands in for the React Native app during hardware-free

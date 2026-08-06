@@ -1,6 +1,6 @@
-# Ghost Medic
+# Archiater
 
-*Being renamed **Archiater**, a **Wyzantium Industries** project.*
+*A **Wyzantium Industries** project. Formerly Ghost Medic; renamed 2026-08-05.*
 
 **Offline decision-support software for the trained responder, running on the
 device they already carry, with an optional wrist sensor accessory streaming
@@ -93,7 +93,7 @@ subfolder:
 ## Repository layout
 
 ```
-Ghost-Medic/
+Archiater/
 ├── README.md            ← you are here (whole-system overview)
 ├── ROADMAP.md · ARCHITECTURE.md · DATA_FORMAT.md   ← project memory
 ├── firmware/            ← 1. wrist sensor accessory — RP2040 hub (Pico SDK C)

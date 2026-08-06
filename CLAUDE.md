@@ -1,13 +1,14 @@
-# Ghost Medic — session rules
+# Archiater — session rules
 
-Offline AI **decision-support prototype** for trained responders. Read
+Offline AI **decision-support prototype** for trained responders, by
+**Wyzantium Industries**. Formerly Ghost Medic; renamed 2026-08-05. Read
 `ROADMAP.md` first every session; `ARCHITECTURE.md` for topology;
 `DATA_FORMAT.md` for the wire contract; `docs/POSITIONING.md` for why the
 product changed shape on 2026-08-05.
 
-Names **Archiater** (product) and **Wyzantium Industries** (company) are
-decided. The mechanical rename is a separate tracked workstream. Do not
-partially rename.
+Rename exceptions, on purpose: `legacy/` keeps its old-name strings, and the
+committed `firmware/ghost_medic_firmware.uf2` keeps its filename because it
+is the artifact of a real build under the former name.
 
 ## The honesty rule (non-negotiable)
 

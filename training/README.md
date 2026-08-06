@@ -1,11 +1,11 @@
-# Ghost Medic — Wilderness Medicine Fine-Tuning Pipeline
+# Archiater — Wilderness Medicine Fine-Tuning Pipeline
 
 This directory sets up (but does **not** run) the pipeline for fine-tuning a
-small local model to behave like Ghost Medic under **Wilderness Medical Society
+small local model to behave like Archiater under **Wilderness Medical Society
 (WMS)** guidance and the **Patient Assessment System (PAS)**.
 
 The goal: a model that, given a wilderness patient vignette, returns a response
-in the exact Ghost Medic format and ends with a correct
+in the exact Archiater format and ends with a correct
 `EVACUATION: [IMMEDIATE / URGENT / DELAYED / NONE]` line.
 
 ```

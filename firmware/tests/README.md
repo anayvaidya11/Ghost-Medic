@@ -1,4 +1,4 @@
-# Ghost Medic — host-side firmware tests
+# Archiater — host-side firmware tests
 
 These are **unit tests for the sensor math**, and they run on your laptop with a
 normal C compiler (`gcc`). **No Raspberry Pi Pico, no sensors, no wiring** are

@@ -1,4 +1,4 @@
-# Ghost Medic — Sensor Data Format (the contract)
+# Archiater — Sensor Data Format (the contract)
 
 This is the **wire contract** between the wrist unit (producer) and everything
 downstream — the bridge, the app, the LLM. It is defined by the firmware in
