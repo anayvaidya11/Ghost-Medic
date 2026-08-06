@@ -7,7 +7,7 @@
  * at rather than guessed at, which matters because no amount of measuring a
  * bounding box tells you whether an arm looks like an arm.
  *
- * usage: node shot.mjs <url> <out.png> [waitMs] [width] [height] [clipSelector] [clickSelector]
+ * usage: node shot.mjs <url> <out.png> [waitMs] [width] [height] [clipSelector] [clickSelector] [scrollY]
  *
  * Point CHROME_PATH at a browser if none of the defaults below exist.
  */
@@ -32,7 +32,7 @@ if (!CHROME) {
   process.exit(1);
 }
 
-const [url, out, waitMs = '3500', w = '1400', h = '900', sel = '', click = ''] = process.argv.slice(2);
+const [url, out, waitMs = '3500', w = '1400', h = '900', sel = '', click = '', scrollY = ''] = process.argv.slice(2);
 if (!url || !out) { console.error('usage: node shot.mjs <url> <out.png> [waitMs] [w] [h] [selector]'); process.exit(1); }
 
 const PORT = 9222 + Math.floor(Math.random() * 300);
@@ -128,6 +128,13 @@ if (click) {
   });
   console.error(`click ${click}: ${r.result.value}`);
   await sleep(Number(waitMs));
+}
+
+if (scrollY) {
+  // For fixed-position layers the viewport itself has to move; a clip alone
+  // photographs them at their page-top state.
+  await send('Runtime.evaluate', { expression: `scrollTo(0, ${Number(scrollY)})` });
+  await sleep(600);
 }
 
 let clip;

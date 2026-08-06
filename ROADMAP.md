@@ -355,6 +355,13 @@ not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
   headline (pre-rendered leaf-blob sprites, swaying at the trunk), understory
   shrubs sink into the fade at the corners, and the rain is a constant soft
   drizzle that swells in waves instead of a rare shower.
+- 🟢 The verge (2026-08-06): foliage down every page's margins, not just the
+  hero. `site/assets/verge.js` mounts two fixed side strips where ferns,
+  vines and leaf sprigs reach in from the edges, sway, drift against the
+  scroll, and carry the same soft rain. Strips size themselves to the free
+  margin beside the 58rem column and remove themselves when it is thin, so
+  no line of text is ever crowded. `shot.mjs` gained a scrollY argument to
+  photograph fixed layers mid-page.
 - ⬜ **Next-session site worklist (text session):** investor-terse rewrite;
   hero spec strip using the four honest numbers — **0** external network
   requests · **10 Hz** one-line contract · **48** committed checks (39 app +
