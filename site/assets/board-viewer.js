@@ -1,5 +1,5 @@
 /**
- * BOARD VIEWER: the Ghost Medic wrist-unit PCB, in 3D, in the browser.
+ * BOARD VIEWER: the Archiater wrist-unit PCB, in 3D, in the browser.
  *
  * The model is ghostmedic-sensor-hub.glb, exported straight from the committed
  * KiCad source with kicad-cli (exact command in hardware/README.md). Nothing here
@@ -46,7 +46,7 @@ export function mountBoardViewer({ mount, model, status, controls }) {
   const canvas = document.createElement('canvas');
   canvas.className = 'board-canvas';
   canvas.setAttribute('aria-label',
-    'Interactive 3D view of the Ghost Medic sensor-hub circuit board. ' +
+    'Interactive 3D view of the Archiater sensor-hub circuit board. ' +
     'Drag to rotate, scroll to zoom. A still render of the same board follows.');
   canvas.tabIndex = 0;
 

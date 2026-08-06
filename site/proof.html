@@ -3,23 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proof · Ghost Medic</title>
+<title>Proof · Archiater</title>
 <meta name="description" content="Four pieces of evidence you can check: the tests, the maths against the sensor maker's own numbers, the answer changing when a fall is detected, and the full list of what is real and what is standing in.">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232C4630'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1E9'%3EA%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="site-nav"><div>
-  <a class="wordmark" href="index.html">Ghost&nbsp;Medic</a>
+  <a class="wordmark" href="index.html">Archiater</a>
   <nav aria-label="Sections">
     <a href="index.html">Overview</a>
     <a href="how-it-works.html">How it works</a>
     <a href="hardware.html">Hardware</a>
     <a href="proof.html" aria-current="page">Proof</a>
     <a href="about.html">About me</a>
-    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository&nbsp;↗</a>
+    <a href="https://github.com/anayvaidya11/Archiater">Repository&nbsp;↗</a>
   </nav>
 </div></header>
 
@@ -63,7 +64,7 @@
 
     <p class="caption">Run it yourself: <code>npm test</code>. Needs Node 22.6 or
     newer and nothing else. All 39 are in
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/tests">tests/</a>.</p>
+    <a href="https://github.com/anayvaidya11/Archiater/tree/main/tests">tests/</a>.</p>
 
     <figure class="chart">
       <div class="frame"><img src="assets/charts/debounce.svg"
@@ -135,7 +136,7 @@ All host tests passed.</pre>
       <p>Recorded from a real run on a laptop, not a model answering now. The run
       is seeded so it repeats. Both answers in full, and the exact sensor readings
       behind them, are in
-      <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md">the session report</a>.</p>
+      <a href="https://github.com/anayvaidya11/Archiater/blob/main/docs/session-reports/2026-07-22-phase2-sensor-aware-llm.md">the session report</a>.</p>
     </div>
 
     <h3>Where it went badly</h3>
@@ -150,7 +151,7 @@ All host tests passed.</pre>
     <p class="eyebrow">Evidence 4</p>
     <h2>Run the whole thing yourself</h2>
 
-    <pre class="block">git clone https://github.com/anayvaidya11/Ghost-Medic &amp;&amp; cd Ghost-Medic
+    <pre class="block">git clone https://github.com/anayvaidya11/Archiater &amp;&amp; cd Archiater
 npm install
 cd bridge &amp;&amp; npm install &amp;&amp; cd ..
 cp services/llmConfig.example.ts services/llmConfig.ts
@@ -182,7 +183,7 @@ npm run web</pre>
         <tr>
           <td>The wrist unit's code compiles for the real chip with no warnings, and makes a file you could load onto one</td>
           <td><span class="mark mark-yes">Verified</span></td>
-          <td><a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/firmware/README.md">firmware/README.md</a></td>
+          <td><a href="https://github.com/anayvaidya11/Archiater/blob/main/firmware/README.md">firmware/README.md</a></td>
         </tr>
         <tr>
           <td>The wrist unit's sensor maths passes tests on a laptop</td>
@@ -268,21 +269,22 @@ npm run web</pre>
     </table>
     </div>
     <p class="caption">Mirrors the table in
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a>.
+    <a href="https://github.com/anayvaidya11/Archiater/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a>.
     If the repository and this page ever disagree, the repository is right.</p>
   </section>
 
 </main>
 
 <footer class="site-foot"><div class="col-w">
+  <p class="eyebrow">Wyzantium Industries</p>
   <div class="links">
-    <a href="https://github.com/anayvaidya11/Ghost-Medic">Repository</a>
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/ARCHITECTURE.md">Architecture</a>
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/blob/main/DATA_FORMAT.md">Wire format</a>
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/tests">Tests</a>
-    <a href="https://github.com/anayvaidya11/Ghost-Medic/tree/main/firmware">Firmware</a>
+    <a href="https://github.com/anayvaidya11/Archiater">Repository</a>
+    <a href="https://github.com/anayvaidya11/Archiater/blob/main/ARCHITECTURE.md">Architecture</a>
+    <a href="https://github.com/anayvaidya11/Archiater/blob/main/DATA_FORMAT.md">Wire format</a>
+    <a href="https://github.com/anayvaidya11/Archiater/tree/main/tests">Tests</a>
+    <a href="https://github.com/anayvaidya11/Archiater/tree/main/firmware">Firmware</a>
   </div>
-  <p>Ghost Medic is an engineering prototype, not a medical device: not clinically evaluated,
+  <p>Archiater is an engineering prototype, not a medical device: not clinically evaluated,
   not medical advice. Simulated data and placeholders are labelled as such. No heart rate or
   blood-oxygen reading anywhere, by design.</p>
 </div></footer>

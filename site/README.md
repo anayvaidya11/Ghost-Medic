@@ -81,9 +81,9 @@ the site ships, and prints the measurements under the canvas.
 ## Deploy to Vercel, exact steps (no experience assumed)
 
 1. Go to <https://vercel.com> → **Sign Up** → **Continue with GitHub** (the
-   account that owns `Ghost-Medic`). The free "Hobby" plan is fine.
+   account that owns `Archiater`). The free "Hobby" plan is fine.
 2. **Add New…** (top right) → **Project**.
-3. Under "Import Git Repository," find **Ghost-Medic** → **Import**. (If it
+3. Under "Import Git Repository," find **Archiater** → **Import**. (If it
    isn't listed, click "Adjust GitHub App Permissions" and grant access.)
 4. On the configure screen, change exactly three things:
    - **Root Directory** → **Edit** → choose the **`site`** folder.
