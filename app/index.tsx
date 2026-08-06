@@ -603,7 +603,10 @@ function ReadyView(props: {
     <View style={s.readyRoot}>
       <View style={s.readyHeader}>
         <Text style={s.brand}>GHOST MEDIC</Text>
-        <Text style={s.tagline}>offline survival assistant</Text>
+        <Text style={s.tagline}>offline decision support</Text>
+        <Text style={s.postureBanner}>
+          DECISION SUPPORT FOR A TRAINED RESPONDER · NOT A MEDICAL DEVICE
+        </Text>
       </View>
 
       <VitalsMonitor vitals={props.vitals} />
@@ -801,6 +804,9 @@ function ResponseView(props: {
           <Text style={s.topBtnLabel}>NEW SITUATION</Text>
         </TouchableOpacity>
       </View>
+      <Text style={s.postureBannerTop}>
+        DECISION SUPPORT FOR A TRAINED RESPONDER · NOT A MEDICAL DEVICE
+      </Text>
 
       <ScrollView
         style={s.respScroll}
@@ -1015,6 +1021,22 @@ const s = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1,
     marginTop: 6,
+  },
+  postureBanner: {
+    fontFamily: MONO,
+    color: DIM,
+    fontSize: 9,
+    letterSpacing: 1.2,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  postureBannerTop: {
+    fontFamily: MONO,
+    color: DIM,
+    fontSize: 9,
+    letterSpacing: 1.2,
+    textAlign: 'center',
+    paddingBottom: 6,
   },
   readyCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   circle: {

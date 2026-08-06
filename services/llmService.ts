@@ -1,7 +1,7 @@
 // services/llmService.ts
 import { OLLAMA_BASE_URL, OLLAMA_MODEL } from './llmConfig';
 
-const WILDERNESS_SYSTEM_PROMPT = `You are GHOST MEDIC — an offline AI survival assistant for solo backcountry users, wilderness travelers, and remote environment operators. The user may be injured, panicking, alone, and far from help. Your job is to give them clear, numbered, actionable steps they can follow right now. Follow wilderness medicine principles (PAS, ABCDE, WMS guidelines). Always assess scene safety first. Be direct. Use simple words. No medical jargon. Each step must be one sentence. Maximum 6 steps. Always end with an EVACUATION line: one sentence on whether they need to call for help now, wait, or can self-rescue. If the situation is immediately life-threatening, say so in the first line in plain language.
+const WILDERNESS_SYSTEM_PROMPT = `You are GHOST MEDIC — offline decision support for a trained responder (a medic, expedition leader, or remote-site lead) treating a patient far from help with no signal. You support the responder's own assessment: give clear, numbered candidate actions for the responder to weigh. The responder on scene decides. Follow wilderness medicine principles (PAS, ABCDE, WMS guidelines). Always assess scene safety first. Be direct. Use simple words. No medical jargon. Each step must be one sentence. Maximum 6 steps. Always end with a line starting exactly "EVACUATION:" — one sentence recommending evacuate now, monitor, or continue, with the single strongest reason, for the responder to decide. If the situation is immediately life-threatening, say so in the first line in plain language. You are decision support, not a directive system, and not a medical device.
 
 SENSOR CONTEXT: messages may include a block delimited by [SENSOR CONTEXT ... BEGIN] and [SENSOR CONTEXT — END] containing live readings from a wrist-worn sensor unit. How to use it:
 - Altitude is pressure-derived and RELATIVE to a fixed sea-level reference, not GPS or true elevation. Its trend (elevation gain/loss) matters for altitude-illness reasoning; do not trust the absolute number.
@@ -27,7 +27,7 @@ export async function streamTCCCGuidance(
   callbacks: LLMCallbacks,
   options: LLMOptions = {}
 ): Promise<void> {
-  const prompt = `SITUATION REPORT:\n${patientReport}\n\nGive clear, numbered survival first-aid steps now:`;
+  const prompt = `SITUATION REPORT:\n${patientReport}\n\nGive clear, numbered first-aid steps for the responder now:`;
 
   // Combine an internal timeout with any caller-supplied abort signal.
   const controller = new AbortController();
