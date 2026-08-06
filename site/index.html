@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Archiater · offline AI first-aid assistant prototype</title>
 <meta name="description" content="A prototype first-aid assistant that works with no internet: a language model on the device you carry, an optional wrist sensor unit, and spoken first-aid steps.">
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=10">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232C4630'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1E9'%3EA%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -26,6 +26,48 @@
 
 <main id="main">
 
+  <!-- ═══════════ OASIS SCENE (decorative) ═══════════ -->
+  <div class="hero-scene" aria-hidden="true">
+    <svg viewBox="0 0 1440 430" preserveAspectRatio="xMidYMax slice" role="presentation" focusable="false">
+      <circle cx="1150" cy="86" r="58" fill="#F2E9D2" opacity=".7"/>
+      <circle cx="1150" cy="86" r="96" fill="#F2E9D2" opacity=".25"/>
+      <path d="M0 258 C 210 212, 420 236, 640 250 C 900 266, 1120 218, 1440 246 L1440 430 L0 430 Z" fill="var(--dune)" opacity=".38"/>
+      <path d="M0 300 C 260 262, 520 292, 780 296 C 1040 300, 1240 272, 1440 292 L1440 430 L0 430 Z" fill="var(--dune-2)" opacity=".42"/>
+      <ellipse cx="805" cy="352" rx="240" ry="30" fill="var(--pool-2)"/>
+      <ellipse cx="805" cy="350" rx="196" ry="22" fill="var(--pool)" opacity=".8"/>
+      <path d="M 660 352 q 40 8 96 6" stroke="var(--water-2)" stroke-width="2" fill="none" opacity=".5"/>
+      <path d="M 800 362 q 52 6 118 2" stroke="var(--water-2)" stroke-width="2" fill="none" opacity=".35"/>
+      <g fill="none" stroke="var(--water)" stroke-linecap="round">
+        <path d="M 585 348 C 577 300 570 250 549 205" stroke-width="10"/>
+        <path d="M 549 205 C 520 185 488 180 458 190" stroke-width="5"/>
+        <path d="M 549 205 C 528 170 500 152 468 148" stroke-width="5"/>
+        <path d="M 549 205 C 556 166 576 140 606 128" stroke-width="5"/>
+        <path d="M 549 205 C 580 180 616 172 648 180" stroke-width="5"/>
+        <path d="M 549 205 C 572 216 600 228 622 246" stroke-width="5"/>
+        <path d="M 549 205 C 522 214 500 230 488 252" stroke-width="5"/>
+        <path d="M 660 350 C 668 314 674 276 690 244" stroke-width="8"/>
+        <path d="M 690 244 C 668 222 640 214 614 220" stroke-width="4.5"/>
+        <path d="M 690 244 C 680 214 662 196 636 190" stroke-width="4.5"/>
+        <path d="M 690 244 C 700 212 720 196 748 192" stroke-width="4.5"/>
+        <path d="M 690 244 C 718 226 748 224 774 234" stroke-width="4.5"/>
+        <path d="M 690 244 C 706 258 724 274 734 296" stroke-width="4.5"/>
+      </g>
+      <g fill="none" stroke="var(--frond)" stroke-width="3" stroke-linecap="round" opacity=".75">
+        <path d="M 1046 368 C 1044 340 1048 316 1058 296"/>
+        <path d="M 1064 370 C 1066 342 1062 318 1050 300"/>
+        <path d="M 1082 370 C 1084 344 1090 324 1102 310"/>
+        <path d="M 1030 372 C 1026 350 1026 332 1034 316"/>
+      </g>
+      <defs>
+        <linearGradient id="heroFade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--stone)" stop-opacity="0"/>
+          <stop offset="1" stop-color="var(--stone)" stop-opacity="1"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="310" width="1440" height="120" fill="url(#heroFade)"/>
+    </svg>
+  </div>
+
   <!-- ═══════════ THE PITCH ═══════════ -->
   <section id="pitch" class="col">
     <p class="eyebrow">Prototype</p>
@@ -33,6 +75,18 @@
     <p class="lead">A wrist unit reads your motion and the air around you. A language model on
     hardware you carry turns that, and what you say, into spoken first-aid steps. No network.</p>
   </section>
+
+  <div class="horizon" aria-hidden="true">
+    <svg viewBox="0 0 1440 64" preserveAspectRatio="none" role="presentation" focusable="false">
+      <path d="M0 44 C 240 24 480 40 720 40 C 960 40 1200 20 1440 38 L1440 46 C 1200 30 960 48 720 48 C 480 48 240 32 0 52 Z" fill="currentColor"/>
+      <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M 210 44 C 208 30 210 18 216 8"/>
+        <path d="M 224 44 C 226 32 224 22 218 14"/>
+        <path d="M 1178 40 C 1176 28 1178 16 1184 6"/>
+        <path d="M 1192 40 C 1194 30 1192 20 1186 12"/>
+      </g>
+    </svg>
+  </div>
 
   <!-- ═══════════ STATUS, UP FRONT ═══════════ -->
   <section id="status" class="col">
@@ -233,6 +287,37 @@
   show('wearer');
 </script>
 
+<div class="oasis-foot" aria-hidden="true">
+  <svg viewBox="0 0 1440 120" preserveAspectRatio="none" role="presentation" focusable="false">
+    <rect x="0" y="58" width="1440" height="62" fill="var(--pool-2)"/>
+    <path d="M0 60 C 360 46 1080 46 1440 60 L1440 120 L0 120 Z" fill="var(--pool)" opacity=".5"/>
+    <g class="drift" fill="none" stroke="var(--water-2)" stroke-width="2" stroke-linecap="round" opacity=".55">
+      <path d="M 480 78 q 60 6 140 4"/>
+      <path d="M 760 90 q 70 6 150 2"/>
+      <path d="M 1020 74 q 50 6 120 4"/>
+    </g>
+    <g fill="none" stroke="var(--water)" stroke-linecap="round" opacity=".9">
+      <path d="M 152 60 C 148 44 142 30 130 18" stroke-width="6"/>
+      <path d="M 130 18 C 114 10 96 10 80 16" stroke-width="3.4"/>
+      <path d="M 130 18 C 118 6 102 0 84 2" stroke-width="3.4"/>
+      <path d="M 130 18 C 134 6 146 -2 162 -2" stroke-width="3.4"/>
+      <path d="M 130 18 C 146 12 164 14 178 24" stroke-width="3.4"/>
+      <path d="M 130 18 C 138 28 148 38 152 50" stroke-width="3.4"/>
+      <path d="M 1298 60 C 1302 42 1308 28 1322 16" stroke-width="6"/>
+      <path d="M 1322 16 C 1338 8 1356 8 1370 14" stroke-width="3.4"/>
+      <path d="M 1322 16 C 1334 4 1350 -2 1366 0" stroke-width="3.4"/>
+      <path d="M 1322 16 C 1316 4 1304 -4 1288 -2" stroke-width="3.4"/>
+      <path d="M 1322 16 C 1306 10 1290 12 1276 22" stroke-width="3.4"/>
+      <path d="M 1322 16 C 1316 28 1308 38 1302 48" stroke-width="3.4"/>
+    </g>
+    <g fill="none" stroke="var(--frond)" stroke-width="2.6" stroke-linecap="round" opacity=".7">
+      <path d="M 226 62 C 224 46 226 32 234 20"/>
+      <path d="M 240 62 C 242 48 240 36 232 26"/>
+      <path d="M 1226 60 C 1224 46 1226 34 1234 24"/>
+      <path d="M 1240 60 C 1242 48 1240 38 1232 28"/>
+    </g>
+  </svg>
+</div>
 <footer class="site-foot"><div class="col-w">
   <p class="eyebrow">Wyzantium Industries</p>
   <div class="links">

@@ -48,6 +48,19 @@ const proc = spawn(CHROME, [
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Watchdog: a screenshot run is seconds of work, so a stuck protocol call must
+// kill the run rather than hang a build forever. Progress marks on stderr say
+// where it died.
+const DEADLINE_MS = 60000 + Number(process.argv[4] ?? 3500) * 2;
+const watchdog = setTimeout(() => {
+  console.error(`WATCHDOG: no screenshot after ${DEADLINE_MS} ms, last mark: ${lastMark}`);
+  try { proc.kill(); } catch {}
+  process.exit(2);
+}, DEADLINE_MS);
+watchdog.unref?.();
+let lastMark = 'start';
+const mark = (m) => { lastMark = m; if (process.env.SHOT_DEBUG) console.error(`· ${m}`); };
+
 async function wsUrl() {
   for (let i = 0; i < 60; i++) {
     try {
@@ -59,11 +72,13 @@ async function wsUrl() {
 }
 
 await wsUrl();                       // wait until the debugging port answers
+mark('cdp port up');
 
 // Open a fresh tab and drive it directly.
 const target = await (await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: 'PUT' })).json();
 const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((r) => ws.addEventListener('open', r, { once: true }));
+mark('ws open');
 
 let id = 0;
 const pending = new Map();
@@ -92,14 +107,18 @@ await send('Page.enable');
 await send('Emulation.setDeviceMetricsOverride', {
   width: Number(w), height: Number(h), deviceScaleFactor: 2, mobile: false,
 });
+mark('metrics set');
 await send('Page.navigate', { url });
+mark('navigated');
 
 // Wait for load, then let the WebGL scene settle.
 for (let i = 0; i < 100; i++) {
   if (events.some((e) => e.method === 'Page.loadEventFired')) break;
   await sleep(100);
 }
+mark('load event (or 10s cap)');
 await sleep(Number(waitMs));
+mark('settled');
 
 if (click) {
   const r = await send('Runtime.evaluate', {
@@ -123,9 +142,11 @@ if (sel) {
   else console.error(`selector not found: ${sel}`);
 }
 
+mark('capturing');
 const shot = await send('Page.captureScreenshot', {
   format: 'png', captureBeyondViewport: !!clip, ...(clip ? { clip } : {}),
 });
+mark('captured');
 writeFileSync(out, Buffer.from(shot.data, 'base64'));
 
 if (consoleErrors.length) console.error('PAGE ERRORS:\n' + consoleErrors.join('\n'));

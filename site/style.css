@@ -31,12 +31,23 @@
   --paper:   #F4F1E9;
   --ink:     #1F241D;
   --ink-2:   #5D655B;
-  --ink-3:   #8A9086;
+  --ink-3:   #5F675C;   /* was #8A9086, which failed AA at this size */
   --forest:  #2C4630;
   --forest-2:#3F6045;
   --clay:    #9C4F28;
   --line:    #D6CFC0;
   --line-2:  #BFB7A4;
+
+  /* The oasis: water and dune are SCENERY. They never make a claim. Forest
+     stays the working ink and clay stays reserved for stand-in states; none
+     of the tokens below may appear in a mark, a gap box, or the ledger. */
+  --water:   #1F4E55;
+  --water-2: #2E6B6F;
+  --pool:    #DCE7E2;
+  --pool-2:  #CFDEDA;
+  --dune:    #DCCFA9;
+  --dune-2:  #C9B98D;
+  --frond:   #4A6B4F;
 
   --serif: "Iowan Old Style", Charter, "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
   --mono:  ui-monospace, "SF Mono", Menlo, "JetBrains Mono", Consolas, monospace;
@@ -55,22 +66,25 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  /* Desert-oasis ground: soft washes of sand and pale green layered down the
-     page, so long scrolls alternate warm and cool without touching the text. */
+  /* Desert-oasis ground: washes of sand, palm green and pool water layered
+     down the page, so long scrolls run sand, green, water, sand without
+     touching the text. */
+  /* The first layer is a tiny pre-rasterised noise tile: paper grain that
+     scrolls with the page. Generated at build time (tools/figure sibling
+     spirit): an SVG feTurbulence filter stalled software rasterisers and a
+     data-URI version deadlocked headless screenshot capture, so it ships as
+     a plain 5 KB asset. */
   background:
+    url("assets/grain.png"),
     radial-gradient(90rem 44rem at 85% 6%,  #EDE6D0 0%, transparent 62%),
-    radial-gradient(74rem 38rem at 6% 30%,  #DCE3CF 0%, transparent 64%),
-    radial-gradient(80rem 42rem at 94% 58%, #E8DFC7 0%, transparent 62%),
-    radial-gradient(70rem 40rem at 10% 86%, #D9E0CD 0%, transparent 64%),
-    linear-gradient(180deg,
-      #E9E4D6 0%, #E4E2D0 20%, #DEE3D1 36%,
-      #E8E2CF 54%, #DBE1CE 72%, #E6E2D3 100%);
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   background-color: var(--stone);
   color: var(--ink);
   font: 400 19px/1.62 var(--serif);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+
 
 /* ── layout ──────────────────────────────────────────────────────────────── */
 
@@ -122,9 +136,10 @@ em { font-style: italic; }
 
 .site-nav {
   position: sticky; top: 0; z-index: 40;
-  background: color-mix(in srgb, var(--stone) 88%, transparent);
+  background: color-mix(in srgb, var(--stone) 92%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 6px 18px -14px rgba(31, 36, 29, .35);
 }
 .site-nav > div {
   width: min(100% - 3rem, var(--wide)); margin-inline: auto;
@@ -184,6 +199,7 @@ em { font-style: italic; }
   background: var(--paper); border: 1px solid var(--line);
   font: 400 13px/1.65 var(--mono); color: var(--ink);
   overflow-x: auto; white-space: pre;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 24px -18px rgba(31,36,29,.35);
 }
 .translate .plain {
   margin: 0; padding: .85rem 0 0 1.1rem;
@@ -199,6 +215,7 @@ pre.block, .receipt {
   background: var(--paper); border: 1px solid var(--line);
   font: 400 13px/1.65 var(--mono); color: var(--ink);
   overflow-x: auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 24px -18px rgba(31,36,29,.35);
 }
 .receipt { border-left: 2px solid var(--forest); }
 pre.block .c, .receipt .c { color: var(--ink-3); }
@@ -244,13 +261,19 @@ figcaption {
   margin-top: .8rem; max-width: 44rem;
 }
 
-.frame { background: var(--paper); border: 1px solid var(--line); padding: .5rem; }
+.frame {
+  background: var(--paper); border: 1px solid var(--line); padding: .5rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 24px -18px rgba(31,36,29,.35);
+}
 
 .embed { width: 100%; height: 780px; border: 1px solid var(--line); background: var(--paper); display: block; }
 
 /* ── board viewer ────────────────────────────────────────────────────────── */
 
-.board-viewer { position: relative; background: var(--paper); border: 1px solid var(--line); padding: .5rem; }
+.board-viewer {
+  position: relative; background: var(--paper); border: 1px solid var(--line); padding: .5rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 14px 30px -20px rgba(31,36,29,.4);
+}
 .board-canvas { display: block; width: 100%; touch-action: pan-y; cursor: grab; }
 .board-canvas:active { cursor: grabbing; }
 .board-viewer.is-3d img, .board-viewer.is-3d .concept-2d { display: none; }
@@ -333,6 +356,7 @@ button.ghost[aria-pressed="true"] {
 .bio img {
   width: 100%; height: auto; display: block;
   border: 1px solid var(--line); background: var(--paper); padding: .4rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 24px -18px rgba(31,36,29,.35);
 }
 .bio > div > :first-child { margin-top: 0; }
 @media (max-width: 40rem) {
@@ -348,6 +372,33 @@ button.ghost[aria-pressed="true"] {
   font: 400 13.5px/1.4 var(--mono); letter-spacing: .04em; color: var(--forest);
 }
 .contact a:hover { text-decoration: underline; }
+
+/* ── the oasis scenery ───────────────────────────────────────────────────────
+   Decorative only, always aria-hidden, and drawn in the scenery tokens: dunes,
+   a pool, palms and reeds. Nothing here carries a mark or a claim. */
+
+.hero-scene { line-height: 0; overflow: hidden; }
+.hero-scene svg { display: block; width: 100%; height: auto; min-height: 150px; object-fit: cover; }
+/* The headline rises over the scene's faded lower edge. */
+.hero-scene + section { margin-top: -3.4rem; position: relative; }
+
+.horizon { line-height: 0; margin: 4.5rem 0 -2.5rem; color: var(--dune-2); opacity: .55; }
+.horizon svg { display: block; width: 100%; height: auto; }
+
+/* Slim scenic band under the nav on interior pages. */
+.horizon--head { margin: 0 0 -1.5rem; opacity: .45; }
+
+/* Dusk band above the footer: still water and palm silhouettes. */
+.oasis-foot { line-height: 0; margin-top: 6rem; }
+.oasis-foot svg { display: block; width: 100%; height: auto; }
+.oasis-foot + .site-foot { margin-top: 0; border-top: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .oasis-foot .drift { animation: drift 60s linear infinite alternate; }
+}
+@keyframes drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-46px); }
+}
 
 /* ── footer ──────────────────────────────────────────────────────────────── */
 
@@ -373,7 +424,7 @@ hr.rule { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
   background: #181a16; border: 1px solid #2c3028; border-radius: 22px;
   padding: 16px 14px 14px; color: #c9d3c0;
   font: 400 12.5px/1.55 var(--mono);
-  box-shadow: 0 18px 40px -18px rgba(31, 36, 29, .45);
+  box-shadow: 0 26px 54px -20px rgba(31, 36, 29, .55);
 }
 .pd-head {
   display: flex; justify-content: space-between; align-items: baseline;
