@@ -4,13 +4,19 @@
  * Two fixed strips, one down each side of the viewport, where foliage
  * reaches in from off-screen: broadleaf sprigs, fern fronds, a hanging vine.
  * They sway on their own phases, drift gently against the scroll so depth
- * reads, and carry the same soft rain as the hero. Decoration only;
+ * reads, and carry the same soft rain as the hero. Under the foliage the
+ * strips also carry the oasis washes: pools of sand, palm green and water
+ * anchored to the page, so a long scroll runs sand, green, water, sand down
+ * its margins. (The washes are painted here and not as a body background
+ * layer because any page-scale background-image stalls software rasterisers
+ * at screenshot time; see the note in style.css.) Decoration only;
  * aria-hidden, pointer-transparent, and drawn only into the margins the
  * text column does not use.
  *
- * The strips size themselves to the free margin beside the 58rem content
- * column and remove themselves entirely when that margin is thin (tablet,
- * phone), so the foliage never crowds a line of text.
+ * The strips size themselves to the free margin beside this page's own
+ * content column (measured, so a narrow prose page keeps its foliage longer
+ * than a wide diagram page) and remove themselves entirely when that margin
+ * is thin (tablet, phone), so the foliage never crowds a line of text.
  *
  * Sprites are pre-rendered once per resize; the frame loop draws a handful
  * of images. Reduced motion gets one still, dry frame. Zero requests.
@@ -24,11 +30,31 @@ export function mountVerge() {
     water2: tok('--water-2', '#2E6B6F'),
     pool: tok('--pool', '#DCE7E2'),
     frond: tok('--frond', '#4A6B4F'),
+    sand: '#EDE6D0',
+  };
+
+  // The oasis washes, anchored to page depth (rem down the document) and
+  // split between the sides: scrolling runs sand, green, water, sand.
+  const WASHES = {
+    left:  [{ y: 30, c: C.frond, a: 0.22 }, { y: 170, c: C.water, a: 0.16 }],
+    right: [{ y: 8, c: C.sand, a: 0.50 }, { y: 64, c: C.water2, a: 0.18 },
+            { y: 118, c: C.frond, a: 0.20 }],
   };
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const WIDE_PX = 58 * 16;                 // the content column the site uses
-  const MIN_MARGIN = 130;                  // below this, no room for foliage
+  const WIDE_PX = 58 * 16;                 // the widest column any page uses
+  const MIN_MARGIN = 72;                   // below this, no room for foliage
+
+  // The free margin is measured against this page's own content, not the
+  // widest column the site owns: a prose-only page (About) keeps its foliage
+  // at window widths where a diagram page has no room for any.
+  const contentPx = () => {
+    let w = 0;
+    for (const el of document.querySelectorAll('main .col, main .col-w')) {
+      w = Math.max(w, el.getBoundingClientRect().width);
+    }
+    return w || WIDE_PX;
+  };
 
   const sides = [];
   for (const side of ['left', 'right']) {
@@ -38,7 +64,7 @@ export function mountVerge() {
     c.style.cssText =
       `position:fixed;top:0;${side}:0;height:100vh;pointer-events:none;z-index:30;display:none;`;
     document.body.appendChild(c);
-    sides.push({ side, c, ctx: c.getContext('2d'), sprigs: [], W: 0, H: 0 });
+    sides.push({ side, c, ctx: c.getContext('2d'), sprigs: [], washes: [], W: 0, H: 0 });
   }
 
   let dpr = 1;
@@ -169,7 +195,7 @@ export function mountVerge() {
 
   const layout = () => {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const margin = (window.innerWidth - WIDE_PX) / 2;
+    const margin = (window.innerWidth - contentPx()) / 2;
     active = margin >= MIN_MARGIN;
     for (const s of sides) {
       s.c.style.display = active ? 'block' : 'none';
@@ -184,14 +210,20 @@ export function mountVerge() {
 
       // a column of sprigs, spaced down the strip, wrapping as you scroll
       seed = s.side === 'left' ? 31 : 907;
+      s.washes = WASHES[s.side].map((wsh) => ({
+        ...wsh, y: wsh.y * 16, ry: (18 + rnd() * 8) * 16,
+      }));
       s.sprigs = [];
       const kinds = ['blob', 'fern', 'vine', 'blob', 'fern', 'blob', 'vine', 'fern'];
       const n = Math.max(5, Math.round(s.H / 210));
+      // In a slim strip the sprigs shrink with it, so narrow margins get
+      // small foliage instead of clipped-off halves of big foliage.
+      const slim = Math.min(1, Math.max(0.55, s.W / 210));
       for (let i = 0; i < n; i++) {
         const kind = kinds[i % kinds.length];
         const scale = 0.75 + rnd() * 0.6;
         const w = Math.min(s.W * 0.94, (kind === 'vine' ? 120 : 210) * scale);
-        const h = (kind === 'vine' ? 230 : 150) * scale;
+        const h = (kind === 'vine' ? 230 : 150) * scale * slim;
         s.sprigs.push({
           kind,
           img: makeSprig(kind, w, h),
@@ -209,13 +241,31 @@ export function mountVerge() {
     const { ctx, W, H } = s;
     ctx.clearRect(0, 0, W, H);
 
-    // a breath of green at the very edge, fading toward the text
-    const g = ctx.createLinearGradient(0, 0, W, 0);
+    // a breath of green at the very edge, fading toward the text (the right
+    // strip's outer edge is x = W, so its gradient runs the other way)
+    const g = s.side === 'left'
+      ? ctx.createLinearGradient(0, 0, W, 0)
+      : ctx.createLinearGradient(W, 0, 0, 0);
     g.addColorStop(0, hexA(C.frond, 0.10));
     g.addColorStop(0.55, hexA(C.frond, 0.03));
     g.addColorStop(1, hexA(C.frond, 0));
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
+
+    // the oasis washes ride the page itself, fading out before the text
+    for (const wsh of s.washes) {
+      const y = wsh.y - scrollY;
+      if (y < -wsh.ry || y > H + wsh.ry) continue;
+      ctx.save();
+      ctx.translate(s.side === 'left' ? 0 : W, y);
+      ctx.scale(1, wsh.ry / W);
+      const wg = ctx.createRadialGradient(0, 0, 0, 0, 0, W);
+      wg.addColorStop(0, hexA(wsh.c, wsh.a));
+      wg.addColorStop(1, hexA(wsh.c, 0));
+      ctx.fillStyle = wg;
+      ctx.fillRect(-W, -W, 2 * W, 2 * W);
+      ctx.restore();
+    }
 
     for (const sp of s.sprigs) {
       const wrap = H + sp.h * 2;

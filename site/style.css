@@ -69,15 +69,16 @@ body {
   /* Desert-oasis ground: washes of sand, palm green and pool water layered
      down the page, so long scrolls run sand, green, water, sand without
      touching the text. */
-  /* The first layer is a tiny pre-rasterised noise tile: paper grain that
-     scrolls with the page. Generated at build time (tools/figure sibling
-     spirit): an SVG feTurbulence filter stalled software rasterisers and a
-     data-URI version deadlocked headless screenshot capture, so it ships as
-     a plain 5 KB asset. */
-  background:
-    url("assets/grain.png"),
-    radial-gradient(90rem 44rem at 85% 6%,  #EDE6D0 0%, transparent 62%),
-  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  /* The washes themselves are painted by the verge canvases (assets/verge.js),
+     not layered here. Recorded so it is not re-litigated: an SVG feTurbulence
+     filter stalled software rasterisers, a data-URI tile deadlocked headless
+     screenshot capture, and any body background-image with a page-scale
+     destination (a stretched bitmap or a radial-gradient stack, under any
+     attachment or repeat) stalled capture again on every long page. The one
+     image layer that survives everywhere is this tiny repeating tile: paper
+     grain, pre-rasterised by tools/render/grain.mjs. */
+  background: url("assets/grain.png");
+  background-repeat: repeat;
   background-color: var(--stone);
   color: var(--ink);
   font: 400 19px/1.62 var(--serif);
