@@ -33,9 +33,11 @@ const CLAY = 0xd8d4cc;          // warm off-white; a display form, not flesh
 const STRAP_COLOR = 0x3d4038;
 
 const STATURE_MM = 1750;        // normalised standing height
-const CARRY_FRAC = 0.54;        // the phone rides where a pocket sits: the hip,
-                                // which is also where a hanging wrist ends up
 const CARRY_BELT_FRAC = 0.575;  // the strap that carries it: a low waist belt
+const CARRY_FRAC = 0.532;       // phone centre: hip-pocket height, chosen so the
+                                // phone's top edge sits at the belt's centreline
+                                // and the belt stays visible above it — the
+                                // carry has to read as ON the belt, not floating
 const CARRY_THETA = Math.PI / 2 + 0.95;  // well round to the side, at the pocket,
                                          // on the instrumented-arm side
 const BELT_FRAC  = 0.60;        // (killed) pack's belt line, as a fraction of stature
@@ -424,16 +426,42 @@ export async function loadWearer({
     quaternion: carryQuat,
   };
   if (chestRig) {
-    // A low belt carries it, with a small plate against the hip so the device
-    // never floats: a plain belt-holster carry.
-    const plate = new THREE.Mesh(
-      new THREE.BoxGeometry(88, 165, 5),
-      new THREE.MeshStandardMaterial({ color: STRAP_COLOR, roughness: 0.92 }));
-    plate.position.copy(carrySurf).addScaledVector(carryNormal, 3.2);
+    // A low belt carries it as a plain belt holster: a plate against the hip
+    // filling the body's curve, and a hook strap up the phone's face and over
+    // the band, so from every angle the device hangs FROM the belt rather
+    // than floating beside it. The site's phone slab is 72 x 150 x 8.5, its
+    // back riding 9.15 mm off the surface; the numbers below are set to that.
+    const beltH = 32, beltStand = 2.5, beltThick = 4.5;
+    const beltYc = CARRY_BELT_FRAC * stat;
+    const beltTop = beltYc + beltH / 2;
+    const rBelt = profileAt(CARRY_THETA, beltYc);
+    const strapMat = new THREE.MeshStandardMaterial({ color: STRAP_COLOR, roughness: 0.92 });
+
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(84, 130, 8), strapMat);
+    plate.position.copy(carrySurf).addScaledVector(carryNormal, 4.2);
+    plate.position.y -= 8;                   // top edge stops under the belt
     plate.quaternion.copy(carryQuat);
     plate.castShadow = plate.receiveShadow = true;
     group.add(plate);
-    group.add(buildBand({ y: CARRY_BELT_FRAC * stat, height: 32, thick: 4.5, standoff: 2.5, profileAt }));
+
+    const dir = new THREE.Vector3(Math.cos(CARRY_THETA), 0, Math.sin(CARRY_THETA));
+    const phoneTop = carryY + 75;            // the slab's top edge at mid-belt
+    const riserH = (beltTop + 1.5) - (phoneTop - 3);
+    const riser = new THREE.Mesh(new THREE.BoxGeometry(26, riserH, 2.6), strapMat);
+    riser.position.copy(dir).multiplyScalar(rBelt + beltStand + beltThick + 2.5);
+    riser.position.y = (beltTop + 1.5 + phoneTop - 3) / 2;
+    riser.quaternion.copy(carryQuat);
+    riser.castShadow = riser.receiveShadow = true;
+    group.add(riser);
+
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(26, 2.6, 9), strapMat);
+    cap.position.copy(dir).multiplyScalar(rBelt + 6.3);
+    cap.position.y = beltTop + 2.8;
+    cap.quaternion.copy(carryQuat);
+    cap.castShadow = cap.receiveShadow = true;
+    group.add(cap);
+
+    group.add(buildBand({ y: beltYc, height: beltH, thick: beltThick, standoff: beltStand, profileAt }));
   }
 
   return {
