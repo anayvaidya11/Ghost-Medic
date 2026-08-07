@@ -167,11 +167,11 @@ export function mountProductViewer({
       };
       const lead = armClear(a.clone()
         .addScaledVector(figure.wrist.axis, -60)
-        .addScaledVector(outw, 24), 10);
+        .addScaledVector(outw, 40), 22);
       curve = new THREE.CatmullRomCurve3([
         a, lead,
-        armClear(drape(0.4, 34, 40, 30), 12),
-        armClear(drape(0.72, 26, 15, 24), 12),
+        armClear(drape(0.4, 34, 40, 30), 26),
+        armClear(drape(0.72, 26, 15, 24), 26),
         b,
       ]);
     } else {

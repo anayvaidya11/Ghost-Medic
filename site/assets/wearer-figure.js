@@ -136,6 +136,32 @@ export async function loadWearer({
       p.needsUpdate = true;
     }
   }
+  // Re-centre on the trunk's own axis. Bounding-box centring is pulled
+  // forward by the A-pose arms and the feet, which left x = z = 0 OUTSIDE
+  // the body at hip height: the front half of the radial profile had no
+  // vertices at all, gap-fill invented radii there from the arm bins, and
+  // the carry mount floated in front of the belly. Found by histogramming
+  // vertex bearings at hip height: the entire front half was empty. Median
+  // over a chest-band trunk core (limbs excluded by |x|) cannot be dragged
+  // by the limbs the way the box centre was.
+  {
+    const p = geo.attributes.position;
+    const xs = [], zs = [];
+    for (let i = 0; i < p.count; i++) {
+      const y = p.getY(i);
+      if (y < 0.60 * statureMm || y > 0.72 * statureMm) continue;
+      if (Math.abs(p.getX(i)) > 0.09 * statureMm) continue;
+      xs.push(p.getX(i)); zs.push(p.getZ(i));
+    }
+    if (xs.length > 100) {
+      xs.sort((a, b) => a - b); zs.sort((a, b) => a - b);
+      const xMed = xs[xs.length >> 1], zMed = zs[zs.length >> 1];
+      for (let i = 0; i < p.count; i++) {
+        p.setXYZ(i, p.getX(i) - xMed, p.getY(i), p.getZ(i) - zMed);
+      }
+      p.needsUpdate = true;
+    }
+  }
   geo.computeVertexNormals();
   geo.computeBoundingBox();
 
@@ -257,7 +283,16 @@ export async function loadWearer({
   if (wristI < 0) wristI = Math.max(0, nSlices - 40);
   const wristSlice = slices[wristI];
   const wristPos = new THREE.Vector3(wristSlice.cx, wristSlice.cy, wristSlice.cz);
-  const wristRMax = wristSlice.rMax;
+  // A single 5 mm slice can hold two or three vertices and report a limb
+  // 10 mm thin — the band bore would then sink into the skin while the
+  // diagnostic swore there was margin. The neighbourhood max over populated
+  // slices is the honest girth.
+  let wristRMax = 0;
+  for (let k = -2; k <= 2; k++) {
+    const sl = slices[wristI + k];
+    if (sl && sl.n >= 3) wristRMax = Math.max(wristRMax, sl.rMax);
+  }
+  if (!wristRMax) wristRMax = wristSlice.rMax;
 
   const wristAxis = fore.clone();                            // proximal → distal
 
@@ -272,6 +307,20 @@ export async function loadWearer({
   const right = new THREE.Vector3().crossVectors(up, wristAxis).normalize();
   const wristQuat = new THREE.Quaternion().setFromRotationMatrix(
     new THREE.Matrix4().makeBasis(right, up, wristAxis));
+
+  /** Distance from a point to the measured distal-arm surface (negative =
+   *  inside the limb). Defined from the wrist scan's slices, so it knows the
+   *  hand's real shape, not just the forearm's axis. */
+  const limbGap = (p) => {
+    let best = Infinity;
+    for (const sl of slices) {
+      if (sl.n < 3) continue;   // a 2-vertex slice understates the limb and
+                                // overstates every clearance measured off it
+      const d = p.distanceTo(new THREE.Vector3(sl.cx, sl.cy, sl.cz)) - sl.rMax;
+      best = Math.min(best, d);
+    }
+    return best;
+  };
 
   // ── Radial torso profile r(theta, y), binned from the vertices. ─────────
   // Bins beat raycasts here: ~4k rays against 26k triangles with no BVH is
@@ -299,11 +348,18 @@ export async function loadWearer({
     // pelvis can be through that band of heights.
     const handBandLo = 0.40 * stat, handBandHi = 0.68 * stat;
     const pelvisMaxX = 0.118 * stat;
+    const pv = new THREE.Vector3();
     for (let i = 0; i < P.count; i++) {
       const x = P.getX(i), y = P.getY(i), z = P.getZ(i);
       if (y < y0 || y > y1) continue;
       if (nearAxis(x, y, z)) continue;
       if (y > handBandLo && y < handBandHi && Math.abs(x) > pelvisMaxX) continue;
+      // The splayed hand escapes both cuts above: fingers reach forward of
+      // the arm axis and inside the pelvis width, right at pocket height, and
+      // any that land in the profile push the carry mount off the body. The
+      // face-on render hid it; the top view did not. Anything within 30 mm of
+      // the measured limb surface (mirrored onto the scanned arm) is limb.
+      if (limbGap(pv.set(-Math.abs(x), y, z)) < 30) continue;
       const row = Math.min(PROF_ROWS - 1, Math.floor(((y - y0) / (y1 - y0)) * PROF_ROWS));
       const th = Math.atan2(z, x);
       const col = ((Math.round((th / (2 * Math.PI)) * PROF_ANGLES) % PROF_ANGLES) + PROF_ANGLES) % PROF_ANGLES;
@@ -364,16 +420,6 @@ export async function loadWearer({
     return den < 1e-9 ? Infinity : num / den;
   };
 
-  const limbGap = (p) => {
-    let best = Infinity;
-    for (const sl of slices) {
-      if (!sl.n) continue;
-      const d = p.distanceTo(new THREE.Vector3(sl.cx, sl.cy, sl.cz)) - sl.rMax;
-      best = Math.min(best, d);
-    }
-    return best;
-  };
-
   // ── Belt seat (for the killed pack, still measurable). ───────────────────
   const beltY = BELT_FRAC * stat;
   let seat = null;
@@ -401,16 +447,36 @@ export async function loadWearer({
   // A hanging wrist ends up at pocket height, which is why pockets are where
   // they are, so this also keeps the wrist-to-device cable short.
   const carryY = CARRY_FRAC * stat;
-  const carrySurf = torsoPoint(CARRY_THETA, carryY);
-  const carryNormal = (() => {
-    const a = torsoPoint(CARRY_THETA - 0.02, carryY);
-    const b = torsoPoint(CARRY_THETA + 0.02, carryY);
-    const t = b.sub(a);
-    const n = new THREE.Vector3(t.z, 0, -t.x).normalize();
-    // outward, away from the body axis
-    if (n.dot(new THREE.Vector3(carrySurf.x, 0, carrySurf.z)) < 0) n.negate();
-    return n;
+  // The carry radius is measured straight off the wedge of mesh vertices
+  // around the carry bearing, not read from the binned profile: the hanging
+  // hand kept poisoning the bins there, and the gap-fill that patches the
+  // resulting holes borrows radii from the hip bulge below, so the profile
+  // stayed inflated at exactly this spot however the exclusions were tuned.
+  // The face-on render hid it; the top view showed the phone hovering off
+  // the body. Vertices cannot lie about where the skin is.
+  const carryR = (() => {
+    const rs = [];
+    const pw = new THREE.Vector3();
+    const pelvisMax = 0.118 * stat;
+    for (let i = 0; i < P.count; i++) {
+      const x = P.getX(i), y = P.getY(i), z = P.getZ(i);
+      if (y < carryY - 80 || y > CARRY_BELT_FRAC * stat + 16) continue;
+      if (Math.abs(x) > pelvisMax) continue;
+      let d = Math.atan2(z, x) - CARRY_THETA;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      if (Math.abs(d) > 0.20) continue;
+      if (limbGap(pw.set(-Math.abs(x), y, z)) < 25) continue;
+      rs.push(Math.hypot(x, z));
+    }
+    rs.sort((a, b) => a - b);
+    // the phone rests on the proudest skin under its footprint (96th
+    // percentile, so a stray unfiltered vertex cannot push it back out)
+    return rs.length >= 30 ? rs[Math.floor((rs.length - 1) * 0.96)]
+      : Math.hypot(torsoPoint(CARRY_THETA, carryY).x, torsoPoint(CARRY_THETA, carryY).z);
   })();
+  const carryNormal = new THREE.Vector3(Math.cos(CARRY_THETA), 0, Math.sin(CARRY_THETA));
+  const carrySurf = carryNormal.clone().multiplyScalar(carryR);
+  carrySurf.y = carryY;
   const carryStandoff = 9;
   const carryQuat = (() => {
     // screen (phone local +Z) faces the surface normal, long edge stays vertical
@@ -434,7 +500,9 @@ export async function loadWearer({
     const beltH = 32, beltStand = 2.5, beltThick = 4.5;
     const beltYc = CARRY_BELT_FRAC * stat;
     const beltTop = beltYc + beltH / 2;
-    const rBelt = profileAt(CARRY_THETA, beltYc);
+    // Clamped to the measured carry radius: a poisoned belt-line bin must
+    // not push the hook out past the surface the phone actually sits on.
+    const rBelt = Math.min(profileAt(CARRY_THETA, beltYc), carryR);
     const strapMat = new THREE.MeshStandardMaterial({ color: STRAP_COLOR, roughness: 0.92 });
 
     const plate = new THREE.Mesh(new THREE.BoxGeometry(84, 130, 8), strapMat);
@@ -444,7 +512,7 @@ export async function loadWearer({
     plate.castShadow = plate.receiveShadow = true;
     group.add(plate);
 
-    const dir = new THREE.Vector3(Math.cos(CARRY_THETA), 0, Math.sin(CARRY_THETA));
+    const dir = carryNormal;                 // the carry bearing, radially out
     const phoneTop = carryY + 75;            // the slab's top edge at mid-belt
     const riserH = (beltTop + 1.5) - (phoneTop - 3);
     const riser = new THREE.Mesh(new THREE.BoxGeometry(26, riserH, 2.6), strapMat);
@@ -477,7 +545,7 @@ export async function loadWearer({
       vertexCount: P.count,
       wristGirthMm: 2 * Math.PI * (wristRMax * 0.9),   // ellipse-ish estimate from max radius
       wristRMax,
-      bandBoreMm: 52,
+      bandBoreMm: 2 * Math.max(26, wristRMax + 1.5),   // what buildWristUnit gets
       carryPos: hip.position.clone(),
       seatRadius: beltSeat.radius,
       buildMs: Math.round(performance.now() - t0),

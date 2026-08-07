@@ -11,6 +11,10 @@
   Extra params:
     ?devices=wrist+phone | wrist+pack | wrist+phone+pack   (default: the shipped set)
     ?preset=figure|wrist|phone|pack|all                    camera preset
+    ?az=&el=   orbit the preset's camera to this azimuth/elevation (radians);
+               el near 1.4 looks straight down. For screenshots of the angles
+               the presets don't cover — a floating part can hide behind its
+               mount from the preset view and give itself away from above.
 -->
 <html lang="en">
 <head>
@@ -97,6 +101,19 @@
   if (wanted && view.presets.includes(wanted)) view.setPreset(wanted);
   view.controls.autoRotate = false;
 
+  // ?az=&el= re-orbit the camera about the preset's own target and distance.
+  if (q.get('az') !== null || q.get('el') !== null) {
+    const az = parseFloat(q.get('az') ?? '0');
+    const el = Math.min(1.45, parseFloat(q.get('el') ?? '0.1'));
+    const t = view.controls.target;
+    const r = view.camera.position.distanceTo(t);
+    view.camera.position.set(
+      t.x + r * Math.cos(el) * Math.sin(az),
+      t.y + r * Math.sin(el),
+      t.z + r * Math.cos(el) * Math.cos(az));
+    view.controls.update();
+  }
+
   document.getElementById('spin').onclick = () => { view.controls.autoRotate = !view.controls.autoRotate; };
 
   function measure() {
@@ -119,8 +136,9 @@
       lines.push('');
       lines.push(`stature                ${d.statureMm.toFixed(0)} mm  (scale applied ${d.scaleApplied.toFixed(2)}x, flipped ${d.flipped})`);
       lines.push(`figure vertices        ${d.vertexCount}  built in ${d.buildMs} ms`);
-      lines.push(`wrist max radius       ${d.wristRMax.toFixed(1)} mm  (band inner radius 26.0; negative margin = band sunk into skin)`);
-      lines.push(`band radial margin     ${(26 - d.wristRMax).toFixed(1)} mm`);
+      const bore = d.bandBoreMm / 2;
+      lines.push(`wrist max radius       ${d.wristRMax.toFixed(1)} mm  (band inner radius ${bore.toFixed(1)}; negative margin = band sunk into skin)`);
+      lines.push(`band radial margin     ${(bore - d.wristRMax).toFixed(1)} mm`);
       lines.push(`pack seat radius       ${d.seatRadius.toFixed(1)} mm  (pack inner face is 150.0)`);
       lines.push(`carry mount at         ${d.carryPos.x.toFixed(0)}, ${d.carryPos.y.toFixed(0)}, ${d.carryPos.z.toFixed(0)} mm (hip)`);
 
@@ -135,12 +153,18 @@
       lines.push(`cable to torso gap     ${cableMin.toFixed(1)} mm  min  (negative = through the body)`);
       lines.push(`cable slack            ${((view.curve.getLength() / straight - 1) * 100).toFixed(0)}% longer than the straight span`);
 
-      // ...and must clear the arm it runs beside (3 = cable radius).
+      // ...and must clear the arm it runs beside (3 = cable radius). The
+      // first 45 mm from the boss are exempt: a cable emerging from a
+      // wrist-mounted unit is AT the wrist by definition, and counting that
+      // as a clip buried the real mid-run numbers this line exists to catch.
       let armMin = Infinity;
+      const cableA = view.curve.getPoint(0);
       for (let i = 0; i <= 240; i++) {
-        armMin = Math.min(armMin, view.figure.surface.limbGap(view.curve.getPoint(i / 240)) - 3);
+        const p = view.curve.getPoint(i / 240);
+        if (p.distanceTo(cableA) < 45) continue;
+        armMin = Math.min(armMin, view.figure.surface.limbGap(p) - 3);
       }
-      lines.push(`cable to arm gap       ${armMin.toFixed(1)} mm  min  (the lead runs beside the forearm on purpose)`);
+      lines.push(`cable to arm gap       ${armMin.toFixed(1)} mm  min  (past the lead-out; the lead runs beside the forearm on purpose)`);
     }
 
     // Marker positions on the canvas.
@@ -166,6 +190,7 @@
     document.getElementById('diag').textContent = lines.join('\n');
   }
   measure();
+  window.__view = view;      // for headless probing (tools/render scripts)
   window.__ready = true;
 </script>
 </body>
