@@ -362,6 +362,12 @@ not. Rationale and evidence: [`docs/POSITIONING.md`](docs/POSITIONING.md).*
   margin beside the 58rem column and remove themselves when it is thin, so
   no line of text is ever crowded. `shot.mjs` gained a scrollY argument to
   photograph fixed layers mid-page.
+- 🟢 Hip-carry defect, owner-caught (2026-08-06): in an A-pose the hands hang
+  at hip height, their vertices leaked into the measured torso profile, and
+  the inflated radii ballooned the belt and seated the phone on the hand
+  instead of the hip. Fixed by excluding anything wider than the pelvis
+  through that band of heights plus a circular median over each profile row;
+  verified by preview screenshots, belt snug and phone flush.
 - ⬜ **Next-session site worklist (text session):** investor-terse rewrite;
   hero spec strip using the four honest numbers — **0** external network
   requests · **10 Hz** one-line contract · **48** committed checks (39 app +

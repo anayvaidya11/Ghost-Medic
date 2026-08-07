@@ -285,14 +285,23 @@ export async function loadWearer({
         rel.set(x * sgn, y, z).sub(centroid);
         const along = rel.dot(axis);
         const d = Math.sqrt(Math.max(0, rel.lengthSq() - along * along));
-        if (d < 95 && along > s0 - 20 && along < s1 + 20) return true;
+        if (d < 120 && along > s0 - 40 && along < s1 + 80) return true;
       }
       return false;
     };
+    // The hands hang beside the hips in an A-pose, wider than the pelvis at
+    // exactly the heights the belt and the carry mount are measured. Any
+    // hand vertex that leaks into the profile inflates r there, and the
+    // first hip-carry render proved it: the belt ballooned and the phone
+    // seated on the hand instead of the hip. Cut everything wider than the
+    // pelvis can be through that band of heights.
+    const handBandLo = 0.40 * stat, handBandHi = 0.68 * stat;
+    const pelvisMaxX = 0.118 * stat;
     for (let i = 0; i < P.count; i++) {
       const x = P.getX(i), y = P.getY(i), z = P.getZ(i);
       if (y < y0 || y > y1) continue;
       if (nearAxis(x, y, z)) continue;
+      if (y > handBandLo && y < handBandHi && Math.abs(x) > pelvisMaxX) continue;
       const row = Math.min(PROF_ROWS - 1, Math.floor(((y - y0) / (y1 - y0)) * PROF_ROWS));
       const th = Math.atan2(z, x);
       const col = ((Math.round((th / (2 * Math.PI)) * PROF_ANGLES) % PROF_ANGLES) + PROF_ANGLES) % PROF_ANGLES;
@@ -310,6 +319,19 @@ export async function loadWearer({
           ].filter((v) => v > 0);
           if (cand.length) prof[rI][c] = cand.reduce((a, b) => a + b, 0) / cand.length;
         }
+      }
+    }
+    // then a circular median per row: whatever contamination survives the
+    // exclusions shows as an isolated spike, and a median removes a spike
+    // without rounding the true surface the way averaging would
+    for (let rI = 0; rI < PROF_ROWS; rI++) {
+      const row = prof[rI];
+      const copy = Float32Array.from(row);
+      for (let c = 0; c < PROF_ANGLES; c++) {
+        const win = [];
+        for (let k = -2; k <= 2; k++) win.push(copy[(c + k + PROF_ANGLES) % PROF_ANGLES]);
+        win.sort((a, b) => a - b);
+        row[c] = win[2];
       }
     }
   }
